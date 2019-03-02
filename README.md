@@ -1,4 +1,7 @@
 # Applications and libraries for Vali/MollenOS
+[![Build Status](http://www.mollenos.com/teamcity/app/rest/builds/buildType:(id:ValiOS_I386_Applications)/statusIcon)](http://www.mollenos.com/teamcity/project.html?projectId=ValiOS&branch_ValiOS=__all_branches__)
+[![Build Status](http://www.mollenos.com/teamcity/app/rest/builds/buildType:(id:ValiOS_Amd64_Applications)/statusIcon)](http://www.mollenos.com/teamcity/project.html?projectId=ValiOS&branch_ValiOS=__all_branches__)
+
 This repository can be downloaded as a basis for application development in Vali. To start using this repository, a few things are mandatory.
 
 ## Pre-requisites
