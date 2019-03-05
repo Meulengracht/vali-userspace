@@ -1,9 +1,4 @@
 # Makefile for building a generic userspace application or library
-
-# Include all the definitions for os
-include ../../config/common.mk
-
-INCLUDES = -I../include/cxx -I../include -Iinclude
 SOURCES = src/autofit/autofit.c \
 		  src/base/ftbase.c \
 		  src/base/ftbbox.c \
@@ -50,18 +45,18 @@ SOURCES = src/autofit/autofit.c \
 OBJECTS = $(SOURCES:.c=.o)
 
 CONFIG_FLAGS = -DFT2_BUILD_LIBRARY -DFT_SHARED_LIBRARY
-CFLAGS = $(GUCFLAGS) $(CONFIG_FLAGS) $(INCLUDES)
-LFLAGS = $(GLFLAGS) /version:2.9 /lldmap /entry:__CrtLibraryEntry /dll $(GUCLIBRARIES) ../lib/zlib.lib ../lib/libpng.lib
+CFLAGS = $(VALI_CFLAGS) $(CONFIG_FLAGS) $(VALI_INCLUDES) -Iinclude
+LFLAGS = /version:2.9 /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) zlib.lib libpng.lib
 
 .PHONY: all
-all: ../bin/libfreetype.dll
+all: $(VALI_APPLICATION_PATH)/bin/libfreetype.dll
 
-../bin/libfreetype.dll: $(OBJECTS)
+$(VALI_APPLICATION_PATH)/bin/libfreetype.dll: $(OBJECTS)
 	@printf "%b" "\033[0;36mCreating shared library " $@ "\033[m\n"
 	@$(LD) $(LFLAGS) $(OBJECTS) /out:$@
-	@mv -f ../bin/libfreetype.lib ../lib/libfreetype.lib
-	@cp -a include/* ../include/
-	@rm -rf ../include/freetype/internal
+	@mv -f $(VALI_APPLICATION_PATH)/bin/libfreetype.lib $(VALI_APPLICATION_PATH)/lib/libfreetype.lib
+	@cp -a include/* $(VALI_APPLICATION_PATH)/include/
+	@rm -rf $(VALI_APPLICATION_PATH)/include/freetype/internal
 	
 %.o : %.c
 	@printf "%b" "\033[0;32mCompiling C source object " $< "\033[m\n"
@@ -70,5 +65,3 @@ all: ../bin/libfreetype.dll
 .PHONY: clean
 clean:
 	@rm -f $(OBJECTS)
-	@rm -f ../lib/libfreetype.lib
-	@rm -f ../bin/libfreetype.dll

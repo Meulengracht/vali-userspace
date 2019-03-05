@@ -1,9 +1,4 @@
 # Makefile for building a generic userspace application
-
-# Include all the definitions for os
-include ../../config/common.mk
-
-INCLUDES = -I../include/cxx -I../include
 SOURCES = $(wildcard generator/*.cpp) \
 		  $(wildcard interpreter/*.cpp) \
 		  $(wildcard lexer/*.cpp) \
@@ -12,13 +7,13 @@ SOURCES = $(wildcard generator/*.cpp) \
 		  macia.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
-CXXFLAGS = $(GUCXXFLAGS) $(INCLUDES)
-LFLAGS = $(GLFLAGS) /lldmap /entry:__CrtConsoleEntry $(GUCXXLIBRARIES)
+CXXFLAGS = $(VALI_CXXFLAGS) $(VALI_INCLUDES)
+LFLAGS = /entry:__CrtConsoleEntry $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS)
 
 .PHONY: all
-all: ../bin/macia.app
+all: $(VALI_APPLICATION_PATH)/bin/macia.app
 
-../bin/macia.app: $(OBJECTS)
+$(VALI_APPLICATION_PATH)/bin/macia.app: $(OBJECTS)
 	@printf "%b" "\033[0;36mCreating application " $@ "\033[m\n"
 	@$(LD) $(LFLAGS) $(OBJECTS) /out:$@
 	
@@ -29,4 +24,3 @@ all: ../bin/macia.app
 .PHONY: clean
 clean:
 	@rm -f $(OBJECTS)
-	@rm -f ../bin/macia.app

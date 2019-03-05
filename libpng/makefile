@@ -1,26 +1,21 @@
 # Makefile for building a generic userspace application or library
-
-# Include all the definitions for os
-include ../../config/common.mk
-
-INCLUDES = -I../include/cxx -I../include
 SOURCES = $(wildcard ./*.c)
 OBJECTS = $(SOURCES:.c=.o)
 
 CONFIG_FLAGS = 
-CFLAGS = $(GUCFLAGS) $(CONFIG_FLAGS) $(INCLUDES)
-LFLAGS = $(GLFLAGS) /version:1.6 /def:libpng.def /lldmap /entry:__CrtLibraryEntry /dll $(GUCLIBRARIES) ../lib/zlib.lib
+CFLAGS = $(VALI_CFLAGS) $(CONFIG_FLAGS) $(VALI_INCLUDES)
+LFLAGS = /version:1.6 /def:libpng.def /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) zlib.lib
 
 .PHONY: all
-all: ../bin/libpng.dll
+all: $(VALI_APPLICATION_PATH)/bin/libpng.dll
 
-../bin/libpng.dll: $(OBJECTS)
+$(VALI_APPLICATION_PATH)/bin/libpng.dll: $(OBJECTS)
 	@printf "%b" "\033[0;36mCreating shared library " $@ "\033[m\n"
 	@$(LD) $(LFLAGS) $(OBJECTS) /out:$@
-	@mv -f ../bin/libpng.lib ../lib/libpng.lib
-	@cp pnglibconf.h ../include/pnglibconf.h
-	@cp pngconf.h ../include/pngconf.h
-	@cp png.h ../include/png.h
+	@mv -f $(VALI_APPLICATION_PATH)/bin/libpng.lib $(VALI_APPLICATION_PATH)/lib/libpng.lib
+	@cp pnglibconf.h $(VALI_APPLICATION_PATH)/include/pnglibconf.h
+	@cp pngconf.h $(VALI_APPLICATION_PATH)/include/pngconf.h
+	@cp png.h $(VALI_APPLICATION_PATH)/include/png.h
 	
 %.o : %.c
 	@printf "%b" "\033[0;32mCompiling C source object " $< "\033[m\n"
@@ -29,5 +24,3 @@ all: ../bin/libpng.dll
 .PHONY: clean
 clean:
 	@rm -f $(OBJECTS)
-	@rm -f ../lib/libpng.lib
-	@rm -f ../bin/libpng.dll
