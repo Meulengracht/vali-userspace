@@ -3,8 +3,8 @@ SOURCES = $(wildcard ./*.c)
 OBJECTS = $(SOURCES:.c=.o)
 
 CONFIG_FLAGS = 
-CFLAGS = $(VALI_CFLAGS) $(CONFIG_FLAGS) $(VALI_INCLUDES)
-LFLAGS = /version:1.6 /def:libpng.def /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) zlib.lib
+CFLAGS = $(VALI_CFLAGS) -O3 $(CONFIG_FLAGS) $(VALI_INCLUDES)
+LFLAGS = /version:1.6 /def:libpng.def /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) z.lib
 
 .PHONY: all
 all: $(VALI_APPLICATION_PATH)/bin/libpng.dll

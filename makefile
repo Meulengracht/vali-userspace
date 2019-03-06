@@ -2,14 +2,24 @@
 # are environmental variables CROSS, VALI_ARCH and VALI_SDK_PATH, that must be set to their
 # appropriate values.
 
+ifndef CROSS
+$(error CROSS is not set)
+endif
 ifndef VALI_ARCH
 $(error VALI_ARCH is not set)
 endif
+
 ifndef VALI_SDK_PATH
 $(error VALI_SDK_PATH is not set)
 endif
-ifndef CROSS
-$(error CROSS is not set)
+
+ifndef VALI_APPLICATION_PATH
+export VALI_BUILD_ROOT = $(shell pwd)
+export VALI_APPLICATION_PATH = $(VALI_BUILD_ROOT)/package_application_$(VALI_ARCH)
+endif
+
+ifndef VALI_VERSION
+VALI_VERSION = local
 endif
 
 # Setup project tools
@@ -19,8 +29,6 @@ export LD := $(CROSS)/bin/lld-link
 export LIB := $(CROSS)/bin/llvm-lib
 export AS := nasm
 
-export VALI_BUILD_ROOT = $(shell pwd)
-export VALI_APPLICATION_PATH = $(VALI_BUILD_ROOT)/package_application
 export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/cxx -I$(VALI_SDK_PATH)/include -I$(VALI_APPLICATION_PATH)/include
 export VALI_LIBRARIES = -LIBPATH:$(VALI_SDK_PATH)/lib -LIBPATH:$(VALI_APPLICATION_PATH)/lib
 export VALI_SDK_CLIBS = libcrt.lib libclang.lib libc.lib libunwind.lib libm.lib
@@ -30,27 +38,27 @@ export VALI_SDK_CXXLIBS = libcxx.lib libclang.lib libc.lib libunwind.lib libm.li
 include config/$(VALI_ARCH).mk
 
 export VALI_LFLAGS = $(arch_lflags) /nodefaultlib /subsystem:native /lldmap $(VALI_LIBRARIES)
-export VALI_CFLAGS = $(shared_flags) $(arch_flags) $(disable_warnings)
-export VALI_CXXFLAGS = -std=c++17 $(shared_flags) $(arch_flags) $(disable_warnings)
+export VALI_CFLAGS = $(shared_flags) $(arch_flags)
+export VALI_CXXFLAGS = $(shared_flags) $(arch_flags)
 
 ###################################
 ##### BUILD TARGETS           #####
 ###################################
-#   build_cpptest build_wintest   build_mesa build_glm build_vioarr_osmesa
+#   build_cpptest build_wintest build_glm build_vioarr_osmesa
 
 .PHONY: build
-build: package_application build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa
 	
-.PHONY:
+.PHONY: package
 package: build
-	@cd $(VALI_APPLICATION_PATH); zip -r vali-apps-$(VALI_ARCH).zip .
-	@mv $(VALI_APPLICATION_PATH)/vali-apps-$(VALI_ARCH).zip .
+	@cd $(VALI_APPLICATION_PATH); zip -r vali-apps-$(VALI_VERSION)-$(VALI_ARCH).zip .
+	@mv $(VALI_APPLICATION_PATH)/vali-apps-$(VALI_VERSION)-$(VALI_ARCH).zip .
 
-package_application:
-	@mkdir -p $@
-	@mkdir -p $@/bin
-	@mkdir -p $@/include
-	@mkdir -p $@/lib
+$(VALI_APPLICATION_PATH):
+	@mkdir -p $(VALI_APPLICATION_PATH)
+	@mkdir -p $(VALI_APPLICATION_PATH)/bin
+	@mkdir -p $(VALI_APPLICATION_PATH)/include
+	@mkdir -p $(VALI_APPLICATION_PATH)/lib
 
 .PHONY: build_zlib
 build_zlib:
@@ -100,8 +108,8 @@ llvm-build:
 build_llvm: llvm-build
 	$(eval CPU_COUNT = $(shell nproc))
 	cd llvm-build && make -j$(CPU_COUNT) && make install
-	@cp llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
-	@mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
+	@-mv llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
+	@-mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
 
 .PHONY: build_mesa
 build_mesa:
@@ -125,9 +133,9 @@ clean:
 	@$(MAKE) -s -C freetype -f makefile clean
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
-	#@$(MAKE) -s -C mesa -f makefile clean
+	@$(MAKE) -s -C mesa -f makefile clean
 	#@$(MAKE) -s -C vioarr -f makefile clean
 	#@$(MAKE) -s -C cpptest -f makefile clean
 	#@$(MAKE) -s -C wintest -f makefile clean
-	@rm -rf package_application
 	@rm -rf llvm-build
+	@rm -rf $(VALI_APPLICATION_PATH)

@@ -6,6 +6,7 @@ APP_SOURCES_CXX := targets/alumni.cpp \
 				   surfaces/surface_vali.cpp \
 			       $(wildcard *.cpp)
 
+CXXFLAGS := -O3 -std=c++17
 LFLAGS := $(VALI_APPLICATION_PATH)/lib/libfreetype.lib
 
 include ../application.mk

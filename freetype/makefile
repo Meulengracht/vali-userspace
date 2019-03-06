@@ -45,8 +45,8 @@ SOURCES = src/autofit/autofit.c \
 OBJECTS = $(SOURCES:.c=.o)
 
 CONFIG_FLAGS = -DFT2_BUILD_LIBRARY -DFT_SHARED_LIBRARY
-CFLAGS = $(VALI_CFLAGS) $(CONFIG_FLAGS) $(VALI_INCLUDES) -Iinclude
-LFLAGS = /version:2.9 /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) zlib.lib libpng.lib
+CFLAGS = $(VALI_CFLAGS) -O3 $(CONFIG_FLAGS) $(VALI_INCLUDES) -Iinclude
+LFLAGS = /version:2.9 /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CLIBS) z.lib libpng.lib
 
 .PHONY: all
 all: $(VALI_APPLICATION_PATH)/bin/libfreetype.dll
