@@ -10,7 +10,9 @@ def fatal(error_msg):
     sys.exit(-1)
 
 def empty_folder_if_exist(folder_path):
+    print("Unpack to " + folder_path)
     if os.path.exists(folder_path):
+        print("Path exists already, emptying it")
         for the_file in os.listdir(folder_path):
             file_path = os.path.join(folder_path, the_file)
             try:
@@ -43,8 +45,10 @@ def main(args):
     arch = ''
   
     for file in glob.glob('*.zip'):
+        print("Detected zip file: " + file)
         m = main_zip_regex.match(file)
         if m:
+            print("Detected primary zip file")
             version_parts.append(m.group(1))
             version_parts.append(m.group(2))
             version_parts.append(m.group(3))
@@ -53,6 +57,7 @@ def main(args):
         else:
             m = sdk_zip_regex.match(file)
             if m:
+                print("Detected sdk zip file")
                 empty_folder_if_exist(sdk_path)
                 sdk_zip = zipfile.ZipFile(file, 'r')
                 sdk_zip.extractall(sdk_path)
@@ -61,6 +66,7 @@ def main(args):
             else:
                 m = ddk_zip_regex.match(file)
                 if m:
+                    print("Detected ddk zip file")
                     empty_folder_if_exist(ddk_path)
                     ddk_zip = zipfile.ZipFile(file, 'r')
                     ddk_zip.extractall(ddk_path)
