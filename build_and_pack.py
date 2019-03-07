@@ -69,7 +69,8 @@ def main(args):
     
     # Spawn the makefile process
     version_arg = "VALI_VERSION=" + version_parts[0] + "." + version_parts[1] + "." + version_parts[2]
-    subprocess.Popen(['make', 'package', version_arg])
+    p = subprocess.Popen(['make', 'package', version_arg])
+    p.wait();
   
 if __name__== "__main__":
     main(sys.argv)
