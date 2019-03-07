@@ -55,4 +55,4 @@ $(VALI_APPLICATION_PATH)/bin/vioarr.app: $(OBJECTS)
 
 .PHONY: clean
 clean:
-	@rm -f $(OBJECTS)
+	@rm -f $(OSMESA_OBJECTS)

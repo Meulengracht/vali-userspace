@@ -28,16 +28,18 @@
 CWindow::CWindow(CEntity* Parent, NVGcontext* VgContext, const std::string &Title, int Width, int Height) 
     : CEntity(Parent, VgContext)
 {
-    m_Title             = Title;
-    m_Width             = Width;
-    m_Height            = Height;
-    m_Streaming         = false;
-    m_Format            = 0;
-    m_InternalFormat    = 0;
-    m_StreamWidth       = 0;
-    m_StreamHeight      = 0;
-    m_StreamBuffer      = nullptr;
-    m_ResourceId        = 0;
+    m_Title          = Title;
+    m_Width          = Width;
+    m_Height         = Height;
+    m_Streaming      = false;
+    m_Format         = 0;
+    m_InternalFormat = 0;
+    m_StreamWidth    = 0;
+    m_StreamHeight   = 0;
+    m_StreamBuffer   = nullptr;
+    m_ResourceId     = 0;
+    m_InputPipe      = UUID_INVALID;
+    m_WmEventPipe    = UUID_INVALID;
 
     m_TitleLabel = new CLabel(this, VgContext);
     m_TitleLabel->SetText(Title);
@@ -112,9 +114,18 @@ void CWindow::SetStreaming(bool Enable) {
     }
 }
 
+void CWindow::SetInputPipe(UUId_t Handle) {
+    m_InputPipe = Handle;
+}
+
+void CWindow::SetWmEventPipe(UUId_t Handle) {
+    m_WmEventPipe = Handle;
+}
+
 void CWindow::HandleKeyEvent(SystemKey_t* Key) {
-    // @todo fix
-    WritePipe(m_Owner, (void*)Key, sizeof(SystemKey_t));
+    if (m_InputPipe != UUID_INVALID) {
+        WritePipe(m_InputPipe, (void*)Key, sizeof(SystemKey_t));   
+    }
 }
 
 void CWindow::Update() {

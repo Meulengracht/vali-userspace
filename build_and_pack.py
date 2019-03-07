@@ -66,6 +66,9 @@ def main(args):
                     ddk_zip.extractall(ddk_path)
                     ddk_zip.close()
                     os.unlink(file)
+                else:
+                    print("Detected unusued zip file, removing")
+                    os.unlink(file)
     
     # Spawn the makefile process
     version_arg = "VALI_VERSION=" + version_parts[0] + "." + version_parts[1] + "." + version_parts[2]

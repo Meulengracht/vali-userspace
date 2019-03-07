@@ -47,6 +47,8 @@ public:
     void SetWidth(int Width);
     void SetHeight(int Height);
     void SetTitle(const std::string &Title);
+    void SetInputPipe(UUId_t Handle);
+    void SetWmEventPipe(UUId_t Handle);
 
     void SetStreamingBufferFormat(GLenum Format, GLenum InternalFormat);
     void SetStreamingBufferDimensions(int Width, int Height);
@@ -68,6 +70,8 @@ private:
     int             m_Height;
     bool            m_Streaming;
     CLabel*         m_TitleLabel;
+    UUId_t          m_InputPipe;
+    UUId_t          m_WmEventPipe;
 
     // Streaming support
     int             m_ResourceId;
