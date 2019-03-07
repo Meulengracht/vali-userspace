@@ -28,15 +28,9 @@ def main(args):
     # vali-<version>-<arch>.zip
     # vali-sdk-<version>-<arch>.zip
     # vali-ddk-<version>-<arch>.zip
-    sdk_path = os.getenv('VALI_SDK_PATH')
-    ddk_path = os.getenv('VALI_DDK_PATH')
-    app_path = os.getenv('VALI_APPLICATION_PATH')
-    if not sdk_path:
-        fatal("VALI_SDK_PATH must be defined for this script to run")
-    if not ddk_path:
-        fatal("VALI_DDK_PATH must be defined for this script to run")
-    if not app_path:
-        fatal("VALI_APPLICATION_PATH must be defined for this script to run")
+    sdk_path = os.path.join(os.getcwd(), 'vali-sdk')
+    ddk_path = os.path.join(os.getcwd(), 'vali-ddk')
+    app_path = os.path.join(os.getcwd(), 'vali-apps')
     
     main_zip_regex = re.compile('vali-([0-9]+).([0-9]+).([0-9]+)-([0-9a-zA-Z]+).zip', re.IGNORECASE)
     sdk_zip_regex = re.compile('vali-sdk-([0-9]+).([0-9]+).([0-9]+)-([0-9a-zA-Z]+).zip', re.IGNORECASE)
@@ -75,7 +69,10 @@ def main(args):
     
     # Spawn the makefile process
     version_arg = "VALI_VERSION=" + version_parts[0] + "." + version_parts[1] + "." + version_parts[2]
-    p = subprocess.Popen(['make', 'package', version_arg])
+    sdk_arg = "VALI_SDK_PATH=" + sdk_path
+    ddk_arg = "VALI_DDK_PATH=" + ddk_path
+    app_arg = "VALI_APPLICATION_PATH=" + app_path
+    p = subprocess.Popen(['make', 'package', version_arg, sdk_arg, ddk_arg, app_arg])
     p.wait();
   
 if __name__== "__main__":
