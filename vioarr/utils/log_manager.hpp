@@ -16,15 +16,14 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS - Vioarr Window Compositor System
- *  - The window compositor system and general window manager for
- *    MollenOS.
+ * Vioarr Window Compositor System
+ *  - The window compositor system and general window manager for Vali.
  */
 #pragma once
 #define __TRACE
 
 #include <os/mollenos.h>
-#include <os/utils.h>
+#include <ddk/utils.h>
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>

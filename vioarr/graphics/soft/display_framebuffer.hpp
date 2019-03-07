@@ -16,15 +16,13 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS - Vioarr Window Compositor System (Display Interface Implementation)
+ * Vioarr Window Compositor System (Display Interface Implementation)
  *  - The window compositor system and general window manager for
- *    MollenOS. This display implementation is of the default display where
+ *    Vali. This display implementation is of the default display where
  *    we use osmesa as the backend combined with the native framebuffer
  */
 #pragma once
 
-/* Includes
- * - Project */
 #include "../../utils/log_manager.hpp"
 #include "display.hpp"
 #include <cstdlib>
@@ -37,8 +35,6 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-/* Extern 
- * Assembler optimized presenting methods for byte copying */
 extern "C" void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
 extern "C" void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
 extern "C" void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
@@ -51,8 +47,9 @@ public:
     // display (vbe/vesa) framebuffer
     CDisplayFramebuffer() {
         int CpuRegisters[4] = { 0 };
+        
         sLog.Info("Creating the opengl context");
-        _Context            = OSMesaCreateContext(OSMESA_BGRA, NULL);
+        _Context = OSMesaCreateContext(OSMESA_BGRA, NULL);
 
         // Select a present-method (basic/sse/sse2)
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -60,6 +57,12 @@ public:
 #else
         __cpuid(1, CpuRegisters[0], CpuRegisters[1], CpuRegisters[2], CpuRegisters[3]);
 #endif
+        // @todo avx/avx2
+#if defined(amd64) || defined(__amd64__)
+        sLog.Info("Using SSE2 presentation method");
+        _BytesStep     = 128;
+        _PresentMethod = present_sse2;
+#else
         if (CpuRegisters[3] & CPUID_FEAT_EDX_SSE2) {
             sLog.Info("Using SSE2 presentation method");
             _BytesStep      = 128;
@@ -75,6 +78,7 @@ public:
             _BytesStep      = 1;
             _PresentMethod  = present_basic;
         }
+#endif
     }
 
     // Destructor

@@ -21,7 +21,7 @@
  *    MollenOS.
  */
 
-#include <os/ipc/ipc.h>
+#include <ddk/ipc/pipe.h>
 #include "window.hpp"
 #include "label.hpp"
 
@@ -81,8 +81,8 @@ void CWindow::SetTitle(const std::string &Title) {
 }
 
 void CWindow::SetStreamingBufferFormat(GLenum Format, GLenum InternalFormat) {
-    m_Format            = m_Format;
-    m_InternalFormat    = m_InternalFormat;
+    m_Format            = Format;
+    m_InternalFormat    = InternalFormat;
 }
 
 void CWindow::SetStreamingBufferDimensions(int Width, int Height) {
@@ -113,7 +113,8 @@ void CWindow::SetStreaming(bool Enable) {
 }
 
 void CWindow::HandleKeyEvent(SystemKey_t* Key) {
-    SendPipe(m_Owner, PIPE_STDIN, (void*)Key, sizeof(SystemKey_t));
+    // @todo fix
+    WritePipe(m_Owner, (void*)Key, sizeof(SystemKey_t));
 }
 
 void CWindow::Update() {

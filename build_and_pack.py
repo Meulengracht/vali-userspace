@@ -49,6 +49,7 @@ def main(args):
             version_parts.append(m.group(2))
             version_parts.append(m.group(3))
             arch = m.group(4)
+            os.unlink(file)
         else:
             m = sdk_zip_regex.match(file)
             if m:
@@ -56,6 +57,7 @@ def main(args):
                 sdk_zip = zipfile.ZipFile(file, 'r')
                 sdk_zip.extractall(sdk_path)
                 sdk_zip.close()
+                os.unlink(file)
             else:
                 m = ddk_zip_regex.match(file)
                 if m:
@@ -63,6 +65,7 @@ def main(args):
                     ddk_zip = zipfile.ZipFile(file, 'r')
                     ddk_zip.extractall(ddk_path)
                     ddk_zip.close()
+                    os.unlink(file)
     
     # Spawn the makefile process
     version_arg = "VALI_VERSION=" + version_parts[0] + "." + version_parts[1] + "." + version_parts[2]

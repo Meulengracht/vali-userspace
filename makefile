@@ -44,10 +44,8 @@ export VALI_CXXFLAGS = $(shared_flags) $(arch_flags)
 ###################################
 ##### BUILD TARGETS           #####
 ###################################
-#   build_cpptest build_wintest build_glm build_vioarr_osmesa
-
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa build_glm build_vioarr_osmesa build_wintest
 	
 .PHONY: package
 package: build
@@ -74,11 +72,6 @@ build_libpng:
 build_libfreetype:
 	@printf "%b" "\033[1;35mChecking if freetype needs to be built\033[m\n"
 	@$(MAKE) -s -C freetype -f makefile
-
-.PHONY: build_cpptest
-build_cpptest:
-	@printf "%b" "\033[1;35mChecking if cpptest needs to be built\033[m\n"
-	@$(MAKE) -s -C cpptest -f makefile
 
 .PHONY: build_wintest
 build_wintest:
@@ -134,8 +127,7 @@ clean:
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C mesa -f makefile clean
-	#@$(MAKE) -s -C vioarr -f makefile clean
-	#@$(MAKE) -s -C cpptest -f makefile clean
-	#@$(MAKE) -s -C wintest -f makefile clean
+	@$(MAKE) -s -C vioarr -f makefile clean
+	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf llvm-build
 	@rm -rf $(VALI_APPLICATION_PATH)

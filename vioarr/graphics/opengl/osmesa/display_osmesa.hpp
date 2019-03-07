@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include <os/contracts/video.h>
+#include <ddk/contracts/video.h>
 #include <GL/osmesa.h>
 #include <GL/gl.h>
 

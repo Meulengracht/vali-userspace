@@ -1,10 +1,10 @@
 # Makefile for building a generic userspace application
-
-# Include all the definitions for os
-include ../../config/common.mk
-
-ASFLAGS = -f win32 -Xvc
-INCLUDES = -I../include/cxx -I../include -I. -Igraphics
+ifeq ($(VALI_ARCH),i386)
+	ASFLAGS = -f win32 -Xvc
+else
+	ASFLAGS = -f win64 -Xvc
+endif
+INCLUDES = $(VALI_INCLUDES) -I$(VALI_DDK_PATH)/include -I. -Igraphics
 NVG_SOURCES = engine/backend/nanovg.c
 SHARED_SOURCES = $(wildcard engine/elements/*.cpp) \
 				 $(wildcard engine/dialogs/*.cpp) \
@@ -20,24 +20,24 @@ SOFT_SOURCES =
 SOFT_ASM = graphics/displays/fb/display_framebuffer_$(VALI_ARCH).s
 SOFT_OBJECTS = $(SHARED_SOURCES:.cpp=.o) $(SOFT_SOURCES:.cpp=.o) $(SOFT_ASM:.s=.o)
 
-CFLAGS = $(GUCFLAGS) -O3 -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE $(INCLUDES)
-CXXFLAGS = $(GUCXXFLAGS) -O3 -std=c++17 $(INCLUDES)
+CFLAGS = $(VALI_CFLAGS) -O3 -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE $(INCLUDES)
+CXXFLAGS = $(VALI_CXXFLAGS) -O3 -std=c++17 $(INCLUDES)
 ifeq ($(MAKECMDGOALS),osmesa)
 	OBJECTS = $(OSMESA_OBJECTS)
 	CXXFLAGS += -D_VIOARR_OSMESA -D_VIOARR_OPENGL -DGL_GLEXT_PROTOTYPES -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION
-	LFLAGS = $(GLFLAGS) /lldmap /entry:__CrtConsoleEntry $(GUCXXLIBRARIES) ../lib/gallium-osmesa.lib ../lib/libfreetype.lib
+	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) gallium-osmesa.lib libfreetype.lib
 else
 	OBJECTS = $(SOFT_OBJECTS)
-	LFLAGS = $(GLFLAGS) /lldmap /entry:__CrtConsoleEntry $(GUCXXLIBRARIES) ../lib/libpng.lib
+	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) libpng.lib
 endif
 
 .PHONY: all
-all: ../bin/vioarr.app
+all: $(VALI_APPLICATION_PATH)/bin/vioarr.app
 
 .PHONY: osmesa
 osmesa: all
 
-../bin/vioarr.app: $(OBJECTS)
+$(VALI_APPLICATION_PATH)/bin/vioarr.app: $(OBJECTS)
 	@printf "%b" "\033[0;36mCreating application " $@ "\033[m\n"
 	@$(LD) $(LFLAGS) $(OBJECTS) /out:$@
 	
@@ -46,7 +46,7 @@ osmesa: all
 	@$(CC) -c $(CXXFLAGS) -o $@ $<
 
 %.o : %.c
-	@printf "%b" "\033[0;32mCompiling C++ source object " $< "\033[m\n"
+	@printf "%b" "\033[0;32mCompiling C source object " $< "\033[m\n"
 	@$(CC) -c $(CFLAGS) -o $@ $<
 
 %.o : %.s
@@ -56,4 +56,3 @@ osmesa: all
 .PHONY: clean
 clean:
 	@rm -f $(OBJECTS)
-	@rm -f ../bin/vioarr.app

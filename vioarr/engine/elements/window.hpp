@@ -22,7 +22,7 @@
  */
 #pragma once
 #include "../entity.hpp"
-#include <os/buffer.h>
+#include <ddk/buffer.h>
 #include <string>
 
 class CLabel;

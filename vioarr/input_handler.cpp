@@ -53,13 +53,7 @@ void SpawnApplication(const char* Path, const char* Arguments)
 {
     ProcessStartupInformation_t StartupInformation;
     InitializeStartupInformation(&StartupInformation);
-
-    // Set arguments
-    if (Arguments != NULL) {
-        StartupInformation.ArgumentPointer  = Arguments;
-        StartupInformation.ArgumentLength   = strlen(Arguments);
-    }
-    ProcessSpawnEx(Path, &StartupInformation, 1);
+    ProcessSpawnEx(Path, Arguments, &StartupInformation);
 }
 
 bool HandleShortcut(SystemKey_t* Key)

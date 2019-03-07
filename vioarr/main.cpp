@@ -16,14 +16,13 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS - Vioarr Window Compositor System
- *  - The window compositor system and general window manager for
- *    MollenOS.
+ * Vioarr Window Compositor System
+ *  - The window compositor system and general window manager for Vali.
  */
 
 #include <os/mollenos.h>
-#include <os/service.h>
-#include <os/window.h>
+#include <ddk/service.h>
+#include <ddk/window.h>
 #include "engine/elements/window.hpp"
 #include "engine/scene.hpp"
 #include "utils/log_manager.hpp"
