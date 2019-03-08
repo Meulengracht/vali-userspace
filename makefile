@@ -88,11 +88,6 @@ build_macia:
 	@printf "%b" "\033[1;35mChecking if macia needs to be built\033[m\n"
 	@$(MAKE) -s -C macia -f makefile
 
-.PHONY: build_vioarr_soft
-build_vioarr_soft:
-	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr -f makefile
-
 llvm-build:
 	mkdir -p llvm-build
 	cd llvm-build && cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../llvm/cmake/platforms/Vali.cmake ../llvm
@@ -114,10 +109,19 @@ build_glm:
 	@cp -r glm/glm/. $(VALI_APPLICATION_PATH)/include/glm
 	@rm $(VALI_APPLICATION_PATH)/include/glm/CMakeLists.txt
 
+.PHONY: build_vioarr_soft
+build_vioarr_soft:
+	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
+	@$(MAKE) -s -C vioarr -f makefile soft
+
 .PHONY: build_vioarr_osmesa
 build_vioarr_osmesa:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
 	@$(MAKE) -s -C vioarr -f makefile osmesa
+
+.PHONY: clean_vioarr
+clean_vioarr:
+	@$(MAKE) -s -C vioarr -f makefile clean
 
 .PHONY: clean
 clean:

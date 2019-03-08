@@ -5,30 +5,33 @@ else
 	ASFLAGS = -f win64 -Xvc
 endif
 INCLUDES = $(VALI_INCLUDES) -I$(VALI_DDK_PATH)/include -I. -Igraphics
-NVG_SOURCES = engine/backend/nanovg.c
 SHARED_SOURCES = $(wildcard engine/elements/*.cpp) \
 				 $(wildcard engine/dialogs/*.cpp) \
 				 $(wildcard engine/*.cpp) \
 				 $(wildcard scenes/*.cpp) \
 				 $(wildcard utils/*.cpp) \
 				 $(wildcard *.cpp)
+SHARED_OBJECTS = $(SHARED_SOURCES:.cpp=.o)
 
+NVG_SOURCES = engine/backend/nanovg.c
 OSMESA_ASM = graphics/opengl/osmesa/display_osmesa_$(VALI_ARCH).s
-OSMESA_OBJECTS = $(OSMESA_ASM:.s=.o) $(NVG_SOURCES:.c=.o) $(SHARED_SOURCES:.cpp=.o)
+OSMESA_OBJECTS = $(OSMESA_ASM:.s=.o) $(NVG_SOURCES:.c=.o)
 
 SOFT_SOURCES = 
 SOFT_ASM = graphics/displays/fb/display_framebuffer_$(VALI_ARCH).s
-SOFT_OBJECTS = $(SHARED_SOURCES:.cpp=.o) $(SOFT_SOURCES:.cpp=.o) $(SOFT_ASM:.s=.o)
+SOFT_OBJECTS = $(SOFT_SOURCES:.cpp=.o) $(SOFT_ASM:.s=.o)
 
 CFLAGS = $(VALI_CFLAGS) -O3 -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE $(INCLUDES)
 CXXFLAGS = $(VALI_CXXFLAGS) -O3 -std=c++17 $(INCLUDES)
 ifeq ($(MAKECMDGOALS),osmesa)
-	OBJECTS = $(OSMESA_OBJECTS)
+	OBJECTS = $(SHARED_OBJECTS) $(OSMESA_OBJECTS)
 	CXXFLAGS += -D_VIOARR_OSMESA -D_VIOARR_OPENGL -DGL_GLEXT_PROTOTYPES -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION
 	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) gallium-osmesa.lib libfreetype.lib
-else
-	OBJECTS = $(SOFT_OBJECTS)
+else ifeq ($(MAKECMDGOALS),soft)
+	OBJECTS = $(SHARED_OBJECTS) $(SOFT_OBJECTS)
 	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) libpng.lib
+else
+	OBJECTS = $(SHARED_OBJECTS) $(OSMESA_OBJECTS) $(SOFT_OBJECTS)
 endif
 
 .PHONY: all
@@ -55,4 +58,4 @@ $(VALI_APPLICATION_PATH)/bin/vioarr.app: $(OBJECTS)
 
 .PHONY: clean
 clean:
-	@rm -f $(OSMESA_OBJECTS)
+	@rm -f $(OBJECTS)

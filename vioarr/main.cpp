@@ -89,6 +89,8 @@ long HandleCreateWindowRequest(MRemoteCallAddress_t *Process, UIWindowParameters
     // Everything is ok, create the window, set elements up and queue up for render
     Window = new CWindow(sEngine.GetContext());
     Window->SetOwner(Process->Process);
+    Window->SetInputPipe(Parameters->InputPipeHandle);
+    Window->SetWmEventPipe(Parameters->WmEventPipeHandle);
     Window->SetWidth(Parameters->Surface.Dimensions.w);
     Window->SetHeight(Parameters->Surface.Dimensions.h);
     Window->SetPosition(250, 200, 0);

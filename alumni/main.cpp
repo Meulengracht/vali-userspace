@@ -16,7 +16,7 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS Terminal Implementation (Alumnious)
+ * Terminal Implementation (Alumnious)
  * - The terminal emulator implementation for Vali. Built on manual rendering and
  *   using freetype as the font renderer.
  */
@@ -30,15 +30,15 @@
 #include <os/input.h>
 
 int main(int argc, char **argv) {
-    std::unique_ptr<CTerminalFreeType>          FreeType(new CTerminalFreeType());
-    CSurfaceRect                                TerminalArea(450, 300);
-    std::unique_ptr<CSurface>                   Surface(new CValiSurface(TerminalArea));
-    std::shared_ptr<CTerminalRenderer>          Renderer(new CTerminalRenderer(std::move(Surface)));
-    std::shared_ptr<CTerminalFont>              Font(new CTerminalFont(std::move(FreeType), "$sys/fonts/DejaVuSansMono.ttf", 12));
-    std::unique_ptr<CTerminal>                  Terminal(new CTerminal(TerminalArea, Renderer, Font));
-    std::unique_ptr<CTerminalInterpreter>       Interpreter(new CTerminalInterpreter());
-    std::unique_ptr<CValiAlumni>                Alumni(new CValiAlumni(std::move(Terminal), std::move(Interpreter)));
-    SystemKey_t                                 Key;
+    std::unique_ptr<CTerminalFreeType>    FreeType(new CTerminalFreeType());
+    CSurfaceRect                          TerminalArea(450, 300);
+    std::unique_ptr<CSurface>             Surface(new CValiSurface(TerminalArea));
+    std::shared_ptr<CTerminalRenderer>    Renderer(new CTerminalRenderer(std::move(Surface)));
+    std::shared_ptr<CTerminalFont>        Font(new CTerminalFont(std::move(FreeType), "$sys/fonts/DejaVuSansMono.ttf", 12));
+    std::unique_ptr<CTerminal>            Terminal(new CTerminal(TerminalArea, Renderer, Font));
+    std::unique_ptr<CTerminalInterpreter> Interpreter(new CTerminalInterpreter());
+    std::unique_ptr<CValiAlumni>          Alumni(new CValiAlumni(std::move(Terminal), std::move(Interpreter)));
+    SystemKey_t                           Key;
 
     Alumni->PrintCommandHeader();
 	while (Alumni->IsAlive()) {
