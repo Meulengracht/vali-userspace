@@ -28,7 +28,11 @@
 #include "utils/log_manager.hpp"
 
 #if defined(_VIOARR_OSMESA)
-#include "graphics/opengl/osmesa/display_osmesa.hpp"
+#if defined(VALI_HEADLESS)
+#include "graphics/opengl/osmesa/display_headless.hpp"
+#else
+#include "graphics/opengl/osmesa/display.hpp"
+#endif
 #define DISPLAY_TYPE() CDisplayOsMesa()
 #else
 #include "graphics/soft/display_framebuffer.hpp"
@@ -58,15 +62,15 @@ int VioarrCompositor::Run()
     // Spawn handlers
     sLog.Info("Spawning message handler");
     SpawnInputHandlers();
-    sLog.Disable();
+    //sLog.Disable();
 
     // Enter event loop
-    sEngine.Render();
+    //sEngine.Render();
     while (m_IsRunning) {
         m_Signal.Wait();
 
         // LastUpdate = std::chrono::steady_clock::now();
-        sEngine.Render();
+        //sEngine.Render();
         // auto render_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - LastUpdate); /*  milliseconds.count() */
         // auto fps = 1000.0f / render_time_ms;
     }

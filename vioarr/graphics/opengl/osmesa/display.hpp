@@ -28,7 +28,7 @@
 #include <GL/gl.h>
 
 #include "utils/log_manager.hpp"
-#include "display.hpp"
+#include "../../display.hpp"
 #include <cstdlib>
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
@@ -39,8 +39,6 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-/* Extern 
- * Assembler optimized presenting methods for byte copying */
 extern "C" void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
 extern "C" void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
 extern "C" void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
@@ -71,7 +69,7 @@ public:
         OSMesaAttributes[n++] = OSMESA_CONTEXT_MINOR_VERSION;
         OSMesaAttributes[n++] = 3;
         OSMesaAttributes[n++] = 0;
-        _Context            = OSMesaCreateContextAttribs(&OSMesaAttributes[0], NULL);
+        _Context              = OSMesaCreateContextAttribs(&OSMesaAttributes[0], NULL);
 
         // Select a present-method (basic/sse/sse2)
 #if defined(_MSC_VER) && !defined(__clang__)

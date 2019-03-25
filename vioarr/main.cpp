@@ -21,8 +21,10 @@
  */
 
 #include <os/mollenos.h>
-#include <ddk/service.h>
-#include <ddk/window.h>
+#include <os/types/ui.h>
+#include <ddk/services/session.h>
+#include <ddk/services/window.h>
+
 #include "engine/elements/window.hpp"
 #include "engine/scene.hpp"
 #include "utils/log_manager.hpp"
@@ -30,15 +32,20 @@
 
 extern void InputHandler();
 
+// Communication handles we have to register to get system events
+static UUId_t RcChannelHandle  = UUID_INVALID;
+static UUId_t InputEventHandle = UUID_INVALID;
+static UUId_t ServiceHandle    = UUID_INVALID;
+
 bool ConvertSurfaceFormatToGLFormat(UISurfaceFormat_t Format, GLenum &FormatResult, 
     GLenum &InternalFormatResult, int &BytesPerPixel)
 {
     bool Success = true;
     switch (Format) {
         case SurfaceRGBA: {
-            FormatResult            = GL_RGBA;
-            InternalFormatResult    = GL_RGBA8;
-            BytesPerPixel           = 4;
+            FormatResult         = GL_RGBA;
+            InternalFormatResult = GL_RGBA8;
+            BytesPerPixel        = 4;
         } break;
 
         default: {
@@ -48,13 +55,14 @@ bool ConvertSurfaceFormatToGLFormat(UISurfaceFormat_t Format, GLenum &FormatResu
     return Success;
 }
 
-long HandleCreateWindowRequest(MRemoteCallAddress_t *Process, UIWindowParameters_t *Parameters, UUId_t BufferHandle)
+long HandleCreateWindowRequest(MRemoteCallAddress_t *Process, UIWindowParameters_t *Parameters, 
+    UUId_t BufferHandle)
 {
-    DmaBuffer_t*    Buffer;
-    CWindow*        Window;
-    long            ElementId;
-    GLenum          Format, InternalFormat;
-    int             BytesPerPixel;
+    DmaBuffer_t* Buffer;
+    CWindow*     Window;
+    long         ElementId;
+    GLenum       Format, InternalFormat;
+    int          BytesPerPixel;
 
     // Does the process already own a window? Then don't create
     // one as we don't want a process to flood us
@@ -108,24 +116,24 @@ long HandleCreateWindowRequest(MRemoteCallAddress_t *Process, UIWindowParameters
 
 void MessageHandler()
 {
-    char *ArgumentBuffer    = NULL;
-    bool IsRunning          = true;
     MRemoteCall_t Message;
+    char*         ArgumentBuffer;
+    bool          IsRunning = true;
     SetCurrentThreadName("vioarr_message");
 
     // Listen for messages
     ArgumentBuffer = (char*)::malloc(IPC_MAX_MESSAGELENGTH);
     while (IsRunning) {
         // Keep processing messages untill no more
-        if (RPCListen(&Message, ArgumentBuffer) == OsSuccess) {
+        if (RPCListen(RcChannelHandle, &Message, ArgumentBuffer) == OsSuccess) {
             if (Message.Function == __WINDOWMANAGER_CREATE) {
-                UIWindowParameters_t*   Parameters = (UIWindowParameters_t*)RPCGetPointerArgument(&Message, 0);
-                long                    ElementId;
-                UUId_t                  BufferHandle;
+                UIWindowParameters_t* Parameters = (UIWindowParameters_t*)RPCGetPointerArgument(&Message, 0);
+                long                  ElementId;
+                UUId_t                BufferHandle;
 
                 // Get arguments
-                BufferHandle    = (UUId_t)Message.Arguments[1].Data.Value;
-                ElementId       = HandleCreateWindowRequest(&Message.From, Parameters, BufferHandle);
+                BufferHandle = (UUId_t)Message.Arguments[1].Data.Value;
+                ElementId    = HandleCreateWindowRequest(&Message.From, Parameters, BufferHandle);
                 RPCRespond(&Message.From, &ElementId, sizeof(long));
             }
             if (Message.Function == __WINDOWMANAGER_DESTROY) {
@@ -151,9 +159,27 @@ void VioarrCompositor::SpawnInputHandlers() {
 }
 
 int main(int argc, char **argv) {
-    if (RegisterService(__WINDOWMANAGER_TARGET) != OsSuccess) {
-        // Only once instance at the time
+    OsStatus_t Status;
+    int        ExitCode;
+    
+    // Create all the neccessary pipes
+    CreatePipe(PIPE_STRUCTURED, &RcChannelHandle);
+    CreatePipe(PIPE_RAW, &InputEventHandle);
+    
+    Status = ListenForSystemEvents(OS_EVENT_STDIN | OS_EVENT_WM, InputEventHandle);
+    if (Status != OsSuccess) {
         return -1;
     }
-    return sVioarr.Run();
+    
+    Status = RegisterServiceObject("vioarr", WindowingService, RcChannelHandle, &ServiceHandle);
+    if (Status != OsSuccess) {
+        return -1;
+    }
+    ExitCode = sVioarr.Run();
+    
+    // Cleanup communication resources
+    UnregisterServiceObject(ServiceHandle);
+    DestroyPipe(InputEventHandle);
+    DestroyPipe(RcChannelHandle);
+    return ExitCode;
 }
