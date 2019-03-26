@@ -95,8 +95,7 @@ public:
     }
     
 private:
-    VideoDescriptor_t   _VideoInformation;
-    OSMesaContext       _Context;
-    void*               _Backbuffer;
-    size_t              _BackbufferSize;
+    OSMesaContext _Context;
+    void*         _Backbuffer;
+    size_t        _BackbufferSize;
 };
