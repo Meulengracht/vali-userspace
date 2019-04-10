@@ -22,7 +22,7 @@
  */
 
 #include <os/mollenos.h>
-#include <os/process.h>
+#include <os/services/process.h>
 #include <os/input.h>
 #include <io.h>
 #include "../terminal_interpreter.hpp"

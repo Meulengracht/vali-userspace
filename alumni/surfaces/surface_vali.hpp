@@ -22,7 +22,7 @@
  */
 #pragma once
 
-#include <os/ui.h>
+#include <os/services/ui.h>
 #include "surface.hpp"
 
 class CValiSurface : public CSurface

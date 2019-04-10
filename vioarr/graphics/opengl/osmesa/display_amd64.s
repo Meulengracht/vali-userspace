@@ -33,6 +33,7 @@ present_sse:
 
 ; present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
+; @abi set to ms
 ; rcx => Framebuffer
 ; rdx => Backbuffer
 ; r8  => Rows
@@ -40,9 +41,11 @@ present_sse:
 ; r10 => RowRemaining
 ; r11 => LeftoverBytes
 present_sse2:
-	; Stack Frame
-	push	rbp
-	mov		rbp, rsp
+	; Store space for XMM6 and XMM7, they are considered non-volatile in
+	; ms abi
+	sub     rsp, 32
+    movdqu [rsp], xmm6
+    movdqu [rsp + 16], xmm7
 
     ; Store state
     push    rdi
@@ -112,6 +115,9 @@ present_sse2:
     pop     rbx
     pop     rsi
     pop     rdi
-	pop     rbp
-	emms
+    
+	; Restore the saved registers
+    movdqu  xmm6, [rsp]
+    movdqu  xmm7, [rsp + 16]
+	add     rsp, 32
 	ret

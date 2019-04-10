@@ -16,15 +16,13 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS - Vioarr Window Compositor System (Display Interface Implementation)
+ * Vioarr Window Compositor System (Display Interface Implementation)
  *  - The window compositor system and general window manager for
- *    MollenOS. This display implementation is of the default display where
+ *    Vali. This display implementation is of the default display where
  *    we use osmesa as the backend combined with the native framebuffer
  */
 #pragma once
 
-/* Includes
- * - OpenGL */
 #include <GL/gl.h>
 #include <assert.h>
 

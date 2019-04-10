@@ -25,7 +25,6 @@ global _present_basic
 global _present_sse
 global _present_sse2
 
-
 ; present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 _present_basic:
@@ -83,6 +82,12 @@ _present_sse:
 	push	ebp
 	mov		ebp, esp
 
+	; Store space for XMM6 and XMM7, they are considered non-volatile in
+	; ms abi
+	sub     esp, 32
+    movdqu [esp], xmm6
+    movdqu [esp + 16], xmm7
+	
     ; Store state
     push    edi
     push    esi
@@ -146,8 +151,13 @@ _present_sse:
     pop     ebx
     pop     esi
     pop     edi
+    
+	; Restore the saved registers
+    movdqu  xmm6, [esp]
+    movdqu  xmm7, [esp + 16]
+	add     esp, 32
+    
 	pop     ebp
-	emms
 	ret
 
 ; present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes)
@@ -157,6 +167,12 @@ _present_sse2:
 	push	ebp
 	mov		ebp, esp
 
+	; Store space for XMM6 and XMM7, they are considered non-volatile in
+	; ms abi
+	sub     esp, 32
+    movdqu [esp], xmm6
+    movdqu [esp + 16], xmm7
+    
     ; Store state
     push    edi
     push    esi
@@ -225,6 +241,11 @@ _present_sse2:
     pop     ebx
     pop     esi
     pop     edi
+    
+	; Restore the saved registers
+    movdqu  xmm6, [esp]
+    movdqu  xmm7, [esp + 16]
+	add     esp, 32
+    
 	pop     ebp
-	emms
 	ret

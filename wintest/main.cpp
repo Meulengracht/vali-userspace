@@ -21,7 +21,7 @@
  *    the stability and integrity of the operating system.
  */
 
-#include <os/ui.h>
+#include <os/services/ui.h>
 #include <chrono>
 #include <thread>
 

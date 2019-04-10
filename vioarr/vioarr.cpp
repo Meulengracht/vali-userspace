@@ -21,7 +21,7 @@
  *    MollenOS.
  */
 
-#include <os/process.h>
+#include <os/services/process.h>
 #include "vioarr.hpp"
 #include "engine/scene.hpp"
 #include "engine/veightengine.hpp"

@@ -31,15 +31,15 @@ export AS := nasm
 
 export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/cxx -I$(VALI_SDK_PATH)/include -I$(VALI_APPLICATION_PATH)/include
 export VALI_LIBRARIES = -LIBPATH:$(VALI_SDK_PATH)/lib -LIBPATH:$(VALI_APPLICATION_PATH)/lib
-export VALI_SDK_CLIBS = libcrt.lib libclang.lib libc.lib libunwind.lib libm.lib
-export VALI_SDK_CXXLIBS = libcxx.lib libclang.lib libc.lib libunwind.lib libm.lib
+export VALI_SDK_CLIBS = crt.lib compiler-rt.lib c.lib m.lib
+export VALI_SDK_CXXLIBS = static_c++.lib static_c++abi.lib unwind.lib $(VALI_SDK_CLIBS)
 
 # Setup default build rules
 include config/$(VALI_ARCH).mk
 
 export VALI_LFLAGS = $(arch_lflags) /nodefaultlib /subsystem:native /lldmap $(VALI_LIBRARIES)
 export VALI_CFLAGS = $(shared_flags) $(arch_flags)
-export VALI_CXXFLAGS = $(shared_flags) $(arch_flags)
+export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 
 ###################################
 ##### BUILD TARGETS           #####

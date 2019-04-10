@@ -1098,22 +1098,16 @@ static void glnvg__fill(GLNVGcontext* gl, GLNVGcall* call)
 	glDisable(GL_STENCIL_TEST);
 }
 
-#define __TRACE
-#include <ddk/utils.h>
 static void glnvg__convexFill(GLNVGcontext* gl, GLNVGcall* call)
 {
 	GLNVGpath* paths = &gl->paths[call->pathOffset];
 	int i, npaths = call->pathCount;
-	TRACE("paths at 0x%llx, offset %u", paths, call->pathOffset);
 
 	glnvg__setUniforms(gl, call->uniformOffset, call->image);
 	glnvg__checkError(gl, "convex fill");
 
 	for (i = 0; i < npaths; i++) {
-		TRACE("... %i/%i fillOffset %i, fillCount %i", i, npaths, 
-			paths[i].fillOffset, paths[i].fillCount);
 		glDrawArrays(GL_TRIANGLE_FAN, paths[i].fillOffset, paths[i].fillCount);
-		TRACE("... next");
 		// Draw fringes
 		if (paths[i].strokeCount > 0) {
 			glDrawArrays(GL_TRIANGLE_STRIP, paths[i].strokeOffset, paths[i].strokeCount);
@@ -1287,10 +1281,8 @@ static void glnvg__renderFlush(void* uptr)
 		glBindBuffer(GL_UNIFORM_BUFFER, gl->fragBuf);
 #endif
 
-		TRACE("... performing draws");
 		for (i = 0; i < gl->ncalls; i++) {
 			GLNVGcall* call = &gl->calls[i];
-			TRACE("... %i/%i type %u", i, gl->ncalls, call->type);
 			glnvg__blendFuncSeparate(gl,&call->blendFunc);
 			if (call->type == GLNVG_FILL)
 				glnvg__fill(gl, call);
@@ -1300,10 +1292,8 @@ static void glnvg__renderFlush(void* uptr)
 				glnvg__stroke(gl, call);
 			else if (call->type == GLNVG_TRIANGLES)
 				glnvg__triangles(gl, call);
-			TRACE("... draw sent");
 		}
 
-		TRACE("... done");
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 #if defined NANOVG_GL3
