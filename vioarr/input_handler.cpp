@@ -35,9 +35,9 @@
 void ShortcutApplicationSearch();
 
 static struct {
-    uint16_t        Flags;
-    uint8_t         KeyCode;
-    void            (*Callback)();
+    uint16_t Flags;
+    uint8_t  KeyCode;
+    void     (*Callback)();
 } SystemShortcuts[] = {
     { KEY_MODIFIER_LALT | KEY_MODIFIER_RELEASED, VK_F, ShortcutApplicationSearch },
     { 0, 0, NULL }
@@ -60,8 +60,8 @@ bool HandleShortcut(SystemKey_t* Key)
 {
     int Index = 0;
     while (SystemShortcuts[Index].KeyCode != 0) {
-        if (Key->Flags      == SystemShortcuts[Index].Flags && 
-            Key->KeyCode    == SystemShortcuts[Index].KeyCode) {
+        if (Key->Flags   == SystemShortcuts[Index].Flags && 
+            Key->KeyCode == SystemShortcuts[Index].KeyCode) {
             // Shortcut has been matched, invoke event
             SystemShortcuts[Index].Callback();
             return true;
