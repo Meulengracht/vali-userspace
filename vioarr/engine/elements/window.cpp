@@ -22,6 +22,7 @@
  */
 
 #include <ddk/ipc/pipe.h>
+#include <os/input.h>
 #include "window.hpp"
 #include "label.hpp"
 
@@ -123,6 +124,38 @@ void CWindow::SetWmEventPipe(UUId_t Handle) {
 }
 
 void CWindow::HandleKeyEvent(SystemKey_t* Key) {
+    // Is it a control event?
+    if (Key->Flags == (KEY_MODIFIER_LALT | KEY_MODIFIER_RELEASED)) {
+        bool Handled = false;
+
+        if (Key->KeyCode == VK_LEFT) {
+            Move(-5.0f, 0.0f, 0.0f);
+            Handled = true;
+        }
+        if (Key->KeyCode == VK_RIGHT) {
+            Move(5.0f, 0.0f, 0.0f);
+            Handled = true;
+        }
+        if (Key->KeyCode == VK_UP) {
+            Move(0.0f, 5.0f, 0.0f);
+            Handled = true;
+        }
+        if (Key->KeyCode == VK_DOWN) {
+            Move(0.0f, -5.0f, 0.0f);
+            Handled = true;
+        }
+        
+        if (Key->KeyCode == VK_ESCAPE) {
+            // Send a SIGINT to the process
+            
+        }
+
+        if (Handled) {
+            InvalidateScreen();
+            return;
+        }
+    }
+
     if (m_InputPipe != UUID_INVALID) {
         WritePipe(m_InputPipe, (void*)Key, sizeof(SystemKey_t));   
     }

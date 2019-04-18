@@ -49,13 +49,6 @@ void ShortcutApplicationSearch()
     sEngine.GetActiveScene()->AddPriority(Dialog);
 }
 
-void SpawnApplication(const char* Path, const char* Arguments)
-{
-    ProcessStartupInformation_t StartupInformation;
-    InitializeStartupInformation(&StartupInformation);
-    ProcessSpawnEx(Path, Arguments, &StartupInformation);
-}
-
 bool HandleShortcut(SystemKey_t* Key)
 {
     int Index = 0;
@@ -77,11 +70,11 @@ bool HandleFunctionKeys(SystemKey_t* Key)
         if (Key->Flags & KEY_MODIFIER_RELEASED) {
             if (Key->KeyCode == VK_F1) {
                 // Spawn the test application
-                SpawnApplication("$bin/wintest.app", NULL);
+                ProcessSpawn("$bin/wintest.app", NULL);
             }
             else if (Key->KeyCode == VK_F2) {
                 // Spawn the terminal application
-                SpawnApplication("$bin/alumni.app", NULL);
+                ProcessSpawn("$bin/alumni.app", NULL);
             }
         }
         return true;

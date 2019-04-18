@@ -111,7 +111,7 @@ public:
         }
     }
 
-    // State Changes
+    // State changes
     void SetActive(bool Active)  {
         // Make sure we set all children inactive in that case
         if (!Active) {

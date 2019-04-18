@@ -45,7 +45,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa build_glm build_vioarr_osmesa build_wintest
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa build_glm build_vioarr build_wintest
 	
 .PHONY: package
 package: build
@@ -114,8 +114,8 @@ build_vioarr_soft:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
 	@$(MAKE) -s -C vioarr -f makefile soft
 
-.PHONY: build_vioarr_osmesa
-build_vioarr_osmesa:
+.PHONY: build_vioarr
+build_vioarr:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
 	@$(MAKE) -s -C vioarr -f makefile osmesa
 

@@ -21,7 +21,6 @@
  *    MollenOS.
  */
 
-#include "utils/event_queue.hpp"
 #include "accessbar.hpp"
 #include "button.hpp"
 #include "sprite.hpp"
@@ -78,7 +77,7 @@ void CAccessBar::Update() {
     char        TimeBuffer[32] = { 0 };
 
     tstruct = localtime(&now);
-    strftime(&TimeBuffer[0], sizeof(TimeBuffer), "%H:%M %a %e", tstruct);
+    strftime(&TimeBuffer[0], sizeof(TimeBuffer), "%H:%M %a %e %B", tstruct);
     m_DateTime->SetText(std::string(&TimeBuffer[0]));
 }
 

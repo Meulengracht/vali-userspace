@@ -62,7 +62,7 @@ int VioarrCompositor::Run()
     // Spawn handlers
     sLog.Info("Spawning message handler");
     SpawnInputHandlers();
-    //sLog.Disable();
+    sLog.Disable();
 
     // Enter event loop
     sEngine.Render();

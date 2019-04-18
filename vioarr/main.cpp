@@ -127,13 +127,15 @@ void MessageHandler()
         // Keep processing messages untill no more
         if (RPCListen(RcChannelHandle, &Message, ArgumentBuffer) == OsSuccess) {
             if (Message.Function == __WINDOWMANAGER_CREATE) {
-                UIWindowParameters_t* Parameters = (UIWindowParameters_t*)RPCGetPointerArgument(&Message, 0);
-                long                  ElementId;
+                UIWindowParameters_t* Parameters;
                 UUId_t                BufferHandle;
+                long                  ElementId;
 
                 // Get arguments
+                Parameters   = (UIWindowParameters_t*)RPCGetPointerArgument(&Message, 0);
                 BufferHandle = (UUId_t)Message.Arguments[1].Data.Value;
-                ElementId    = HandleCreateWindowRequest(&Message.From, Parameters, BufferHandle);
+                
+                ElementId = HandleCreateWindowRequest(&Message.From, Parameters, BufferHandle);
                 RPCRespond(&Message.From, &ElementId, sizeof(long));
             }
             if (Message.Function == __WINDOWMANAGER_DESTROY) {
