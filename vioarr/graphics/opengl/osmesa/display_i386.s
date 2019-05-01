@@ -36,8 +36,6 @@ _present_basic:
     push    edi
     push    esi
     push    ebx
-    push    ecx
-    push    edx
 
 	; Get destination/source
 	mov		edi, dword [ebp + 8]
@@ -66,8 +64,6 @@ _present_basic:
         jnz .NextRow
     
     ; Store state
-    pop     edx
-    pop     ecx
     pop     ebx
     pop     esi
     pop     edi
@@ -92,8 +88,6 @@ _present_sse:
     push    edi
     push    esi
     push    ebx
-    push    ecx
-    push    edx
 
 	; Get destination/source
 	mov		edi, dword [ebp + 8]
@@ -146,8 +140,6 @@ _present_sse:
         jnz     .NextRow
     
     ; Store state
-    pop     edx
-    pop     ecx
     pop     ebx
     pop     esi
     pop     edi
@@ -177,8 +169,6 @@ _present_sse2:
     push    edi
     push    esi
     push    ebx
-    push    ecx
-    push    edx
 
 	; Get destination/source
 	mov		edi, dword [ebp + 8]
@@ -197,11 +187,6 @@ _present_sse2:
         push    ecx
         push    edi
         .NextCopy:
-            prefetchnta [esi + 128]
-            prefetchnta [esi + 160]
-            prefetchnta [esi + 192]
-            prefetchnta [esi + 224]
-
             movdqa xmm0, [esi]
             movdqa xmm1, [esi + 16]
             movdqa xmm2, [esi + 32]
@@ -236,8 +221,6 @@ _present_sse2:
         jnz     .NextRow
     
     ; Store state
-    pop     edx
-    pop     ecx
     pop     ebx
     pop     esi
     pop     edi

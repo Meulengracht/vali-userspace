@@ -53,8 +53,6 @@ present_sse2:
     push    rdi
     push    rsi
     push    rbx
-    push    rcx
-    push    rdx
 
 	; Get destination/source
 	mov		rdi, rcx
@@ -73,11 +71,6 @@ present_sse2:
         push    rcx
         push    rdi
         .NextCopy:
-            prefetchnta [rsi + 128]
-            prefetchnta [rsi + 160]
-            prefetchnta [rsi + 192]
-            prefetchnta [rsi + 224]
-
             movdqa xmm0, [rsi]
             movdqa xmm1, [rsi + 16]
             movdqa xmm2, [rsi + 32]
@@ -112,8 +105,6 @@ present_sse2:
         jnz     .NextRow
     
     ; Store state
-    pop     rdx
-    pop     rcx
     pop     rbx
     pop     rsi
     pop     rdi

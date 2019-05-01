@@ -81,6 +81,7 @@ public:
 
     void Disable() {
         m_Enabled = false;
+        MollenOSEndBoot();
     }
 
 private:

@@ -124,7 +124,6 @@ void CValiAlumni::WaitForProcess()
     ProcessJoin(m_Application, 0, &ExitCode);
     m_Terminal->Print("process exitted with code %i\n", ExitCode);
     m_Application = UUID_INVALID;
-    PrintCommandHeader();
 }
 
 bool CValiAlumni::ExecuteProgram(const std::string& Program, const std::vector<std::string>& Arguments)

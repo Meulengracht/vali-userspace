@@ -35,9 +35,9 @@
 void ShortcutApplicationSearch();
 
 static struct {
-    uint16_t        Flags;
-    uint8_t         KeyCode;
-    void            (*Callback)();
+    uint16_t Flags;
+    uint8_t  KeyCode;
+    void     (*Callback)();
 } SystemShortcuts[] = {
     { KEY_MODIFIER_LALT | KEY_MODIFIER_RELEASED, VK_F, ShortcutApplicationSearch },
     { 0, 0, NULL }
@@ -49,19 +49,12 @@ void ShortcutApplicationSearch()
     sEngine.GetActiveScene()->AddPriority(Dialog);
 }
 
-void SpawnApplication(const char* Path, const char* Arguments)
-{
-    ProcessStartupInformation_t StartupInformation;
-    InitializeStartupInformation(&StartupInformation);
-    ProcessSpawnEx(Path, Arguments, &StartupInformation);
-}
-
 bool HandleShortcut(SystemKey_t* Key)
 {
     int Index = 0;
     while (SystemShortcuts[Index].KeyCode != 0) {
-        if (Key->Flags      == SystemShortcuts[Index].Flags && 
-            Key->KeyCode    == SystemShortcuts[Index].KeyCode) {
+        if (Key->Flags   == SystemShortcuts[Index].Flags && 
+            Key->KeyCode == SystemShortcuts[Index].KeyCode) {
             // Shortcut has been matched, invoke event
             SystemShortcuts[Index].Callback();
             return true;
@@ -77,11 +70,11 @@ bool HandleFunctionKeys(SystemKey_t* Key)
         if (Key->Flags & KEY_MODIFIER_RELEASED) {
             if (Key->KeyCode == VK_F1) {
                 // Spawn the test application
-                SpawnApplication("$bin/wintest.app", NULL);
+                ProcessSpawn("$bin/wintest.app", NULL);
             }
             else if (Key->KeyCode == VK_F2) {
                 // Spawn the terminal application
-                SpawnApplication("$bin/alumni.app", NULL);
+                ProcessSpawn("$bin/alumni.app", NULL);
             }
         }
         return true;
