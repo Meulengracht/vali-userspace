@@ -38,12 +38,14 @@ present_sse:
 ; rdx => Backbuffer
 ; r8  => Rows
 ; r9  => RowLoops
-; r10 => RowRemaining
-; r11 => LeftoverBytes
+; r10 => RowRemaining   ; stack in ms
+; r11 => LeftoverBytes  ; stack in ms
 present_sse2:
 	; Store space for XMM6 and XMM7, they are considered non-volatile in
-	; ms abi
-	sub     rsp, 32
+	; ms abi, and save the two spilled arguments
+	mov r10, qword [rsp + 40] ; arg0 is 32 + 8 (reserved + return address)
+	mov r11, qword [rsp + 48] ; arg1 is 32 + 8 + 8 (reserved + return address + arg0)
+	sub rsp, 32
     movdqu [rsp], xmm6
     movdqu [rsp + 16], xmm7
 

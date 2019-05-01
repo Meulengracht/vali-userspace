@@ -30,11 +30,17 @@
 #include "utils/log_manager.hpp"
 #include "../../display.hpp"
 #include <cstdlib>
+
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
 #else
 #include <cpuid.h>
 #endif
+
+#define CPUID_FEAT_ECX_SSSE3    1 << 9
+#define CPUID_FEAT_ECX_SSE4_1   1 << 19
+#define CPUID_FEAT_ECX_SSE4_2   1 << 20
+#define CPUID_FEAT_ECX_AVX      1 << 28
 
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
