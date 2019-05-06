@@ -144,11 +144,6 @@ void CWindow::HandleKeyEvent(SystemKey_t* Key) {
             Move(0.0f, -5.0f, 0.0f);
             Handled = true;
         }
-        
-        if (Key->KeyCode == VK_ESCAPE) {
-            // Send a SIGINT to the process
-            
-        }
 
         if (Handled) {
             InvalidateScreen();

@@ -65,15 +65,15 @@ int VioarrCompositor::Run()
     sLog.Disable();
 
     // Enter event loop
-    sEngine.Render();
     while (m_IsRunning) {
-        sLog.Info("... waiting for event");
-        m_Signal.Wait();
-
         // LastUpdate = std::chrono::steady_clock::now();
         sEngine.Render();
+        
         // auto render_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - LastUpdate); /*  milliseconds.count() */
         // auto fps = 1000.0f / render_time_ms;
+        
+        sLog.Info("... waiting for event");
+        m_Signal.Wait();
     }
     return 0;
 }

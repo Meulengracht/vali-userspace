@@ -45,9 +45,9 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-extern "C" void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
-extern "C" void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
-extern "C" void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes);
+extern "C" void present_basic(void *Framebuffer, void *Backbuffer, size_t Rows, size_t RowLoops, size_t RowRemaining, size_t BytesPerScanline);
+extern "C" void present_sse(void *Framebuffer, void *Backbuffer, size_t Rows, size_t RowLoops, size_t RowRemaining, size_t BytesPerScanline);
+extern "C" void present_sse2(void *Framebuffer, void *Backbuffer, size_t Rows, size_t RowLoops, size_t RowRemaining, size_t BytesPerScanline);
 
 class CDisplayOsMesa : public CDisplay {
 public:
@@ -139,7 +139,7 @@ public:
         // Calculate some values needed for filling the framebuffer
         sLog.Info("Creating access to the display framebuffer");
         _Framebuffer    = CreateDisplayFramebuffer();
-        _BytesToCopy    = Width * 4  * sizeof(GLubyte);
+        _BytesToCopy    = (size_t)Width * 4  * sizeof(GLubyte);
         _RowLoops       = _BytesToCopy / _BytesStep;
         _BytesRemaining = _BytesToCopy % _BytesStep;
         _FramebufferEnd = ((char*)_Framebuffer + (_VideoInformation.BytesPerScanline * (Height - 1)));
@@ -157,22 +157,22 @@ public:
     // as opengl's buffer is backwards
     bool Present() {
         _PresentMethod(_Framebuffer, _Backbuffer, _VideoInformation.Height, 
-            _RowLoops, _BytesRemaining, _VideoInformation.BytesPerScanline);
+            _RowLoops, _BytesRemaining, (size_t)_VideoInformation.BytesPerScanline);
         return true;
     }
     
 private:
-    VideoDescriptor_t   _VideoInformation;
-    OSMesaContext       _Context;
-    unsigned long       _BackbufferSize;
-    void*               _Backbuffer;
-    void*               _Framebuffer;
-    void*               _FramebufferEnd;
+    VideoDescriptor_t _VideoInformation;
+    OSMesaContext     _Context;
+    unsigned long     _BackbufferSize;
+    void*             _Backbuffer;
+    void*             _Framebuffer;
+    void*             _FramebufferEnd;
 
     // Needed by flushing
-    void(*_PresentMethod)(void*, void*, int, int, int, int);
-    int                 _RowLoops;
-    int                 _BytesToCopy;
-    int                 _BytesRemaining;
-    int                 _BytesStep;
+    void(*_PresentMethod)(void*, void*, size_t, size_t, size_t, size_t);
+    size_t _RowLoops;
+    size_t _BytesToCopy;
+    size_t _BytesRemaining;
+    size_t _BytesStep;
 };

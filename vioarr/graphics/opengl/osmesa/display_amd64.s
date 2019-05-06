@@ -15,7 +15,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;
-; x86 framebuffer present methods
+; x86-64 framebuffer present methods
 
 bits 64
 segment .text
@@ -31,15 +31,16 @@ present_basic:
 present_sse:
     ret
 
-; present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int LeftoverBytes)
+; present_sse2(void *Framebuffer, void *Backbuffer, uint64_t Rows, 
+;   uint64_t RowLoops, uint64_t RowRemaining, uint64_t BytesPerScanline)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 ; @abi set to ms
 ; rcx => Framebuffer
 ; rdx => Backbuffer
 ; r8  => Rows
 ; r9  => RowLoops
-; r10 => RowRemaining   ; stack in ms
-; r11 => LeftoverBytes  ; stack in ms
+; r10 => RowRemaining      ; stack in ms
+; r11 => BytesPerScanline  ; stack in ms
 present_sse2:
     ; Save the two stacked arguments to volatile registers
     mov r10, qword [rsp + 40] ; arg0 is 32 + 8 (reserved + return address)
