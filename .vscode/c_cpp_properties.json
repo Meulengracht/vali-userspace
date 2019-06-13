@@ -1,0 +1,114 @@
+{
+    "configurations": [
+        {
+            "name": "MollenOS-i386",
+            "includePath": [
+                "${workspaceFolder}/alumni/**",
+                "${workspaceFolder}/asgaard/**",
+                "${workspaceFolder}/freetype/include/**",
+                "${workspaceFolder}/glm/**",
+                "${workspaceFolder}/mesa/include/**",
+                "${workspaceFolder}/macia/**",
+                "${workspaceFolder}/vioarr/**",
+                "${workspaceFolder}/wintest/**",
+                "${VALI_SDK_PATH}/include/**",
+                "${VALI_DDK_PATH}/include/**"
+            ],
+            "defines": [
+                "__STDC_VERSION__=201112L",
+                "__IDE",
+                "__clang__",
+                "MOLLENOS",
+                "i386",
+                "__i386__",
+                "UNICODE",
+                "__need_size_t",
+                "__INT_MAX__=2147483647",
+                "__INT64_TYPE__=long long",
+                "__UINT64_TYPE__=unsigned long long",
+                "__INT32_TYPE__=int",
+                "__UINT32_TYPE__=unsigned int",
+                "__INT16_TYPE__=short",
+                "__UINT16_TYPE__=unsigned short",
+                "__INT8_TYPE__=char",
+                "__UINT8_TYPE__=unsigned char",
+                "__SIZE_TYPE__=__UINT32_TYPE__",
+                "__UINTPTR_TYPE__=__UINT32_TYPE__",
+                "__INTPTR_TYPE__=__INT32_TYPE__",
+                "__PTRDIFF_TYPE__=__UINT32_TYPE__",
+                "_DOUBLE_IS_32BITS",
+                "_HAVE_LONG_DOUBLE",
+                "_LDBL_EQ_DBL",
+                "__OSCONFIG_HAS_MMIO",
+                "__OSCONFIG_HAS_VIDEO",
+                "__OSCONFIG_ACPI_SUPPORT"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "MollenOS-amd64",
+            "includePath": [
+                "${workspaceFolder}/alumni/**",
+                "${workspaceFolder}/asgaard/**",
+                "${workspaceFolder}/freetype/include/**",
+                "${workspaceFolder}/glm/**",
+                "${workspaceFolder}/mesa/include/**",
+                "${workspaceFolder}/macia/**",
+                "${workspaceFolder}/vioarr/**",
+                "${workspaceFolder}/wintest/**",
+                "${VALI_SDK_PATH}/include/**",
+                "${VALI_DDK_PATH}/include/**"
+            ],
+            "defines": [
+                "__STDC_VERSION__=201112L",
+                "__IDE",
+                "__clang__",
+                "MOLLENOS",
+                "amd64",
+                "__amd64__",
+                "UNICODE",
+                "_USE_64BIT_TIME_T",
+                "_INTEGRAL_MAX_BITS=64",
+                "__need_size_t",
+                "__INT_MAX__=2147483647",
+                "__INT64_TYPE__=long long",
+                "__UINT64_TYPE__=unsigned long long",
+                "__INT32_TYPE__=int",
+                "__UINT32_TYPE__=unsigned int",
+                "__INT16_TYPE__=short",
+                "__UINT16_TYPE__=unsigned short",
+                "__INT8_TYPE__=char",
+                "__UINT8_TYPE__=unsigned char",
+                "__SIZE_TYPE__=__UINT64_TYPE__",
+                "__UINTPTR_TYPE__=__UINT64_TYPE__",
+                "__INTPTR_TYPE__=__INT64_TYPE__",
+                "__PTRDIFF_TYPE__=__UINT64_TYPE__",
+                "_LDBL_EQ_DBL",
+                "_HAVE_LONG_DOUBLE",
+                "__OSCONFIG_HAS_MMIO",
+                "__OSCONFIG_HAS_VIDEO",
+                "__OSCONFIG_ACPI_SUPPORT"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
