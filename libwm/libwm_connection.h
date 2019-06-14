@@ -16,22 +16,21 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * Wm Server Type Definitions & Structures
- * - This header describes the base server-structure, prototypes
+ * Wm Connection Type Definitions & Structures
+ * - This header describes the base connection-structure, prototypes
  *   and functionality, refer to the individual things for descriptions
  */
 
-#ifndef __LIBWM_SERVER_H__
-#define __LIBWM_SERVER_H__
+#ifndef __LIBWM_CONNECTION_H__
+#define __LIBWM_CONNECTION_H__
 
 #include "libwm_types.h"
 
-typedef void(*wm_server_message_handler_t)(wm_event_type_t, wm_request_header_t*);
+// Prototypes
+struct sockaddr;
 
-// Server API
-// This should be called for the compositor that wants to manage
-// wm-clients. This will initiate data structures and setup handler threads
-int wm_server_initialize(wm_server_message_handler_t);
-int wm_server_shutdown(void);
+// Connection API
+// Used to manage all the connections to the window manager. 
+int wm_connection_create(int, struct sockaddr*, int);
 
-#endif // !__LIBWM_SERVER_H__
+#endif // !__LIBWM_CONNECTION_H__
