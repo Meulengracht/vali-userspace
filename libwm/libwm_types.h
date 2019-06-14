@@ -83,10 +83,9 @@ typedef struct {
 } wm_request_pong_t;
 
 typedef struct {
-    wm_request_header_t header;
-    unsigned            flags;
-    int                 input_pipe_fd;
-    int                 message_pipe_fd;
+    wm_request_header_t     header;
+    wm_surface_descriptor_t surface_descriptor;
+    unsigned                flags;
 } wm_request_window_create_t;
 
 typedef struct {

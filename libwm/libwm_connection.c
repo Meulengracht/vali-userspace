@@ -30,7 +30,6 @@ typedef struct {
     int             c_socket;
     struct sockaddr address;
     int             address_length;
-    
 } wm_connection_t;
 
 static int wm_connection_handler(void* param)
@@ -45,7 +44,7 @@ static int wm_connection_handler(void* param)
     
     // Set a timeout on recv so we can use ping the client at regular intervals
     status = setsockopt(connection->c_socket, SOL_SOCKET, SO_RCVTIMEO, 
-        (char*)&ping_ms, sizeof(ping_ms));
+        &ping_ms, sizeof(ping_ms));
     assert(status >= 0);
     
     // listen for messages
