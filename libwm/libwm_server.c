@@ -116,6 +116,14 @@ static int wm_input_handler(void* param)
     return shutdown(input_socket, SHUT_RDWR);
 }
 
+static void wm_connection_handler(int connection, wm_request_header_t* request)
+{
+    // handle internal events
+
+    // let the user code handle it
+    wm_server_handler(connection, request);
+}
+
 int wm_server_initialize(wm_server_message_handler_t handler)
 {
     // store handler

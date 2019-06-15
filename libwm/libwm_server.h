@@ -26,7 +26,7 @@
 
 #include "libwm_types.h"
 
-typedef void(*wm_server_message_handler_t)(wm_event_type_t, wm_request_header_t*);
+typedef void(*wm_server_message_handler_t)(int, wm_request_header_t*);
 
 // Server API
 // This should be called for the compositor that wants to manage

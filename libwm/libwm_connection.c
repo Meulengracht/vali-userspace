@@ -22,6 +22,7 @@
  */
 
 #include <assert.h>
+#include <inet/socket.h>
 #include "libwm_connection.h"
 #include <errno.h>
 #include <threads.h>
@@ -30,7 +31,10 @@ typedef struct {
     int             c_socket;
     struct sockaddr address;
     int             address_length;
+    int             alive;
 } wm_connection_t;
+
+static wm_connection_event_handler_t connection_event_handler;
 
 static int wm_connection_handler(void* param)
 {
@@ -40,7 +44,7 @@ static int wm_connection_handler(void* param)
     
     char                 buffer[256];
     wm_request_header_t* header = &buffer[0];
-    void*                body   = &buffer[sizeof(wm_request_header_t)]
+    void*                body   = &buffer[sizeof(wm_request_header_t)];
     
     // Set a timeout on recv so we can use ping the client at regular intervals
     status = setsockopt(connection->c_socket, SOL_SOCKET, SO_RCVTIMEO, 
@@ -48,7 +52,7 @@ static int wm_connection_handler(void* param)
     assert(status >= 0);
     
     // listen for messages
-    while (1) {
+    while (connection->alive) {
         bytes_read = recv(connection->c_socket, header, 
             sizeof(wm_request_header_t), MSG_WAITALL);
         if (bytes_read != sizeof(wm_request_header_t)) {
@@ -73,8 +77,19 @@ static int wm_connection_handler(void* param)
         }
 
         // elevate message to handler
-        user_message_handler(header);
+        connection_event_handler(connection->c_socket, header);
     }
+    
+    // Cleanup connection
+    shutdown(connection->c_socket, SHUT_RDRW);
+    free(connection);
+    return 0;
+}
+
+int wm_connection_initialize(wm_connection_event_handler_t handler)
+{
+    connection_event_handler = handler;
+    return 0;
 }
 
 int wm_connection_create(int client_socket, struct sockaddr* address, int address_length)
@@ -91,7 +106,14 @@ int wm_connection_create(int client_socket, struct sockaddr* address, int addres
     memcpy(&connection->address, address, address_length);
     connection->c_socket       = client_socket;
     connection->address_length = address_length;
+    connection->alive          = 1;
     
     // Spawn a new thread to handle the connection
     thrd_create(&thread_id, wm_connection_handler, connection);
+    return 0;
+}
+
+int wm_connection_shutdown(int connection)
+{
+
 }
