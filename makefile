@@ -45,7 +45,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_alumni build_llvm build_mesa build_glm build_vioarr build_wintest
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_llvm build_mesa build_glm
 	
 .PHONY: package
 package: build
