@@ -26,6 +26,7 @@
 #include "protocols/wm_core_protocol.h"
 #include "engine/vioarr_screen.h"
 #include "engine/vioarr_utils.h"
+#include <libwm_server.h>
 
 void wm_screen_get_properties_callback(int client, struct wm_screen_get_properties_args* input, struct wm_screen_get_properties_ret* output)
 {

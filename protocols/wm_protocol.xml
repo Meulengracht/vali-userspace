@@ -66,6 +66,13 @@
                     <request>
                         <param name="object_id" type="uint32_t" count="1" />
                     </request>
+                    <response>
+                        <param name="object_id" type="uint32_t" count="1" />
+                        <param name="x" type="int" count="1" />
+                        <param name="y" type="int" count="1" />
+                        <param name="transform" type="transform" count="1" />
+                        <param name="scale" type="int" count="1" />
+                    </response>
                 </function>
                 <function name="get_modes" synchronous="false">
                     <request>
@@ -95,13 +102,6 @@
             </functions>
             
             <events>
-                <event name="properties">
-                    <param name="object_id" type="uint32_t" count="1" />
-                    <param name="x" type="int" count="1" />
-                    <param name="y" type="int" count="1" />
-                    <param name="transform" type="transform" count="1" />
-                    <param name="scale" type="int" count="1" />
-                </event>
                 <event name="mode">
                     <param name="flags" type="mode_attributes" count="1" />
                     <param name="resolution_x" type="int" count="1" />
