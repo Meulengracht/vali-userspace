@@ -123,6 +123,16 @@ build_vioarr:
 clean_vioarr:
 	@$(MAKE) -s -C vioarr -f makefile clean
 
+.PHONY: build_vioarr2
+build_vioarr2:
+	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
+	@$(MAKE) -s -C vioarr2 -f makefile
+
+.PHONY: clean_vioarr2
+clean_vioarr2:
+	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
+	@$(MAKE) -s -C vioarr2 -f makefile clean
+
 .PHONY: clean
 clean:
 	@$(MAKE) -s -C zlib -f makefile clean

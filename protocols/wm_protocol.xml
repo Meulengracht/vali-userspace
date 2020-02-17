@@ -2,6 +2,7 @@
 <root>
     <types>
         <type name="uint32_t" header="stdint.h" />
+        <type name="UUId_t" header="os/osdefs.h" />
     </types>
     <enums>
         <enum name="pixel_format">
@@ -53,7 +54,7 @@
                     <value name="mode_preferred"></value>
                 </enum>
                 <enum name="transform">
-                    <value name="none"></value>
+                    <value name="no_transform"></value>
                     <value name="rotate_90"></value>
                     <value name="rotate_180"></value>
                     <value name="rotate_270"></value>
@@ -65,15 +66,12 @@
                     <request>
                         <param name="object_id" type="uint32_t" count="1" />
                     </request>
-                    <response>
-                        <param name="object_id" type="uint32_t" count="1" />
-                        <param name="x" type="int" count="1" />
-                        <param name="y" type="int" count="1" />
-                        <param name="transform" type="transform" count="1" />
-                        <param name="scale" type="int" count="1" />
-                    </response>
                 </function>
-                <function name="get_modes" synchronous="false" />
+                <function name="get_modes" synchronous="false">
+                    <request>
+                        <param name="object_id" type="uint32_t" count="1" />
+                    </request>
+                </function>
                 <function name="set_scale" synchronous="false">
                     <request>
                         <param name="object_id" type="uint32_t" count="1" />
@@ -97,6 +95,13 @@
             </functions>
             
             <events>
+                <event name="properties">
+                    <param name="object_id" type="uint32_t" count="1" />
+                    <param name="x" type="int" count="1" />
+                    <param name="y" type="int" count="1" />
+                    <param name="transform" type="transform" count="1" />
+                    <param name="scale" type="int" count="1" />
+                </event>
                 <event name="mode">
                     <param name="flags" type="mode_attributes" count="1" />
                     <param name="resolution_x" type="int" count="1" />
@@ -145,11 +150,11 @@
         <protocol name="surface" id="0x14">
             <enums>
                 <enum name="edge">
-                    <value name="none" />
-                    <value name="top_left" />
-                    <value name="top_right" />
-                    <value name="bottom_left" />
-                    <value name="bottom_right" />
+                    <value name="no_edges" value="0" />
+                    <value name="top_left" value="0x1" />
+                    <value name="top_right" value="0x2" />
+                    <value name="bottom_left" value="0x4" />
+                    <value name="bottom_right" value="0x8" />
                 </enum>
             </enums>
             

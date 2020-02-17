@@ -1,0 +1,128 @@
+/* MollenOS
+ *
+ * Copyright 2020, Philip Meulengracht
+ *
+ * This program is free software : you can redistribute it and / or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation ? , either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Vioarr - Vali Compositor
+ * - Implements the default system compositor for Vali. It utilizies the gracht library
+ *   for communication between compositor clients and the server. The server renders
+ *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
+ */
+
+#define ENGINE_SCREEN_REFRESH_HZ 60
+#define ENGINE_SCREEN_REFRESH_MS (1000 / ENGINE_SCREEN_REFRESH_HZ)
+
+#include <ddk/contracts/video.h>
+#include <os/mollenos.h>
+#include "vioarr_engine.h"
+#include "vioarr_renderer.h"
+#include "vioarr_resources.h"
+#include "vioarr_screen.h"
+#include "vioarr_utils.h"
+#include <time.h>
+#include <threads.h>
+
+#include <glad/glad.h>
+#include "backend/nanovg.h"
+#include "backend/nanovg_gl.h"
+
+#if defined(__VIOARR_CONFIG_RENDERER_OSMESA) || defined(__VIOARR_CONFIG_RENDERER_HEADLESS)
+#include <GL/osmesa.h>
+#define glGetProcAddress OSMesaGetProcAddress
+#else
+#error "You must define a default renderer for vioarr to use"
+#endif
+
+static int vioarr_engine_setup_screens(void);
+static int vioarr_engine_update(void*);
+
+static vioarr_screen_t* primary_screen;
+static thrd_t           screen_thread;
+static NVGcontext*      nvg_root_context;
+
+int vioarr_engine_initialize(void)
+{
+    int status;
+    
+    // Initialize the GL loader library, it returns 1 on success
+    status = gladLoadGLLoader((GLADloadproc)glGetProcAddress);
+    if (!status) {
+        return -1;
+    }
+    
+#ifdef __VIOARR_CONFIG_RENDERER_MSAA
+	nvg_root_context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+#else
+	nvg_root_context = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
+#endif
+    if (!nvg_root_context) {
+        return -1;
+    }
+    
+    status = vioarr_resources_initialize(nvg_root_context);
+    if (status) {
+        return status;
+    }
+    
+    status = vioarr_engine_setup_screens();
+    if (status) {
+        return status;
+    }
+    
+    return 0;
+}
+
+static int vioarr_engine_setup_screens(void)
+{
+    VideoDescriptor_t video;
+    OsStatus_t        os_status;
+    
+    // Get screens available from OS.
+    os_status = QueryDisplayInformation(&video);
+    if (os_status != OsSuccess) {
+        OsStatusToErrno(os_status);
+        return -1;
+    }
+    
+    // Create the primary screen object. In the future we will support
+    // multiple displays and also listen for screen hotplugs
+    primary_screen = vioarr_screen_create(nvg_root_context, &video);
+    if (!primary_screen) {
+        return -1;
+    }
+    
+    // Spawn the renderer thread, this will update the screen at a 60 hz frequency
+    // and handle all redrawing
+    return thrd_create(&screen_thread, vioarr_engine_update, primary_screen);
+}
+
+static int vioarr_engine_update(void* context)
+{
+    vioarr_screen_t* screen = context;
+    clock_t start, end, diff_ms;
+    
+    for (;;) {
+        start = clock();
+        
+        vioarr_screen_frame(screen);
+        
+        end = clock();
+        diff_ms = (end - start) / CLOCKS_PER_SEC;
+        start = end;
+        
+        thrd_sleepex(ENGINE_SCREEN_REFRESH_MS - (diff_ms % ENGINE_SCREEN_REFRESH_MS));
+    }
+}
