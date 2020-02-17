@@ -25,9 +25,31 @@
 #include "vioarr_utils.h"
 #include <stdatomic.h>
  
+typedef struct vioarr_resource {
+    uint32_t id;
+    void*    object;
+} vioarr_resource_t;
+ 
 static _Atomic(uint32_t) object_id = ATOMIC_VAR_INIT(0x100);
  
-uint32_t vioarr_utils_get_object_id(void)
+static uint32_t vioarr_utils_get_object_id(void)
 {
     return atomic_fetch_add(&object_id, 1);
+}
+
+uint32_t vioarr_utils_create_object(void* object)
+{
+    
+    
+    return vioarr_utils_get_object_id();
+}
+
+void* vioarr_utils_get_object(uint32_t id)
+{
+    return NULL;
+}
+
+int vioarr_utils_remove_object(uint32_t id)
+{
+    return 0;
 }

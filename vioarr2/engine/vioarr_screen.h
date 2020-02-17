@@ -31,6 +31,8 @@
 typedef struct vioarr_screen vioarr_screen_t;
 
 vioarr_screen_t* vioarr_screen_create(NVGcontext*, VideoDescriptor_t*);
+int vioarr_screen_width(vioarr_screen_t*);
+int vioarr_screen_height(vioarr_screen_t*);
 void vioarr_screen_frame(vioarr_screen_t*);
 
 #endif //!__VIOARR_SCREEN_H__

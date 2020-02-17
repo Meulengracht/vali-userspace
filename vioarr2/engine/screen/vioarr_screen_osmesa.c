@@ -138,6 +138,22 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     return screen;
 }
 
+int vioarr_screen_width(vioarr_screen_t* screen)
+{
+    if (!screen) {
+        return -1;
+    }
+    return screen->width;
+}
+
+int vioarr_screen_height(vioarr_screen_t* screen)
+{
+    if (!screen) {
+        return -1;
+    }
+    return screen->height;
+}
+
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
     OSMesaMakeCurrent(screen->context, screen->backbuffer,
