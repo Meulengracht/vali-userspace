@@ -22,4 +22,11 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "vioarr_utils.h"
+#ifndef __VIOARR_BUFFER_H__
+#define __VIOARR_BUFFER_H__
+
+typedef struct vioarr_buffer vioarr_buffer_t;
+
+
+
+#endif //!__VIOARR_BUFFER_H__

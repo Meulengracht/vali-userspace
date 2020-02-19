@@ -22,4 +22,15 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "vioarr_utils.h"
+#ifndef __VIOARR_UTILS_H__
+#define __VIOARR_UTILS_H__
+
+#include <stdint.h>
+#include "../protocols/wm_core_protocol.h"
+
+uint32_t vioarr_objects_create_object(void*, enum wm_core_object_type);
+int      vioarr_objects_remove_object(uint32_t);
+void*    vioarr_objects_get_object(uint32_t);
+void     vioarr_objects_publish(int);
+
+#endif //!__VIOARR_UTILS_H__

@@ -23,13 +23,14 @@
  */
 
 #include "protocols/wm_core_protocol.h"
+#include "engine/vioarr_objects.h"
 
 void wm_core_sync_callback(int client, struct wm_core_sync_args* input, struct wm_core_sync_ret* output)
 {
-    
+    output->serial = input->serial;
 }
 
-void wm_core_get_state_callback(int client)
+void wm_core_get_objects_callback(int client)
 {
-    
+    vioarr_objects_publish(client);
 }

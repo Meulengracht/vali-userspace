@@ -30,8 +30,10 @@
 typedef struct vioarr_renderer vioarr_renderer_t;
 
 vioarr_renderer_t* vioarr_renderer_create(NVGcontext*, vioarr_screen_t*);
-void vioarr_renderer_set_scale(vioarr_renderer_t*, int);
-void vioarr_renderer_set_transform(vioarr_renderer_t*, int);
-void vioarr_renderer_render(vioarr_renderer_t*);
+void               vioarr_renderer_set_scale(vioarr_renderer_t*, int);
+void               vioarr_renderer_set_rotation(vioarr_renderer_t*, int);
+int                vioarr_renderer_scale(vioarr_renderer_t*);
+int                vioarr_renderer_rotation(vioarr_renderer_t*);
+void               vioarr_renderer_render(vioarr_renderer_t*);
 
 #endif //!__VIOARR_RENDERER_H__

@@ -57,28 +57,36 @@ int vioarr_engine_initialize(void)
 {
     int status;
     
+    vioarr_utils_trace("[vioarr] [initialize] loading gl extensions");
     // Initialize the GL loader library, it returns 1 on success
     status = gladLoadGLLoader((GLADloadproc)glGetProcAddress);
     if (!status) {
+        vioarr_utils_error("[vioarr] [initialize] failed to load gl extensions, code %i", status);
         return -1;
     }
     
+    vioarr_utils_trace("[vioarr] [initialize] creating nvg context");
 #ifdef __VIOARR_CONFIG_RENDERER_MSAA
 	nvg_root_context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
 	nvg_root_context = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
 #endif
     if (!nvg_root_context) {
+        vioarr_utils_error("[vioarr] [initialize] failed to create the nvg context");
         return -1;
     }
     
+    vioarr_utils_trace("[vioarr] [initialize] loading resources");
     status = vioarr_resources_initialize(nvg_root_context);
     if (status) {
+        vioarr_utils_error("[vioarr] [initialize] resources failed to load, code %i", status);
         return status;
     }
     
+    vioarr_utils_trace("[vioarr] [initialize] initializing screens");
     status = vioarr_engine_setup_screens();
     if (status) {
+        vioarr_utils_error("[vioarr] [initialize] failed to initialize screens, code %i", status);
         return status;
     }
     
@@ -90,20 +98,25 @@ static int vioarr_engine_setup_screens(void)
     VideoDescriptor_t video;
     OsStatus_t        os_status;
     
+    vioarr_utils_trace("[vioarr] [initialize] quering screen information");
     // Get screens available from OS.
     os_status = QueryDisplayInformation(&video);
     if (os_status != OsSuccess) {
+        vioarr_utils_error("[vioarr] [initialize] failed to query screens, status %u", os_status);
         OsStatusToErrno(os_status);
         return -1;
     }
     
+    vioarr_utils_trace("[vioarr] [initialize] creating primary screen object");
     // Create the primary screen object. In the future we will support
     // multiple displays and also listen for screen hotplugs
     primary_screen = vioarr_screen_create(nvg_root_context, &video);
     if (!primary_screen) {
+        vioarr_utils_error("[vioarr] [initialize] failed to create primary screen object");
         return -1;
     }
     
+    vioarr_utils_trace("[vioarr] [initialize] creating screen renderer thread");
     // Spawn the renderer thread, this will update the screen at a 60 hz frequency
     // and handle all redrawing
     return thrd_create(&screen_thread, vioarr_engine_update, primary_screen);
@@ -114,7 +127,8 @@ static int vioarr_engine_update(void* context)
     vioarr_screen_t* screen = context;
     clock_t start, end, diff_ms;
     
-    for (;;) {
+    vioarr_utils_trace("[vioarr] [renderer_thread] started");
+    while (1) {
         start = clock();
         
         vioarr_screen_frame(screen);

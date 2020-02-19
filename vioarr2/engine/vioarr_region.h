@@ -22,4 +22,18 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "vioarr_utils.h"
+#ifndef __VIOARR_REGION_H__
+#define __VIOARR_REGION_H__
+
+typedef struct vioarr_region vioarr_region_t;
+
+vioarr_region_t* vioarr_region_create(void);
+void             vioarr_region_zero(vioarr_region_t*);
+void             vioarr_region_add(vioarr_region_t*, int, int, int, int);
+int              vioarr_region_x(vioarr_region_t*);
+int              vioarr_region_y(vioarr_region_t*);
+int              vioarr_region_width(vioarr_region_t*);
+int              vioarr_region_height(vioarr_region_t*);
+int              vioarr_region_is_zero(vioarr_region_t*);
+
+#endif //!__VIOARR_REGION_H__

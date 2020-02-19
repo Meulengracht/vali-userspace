@@ -33,9 +33,8 @@ typedef struct vioarr_screen {
     OSMesaContext      context;
     void*              backbuffer;
     size_t             backbuffer_size;
-    int                width;
-    int                height;
     int                depth_bits;
+    vioarr_region_t    dimensions;
     vioarr_renderer_t* renderer;
 } vioarr_screen_t;
 
@@ -61,8 +60,8 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     attributes[n++] = 0;
     screen->context = OSMesaCreateContextAttribs(&attributes[0], NULL);
 
-    screen->width      = video->Width;
-    screen->height     = video->Height;
+    vioarr_region_zero(&screen->dimensions);
+    vioarr_region_add(&screen->dimensions, 0, 0, video->Width, video->Height);
     screen->depth_bits = video->Depth;
     
     screen->backbuffer_size = video->Width * video->Height * 4 * sizeof(GLubyte);
@@ -81,20 +80,46 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     return screen;
 }
 
-int vioarr_screen_width(vioarr_screen_t* screen)
+void vioarr_screen_set_scale(vioarr_screen_t* screen, int scale)
 {
-    if (!screen) {
-        return -1;
-    }
-    return screen->width;
+    // do nothing
 }
 
-int vioarr_screen_height(vioarr_screen_t* screen)
+void vioarr_screen_set_transform(vioarr_screen_t* screen, enum wm_screen_transform transform)
+{
+    // do nothing
+}
+
+vioarr_region_t* vioarr_screen_region(vioarr_screen_t* screen)
+{
+    if (!screen) {
+        return NULL;
+    }
+    return &screen->dimensions;
+}
+
+int vioarr_screen_scale(vioarr_screen_t* screen)
+{
+    if (!screen) {
+        return 1;
+    }
+    return 1;
+}
+
+enum wm_screen_transform vioarr_screen_transform(vioarr_screen_t* screen)
+{
+    return no_transform;
+}
+
+int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
 {
     if (!screen) {
         return -1;
     }
-    return screen->height;
+    
+    // One hardcoded format
+    return wm_screen_event_mode_single(client, mode_current | mode_preferred,
+        vioarr_region_width(&screen->dimensions), vioarr_region_height(&screen->dimensions), 60);
 }
 
 void vioarr_screen_frame(vioarr_screen_t* screen)

@@ -14,11 +14,11 @@
         <protocol name="core" id="0x10">
             <enums>
                 <enum name="object_type">
-                    <value name="object_screen"></value>
-                    <value name="object_memory"></value>
-                    <value name="object_memory_pool"></value>
-                    <value name="object_surface"></value>
-                    <value name="object_buffer"></value>
+                    <value name="object_type_screen"></value>
+                    <value name="object_type_memory"></value>
+                    <value name="object_type_memory_pool"></value>
+                    <value name="object_type_surface"></value>
+                    <value name="object_type_buffer"></value>
                 </enum>
             </enums>
             
@@ -31,7 +31,7 @@
                         <param name="serial" type="uint32_t" count="1" />
                     </response>
                 </function>
-                <function name="get_state" synchronous="false" />
+                <function name="get_objects" synchronous="false" />
             </functions>
             
             <events>
@@ -40,7 +40,7 @@
                     <param name="error_id" type="int" count="1" />
                     <param name="error_description" type="string" count="64" />
                 </event>
-                <event name="state">
+                <event name="object">
                     <param name="object_id" type="uint32_t" count="1" />
                     <param name="type" type="object_type" count="1" />
                 </event>
@@ -50,8 +50,8 @@
         <protocol name="screen" id="0x11">
             <enums>
                 <enum name="mode_attributes">
-                    <value name="mode_current"></value>
-                    <value name="mode_preferred"></value>
+                    <value name="mode_current" value="0x1"></value>
+                    <value name="mode_preferred" value="0x2"></value>
                 </enum>
                 <enum name="transform">
                     <value name="no_transform"></value>
@@ -115,7 +115,6 @@
             <functions>
                 <function name="create_pool" synchronous="false">
                     <request>
-                        <param name="object_id" type="uint32_t" count="1" />
                         <param name="size" type="int" count="1" />
                         <param name="capacity" type="int" count="1" />
                     </request>
@@ -165,7 +164,14 @@
                     </request>
                 </function>
                 <function name="set_buffer" synchronous="false" />
-                <function name="invalidate" synchronous="false" />
+                <function name="invalidate" synchronous="false">
+                    <request>
+                        <param name="x" type="int"/>
+                        <param name="y" type="int"/>
+                        <param name="width" type="int"/>
+                        <param name="height" type="int"/>
+                    </request>
+                </function>
                 <function name="commit" synchronous="false" />
                 <function name="resize" synchronous="false">
                     <request>

@@ -27,11 +27,19 @@
 #include "vioarr_renderer.h"
 #include <stdlib.h>
 
+typedef struct vioarr_renderer_entity {
+    vioarr_surface_t*              surface;
+    struct vioarr_renderer_entity* link;
+} vioarr_renderer_entity_t;
+
 typedef struct vioarr_renderer {
     NVGcontext* context;
     int         width;
     int         height;
     float       pixel_ratio;
+    
+    vioarr_renderer_entity_t* entities;
+    vioarr_renderer_entity_t* front_entities;
 } vioarr_renderer_t;
 
 vioarr_renderer_t* vioarr_renderer_create(NVGcontext* context, vioarr_screen_t* screen)
@@ -55,19 +63,42 @@ void vioarr_renderer_set_scale(vioarr_renderer_t* renderer, int scale)
     
 }
 
-void vioarr_renderer_set_transform(vioarr_renderer_t* renderer, int transform)
+void vioarr_renderer_set_rotation(vioarr_renderer_t* renderer, int rotation)
 {
     
 }
 
+int vioarr_renderer_scale(vioarr_renderer_t*)
+{
+    return 1;
+}
+
+int vioarr_renderer_rotation(vioarr_renderer_t*)
+{
+    return 0;
+}
+
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
+    vioarr_renderer_entity_t* entity;
+    
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
-    // render(renderer->context)
-    nvgEndFrame(renderer->context);
     
+    entity = renderer->entities;
+    while (entity) {
+        vioarr_surface_render(renderer->context, entity->surface);
+        entity = entity->link;
+    }
+    
+    entity = renderer->front_entities;
+    while (entity) {
+        vioarr_surface_render(renderer->context, entity->surface);
+        entity = entity->link;
+    }
+    
+    nvgEndFrame(renderer->context);
     glFinish();
 }

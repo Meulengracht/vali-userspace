@@ -25,4 +25,10 @@
 #ifndef __VIOARR_SURFACE_H__
 #define __VIOARR_SURFACE_H__
 
+#include "backend/nanovg.h"
+
+typedef struct vioarr_surface vioarr_surface_t;
+
+void vioarr_surface_render(NVGcontext*, vioarr_surface_t*);
+
 #endif //!__VIOARR_SURFACE_H__
