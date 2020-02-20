@@ -23,8 +23,8 @@
  */
 
 #include <errno.h>
-#include <libwm_os.h>
-#include <libwm_server.h>
+#include <gracht/os.h>
+#include <gracht/server.h>
 #include <stdio.h>
 
 #include "protocols/hid_events_protocol_server.h"
@@ -39,12 +39,12 @@
 
 int server_initialize(void)
 {
-    wm_server_configuration_t configuration;
-    int                       status;
+    gracht_server_configuration_t configuration;
+    int                           status;
     
-    wm_os_get_server_client_address(&configuration.server_address, &configuration.server_address_length);
-    wm_os_get_server_packet_address(&configuration.dgram_address, &configuration.dgram_address_length);
-    status = wm_server_initialize(&configuration);
+    gracht_os_get_server_client_address(&configuration.server_address, &configuration.server_address_length);
+    gracht_os_get_server_packet_address(&configuration.dgram_address, &configuration.dgram_address_length);
+    status = gracht_server_initialize(&configuration);
     if (status) {
         printf("error initializing server library %i", errno);
     }
@@ -53,7 +53,7 @@ int server_initialize(void)
 
 int server_run(void)
 {
-    return wm_server_main_loop();    
+    return gracht_server_main_loop();    
 }
 
 /*******************************************
@@ -71,12 +71,12 @@ int main(int argc, char **argv)
         return status;
     }
     
-    wm_server_register_protocol(&hid_events_protocol);
-    wm_server_register_protocol(&wm_core_protocol);
-    wm_server_register_protocol(&wm_screen_protocol);
-    wm_server_register_protocol(&wm_memory_protocol);
-    wm_server_register_protocol(&wm_memory_pool_protocol);
-    wm_server_register_protocol(&wm_buffer_protocol);
-    wm_server_register_protocol(&wm_surface_protocol);
+    gracht_server_register_protocol(&hid_events_protocol);
+    gracht_server_register_protocol(&wm_core_protocol);
+    gracht_server_register_protocol(&wm_screen_protocol);
+    gracht_server_register_protocol(&wm_memory_protocol);
+    gracht_server_register_protocol(&wm_memory_pool_protocol);
+    gracht_server_register_protocol(&wm_buffer_protocol);
+    gracht_server_register_protocol(&wm_surface_protocol);
     return server_run();
 }

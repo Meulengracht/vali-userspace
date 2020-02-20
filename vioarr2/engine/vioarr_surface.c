@@ -53,7 +53,7 @@ typedef struct vioarr_surface {
 static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface);
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
-int vioarr_surface_create(int x, int y, int width, int height, vioarr_surface_t** surface_out, uint32_t* id_out)
+int vioarr_surface_create(int x, int y, int width, int height, vioarr_surface_t** surface_out)
 {
     vioarr_surface_t* surface;
     
@@ -132,11 +132,11 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
     if (surface->properties.content != surface->pending_properties.content) {
         if (surface->properties.resource_id) {
             nvgDeleteImage(context, surface->properties.resource_id);
-            vioarr_buffer_release(surface->properties.content);
+            vioarr_buffer_destroy(surface->properties.content);
         }
         
         vioarr_buffer_acquire(surface->pending_properties.content);
-        surface->pending_properties.resource_id = nvgCreateImageRGBA(m_VgContext, 
+        surface->pending_properties.resource_id = nvgCreateImageRGBA(context, 
             vioarr_buffer_width(surface->pending_properties.content), vioarr_buffer_height(surface->pending_properties.content),
             NVG_IMAGE_FLIPY, (const uint8_t*)vioarr_buffer_data(surface->pending_properties.content));
     }
@@ -156,7 +156,7 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
     }
     
     // Only update the image data if the region is not empty
-    if (vioarr_region_is_zero(&surface->properties.dirt)) {
+    if (vioarr_region_is_zero(surface->properties.dirt)) {
         nvgUpdateImage(context, surface->properties.resource_id,
             (const uint8_t*)vioarr_buffer_data(surface->properties.content));
     }
@@ -168,7 +168,7 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
 {
 	NVGpaint shadow_paint = nvgBoxGradient(context, 0, 0 + 2.0f, surface->width, surface->height, 
-	    surface->properties.drop_shadow_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
+	    surface->properties.corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
 	nvgBeginPath(context);
 	nvgRect(context, -10, -10, surface->width + 20, surface->height + 30);
 	//nvgRoundedRect(context, 0, 0, surface->width, surface->height, surface->properties.corner_radius);

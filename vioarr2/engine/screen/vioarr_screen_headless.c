@@ -27,6 +27,7 @@
 #include <GL/osmesa.h>
 #include "../vioarr_renderer.h"
 #include "../vioarr_screen.h"
+#include "../../protocols/wm_screen_protocol_server.h"
 #include <stdlib.h>
 
 typedef struct vioarr_screen {
@@ -34,7 +35,7 @@ typedef struct vioarr_screen {
     void*              backbuffer;
     size_t             backbuffer_size;
     int                depth_bits;
-    vioarr_region_t    dimensions;
+    vioarr_region_t*   dimensions;
     vioarr_renderer_t* renderer;
 } vioarr_screen_t;
 
@@ -58,11 +59,11 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     attributes[n++] = OSMESA_CONTEXT_MINOR_VERSION;
     attributes[n++] = 3;
     attributes[n++] = 0;
+    
     screen->context = OSMesaCreateContextAttribs(&attributes[0], NULL);
-
-    vioarr_region_zero(&screen->dimensions);
-    vioarr_region_add(&screen->dimensions, 0, 0, video->Width, video->Height);
+    screen->dimensions = vioarr_region_create();
     screen->depth_bits = video->Depth;
+    vioarr_region_add(screen->dimensions, 0, 0, video->Width, video->Height);
     
     screen->backbuffer_size = video->Width * video->Height * 4 * sizeof(GLubyte);
     screen->backbuffer      = aligned_alloc(32, screen->backbuffer_size);
@@ -95,7 +96,7 @@ vioarr_region_t* vioarr_screen_region(vioarr_screen_t* screen)
     if (!screen) {
         return NULL;
     }
-    return &screen->dimensions;
+    return screen->dimensions;
 }
 
 int vioarr_screen_scale(vioarr_screen_t* screen)
@@ -119,13 +120,13 @@ int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
     
     // One hardcoded format
     return wm_screen_event_mode_single(client, mode_current | mode_preferred,
-        vioarr_region_width(&screen->dimensions), vioarr_region_height(&screen->dimensions), 60);
+        vioarr_region_width(screen->dimensions), vioarr_region_height(screen->dimensions), 60);
 }
 
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
     OSMesaMakeCurrent(screen->context, screen->backbuffer,
-        GL_UNSIGNED_BYTE, screen->width, screen->height);
+        GL_UNSIGNED_BYTE, vioarr_region_width(screen->dimensions), vioarr_region_height(screen->dimensions));
     vioarr_renderer_render(screen->renderer);
     // no present logic in headless
 }

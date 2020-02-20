@@ -22,11 +22,11 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "protocols/wm_screen_protocol.h"
-#include "protocols/wm_core_protocol.h"
+#include "protocols/wm_screen_protocol_server.h"
+#include "protocols/wm_core_protocol_server.h"
 #include "engine/vioarr_screen.h"
 #include "engine/vioarr_utils.h"
-#include <libwm_server.h>
+#include <gracht/server.h>
 
 void wm_screen_get_properties_callback(int client, struct wm_screen_get_properties_args* input, struct wm_screen_get_properties_ret* output)
 {
@@ -35,6 +35,7 @@ void wm_screen_get_properties_callback(int client, struct wm_screen_get_properti
     
     if (!screen) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        return;
     }
     
     region = vioarr_screen_region(screen);
@@ -51,9 +52,10 @@ void wm_screen_get_modes_callback(int client, struct wm_screen_get_modes_args* i
     int              status;
     if (!screen) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        return;
     }
     
-    status = vioarr_screen_publish_modes(screen, client)
+    status = vioarr_screen_publish_modes(screen, client);
     if (status) {
         wm_core_event_error_single(client, input->object_id, status, "wm_screen: failed to publish modes");
     }
@@ -64,6 +66,7 @@ void wm_screen_set_scale_callback(int client, struct wm_screen_set_scale_args* i
     vioarr_screen_t* screen = vioarr_utils_get_object(input->object_id);
     if (!screen) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        return;
     }
     
     vioarr_screen_set_scale(screen, input->scale);
@@ -74,6 +77,7 @@ void wm_screen_set_transform_callback(int client, struct wm_screen_set_transform
     vioarr_screen_t* screen = vioarr_utils_get_object(input->object_id);
     if (!screen) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        return;
     }
     
     vioarr_screen_set_transform(screen, input->transform);
@@ -84,6 +88,7 @@ void wm_screen_create_surface_callback(int client, struct wm_screen_create_surfa
     vioarr_screen_t* screen = vioarr_utils_get_object(input->object_id);
     if (!screen) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        return;
     }
     
 }

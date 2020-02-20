@@ -22,21 +22,60 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "protocols/wm_memory_protocol.h"
-#include "protocols/wm_memory_pool_protocol.h"
-#include "protocols/wm_buffer_protocol.h"
+#include "protocols/wm_core_protocol_server.h"
+#include "protocols/wm_memory_protocol_server.h"
+#include "protocols/wm_memory_pool_protocol_server.h"
+#include "protocols/wm_buffer_protocol_server.h"
+#include "engine/vioarr_memory.h"
+#include "engine/vioarr_buffer.h"
+#include "engine/vioarr_utils.h"
+#include <errno.h>
 
 void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_args* input, struct wm_memory_create_pool_ret* output)
 {
+    vioarr_memory_pool_t* pool;
+    int                   status;
     
+    // get memory subsystem
+    // TODO
+    
+    status = vioarr_memory_create_pool(input->size, &pool);
+    if (status) {
+        wm_core_event_error_single(client, 0 /* input->object_id */, status, "wm_memory: failed to create memory pool");
+        return;
+    }
+    
+    output->object_id = vioarr_memory_pool_id(pool);
+    output->handle    = vioarr_memory_pool_handle(pool);
 }
 
 void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_create_buffer_args* input, struct wm_memory_pool_create_buffer_ret* output)
 {
+    vioarr_memory_pool_t* pool = vioarr_utils_get_object(input->object_id);
+    vioarr_buffer_t*      buffer;
+    int                   status;
+    if (!pool) {
+        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_memory: object does not exist");
+        return;
+    }
     
+    status = vioarr_buffer_create(pool, input->offset, input->width, input->height, input->stride, input->format, &buffer);
+    if (status) {
+        wm_core_event_error_single(client, input->object_id, status, "wm_memory: failed to create memory buffer");
+        return;
+    }
+    
+    output->object_id = vioarr_buffer_id(buffer);
 }
 
 void wm_buffer_destroy_callback(int client, struct wm_buffer_destroy_args* input)
 {
+    vioarr_buffer_t* buffer = vioarr_utils_get_object(input->object_id);
+    int              status;
+    if (!buffer) {
+        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_memory: object does not exist");
+        return;
+    }
     
+    vioarr_buffer_destroy(buffer);
 }

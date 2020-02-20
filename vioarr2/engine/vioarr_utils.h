@@ -33,8 +33,4 @@
 #define vioarr_utils_trace TRACE
 #define vioarr_utils_error ERROR
 
-uint32_t vioarr_utils_create_object(void*);
-void*    vioarr_utils_get_object(uint32_t);
-int      vioarr_utils_remove_object(uint32_t);
-
 #endif //!__VIOARR_UTILS_H__

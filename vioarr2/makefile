@@ -2,7 +2,7 @@
 # Include all the definitions for os
 
 INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
-LFLAGS := ddk.lib libwm.lib libfreetype.lib gallium-osmesa.lib
+LFLAGS := libds.lib ddk.lib libgracht.lib libfreetype.lib gallium-osmesa.lib
 
 ifeq ($(VALI_ARCH),i386)
 	ASFLAGS = -f win32 -Xvc
@@ -13,6 +13,7 @@ endif
 APP_SOURCES_ASM := 
 APP_SOURCES_C := loader/src/glad.c \
 				 $(wildcard engine/backend/*.c) \
+				 $(wildcard engine/memory/*.c) \
 				 $(wildcard engine/*.c) \
 		         $(wildcard *.c)
 		         
@@ -39,10 +40,10 @@ APP_CFLAGS = $(VALI_CFLAGS) $(CFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES
 APP_CXXFLAGS = $(VALI_CXXFLAGS) $(CXXFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
 APP_LFLAGS = /entry:__CrtConsoleEntry $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS) $(LFLAGS)
 
-APP_OBJECTS = $(APP_SOURCES_CXX:.cpp=.o) $(APP_SOURCES_C:.c=.o) $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_ASM:.s=.o)
+APP_OBJECTS = $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_CXX:.cpp=.o) $(APP_SOURCES_C:.c=.o) $(APP_SOURCES_ASM:.s=.o)
 
 .PHONE: all
-all: $(VALI_APPLICATION_PATH)/bin/vioarr.app
+all: protocols loader $(VALI_APPLICATION_PATH)/bin/vioarr.app
 
 $(VALI_APPLICATION_PATH)/bin/vioarr.app: $(APP_OBJECTS)
 	@printf "%b" "\033[0;36mCreating application " $@ "\033[m\n"
@@ -51,11 +52,11 @@ $(VALI_APPLICATION_PATH)/bin/vioarr.app: $(APP_OBJECTS)
 protocols:
 	@mkdir -p $@
 
-protocols/wm_core_protocol_server.c: protocols ../protocols/wm_protocol.xml
+protocols/wm_core_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
 	python $(VALI_DDK_PATH)/protocols/gracht_generator.py --protocol $< --lang-c --server --out ./protocols/
 
-protocols/hid_events_protocol_server.c: protocols $(VALI_DDK_PATH)/protocols/hid_protocol.xml
+protocols/hid_events_protocol_server.c: $(VALI_DDK_PATH)/protocols/hid_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
 	python $(VALI_DDK_PATH)/protocols/gracht_generator.py --protocol $< --lang-c --server --out ./protocols/
 

@@ -22,18 +22,18 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#ifndef __VIOARR_RSOURCES_H__
-#define __VIOARR_RSOURCES_H__
+#ifndef __VIOARR_MEMORY_H__
+#define __VIOARR_MEMORY_H__
 
-#include "backend/nanovg.h"
+#include <os/osdefs.h>
 
-#define VIOARR_RESOURCE_BACKGROUND 0
-#define VIOARR_RESOURCE_COUNT      1
+typedef struct vioarr_memory_pool vioarr_memory_pool_t;
 
-typedef struct vioarr_resource {
-    void* data;
-} vioarr_resource_t;
+int      vioarr_memory_create_pool(size_t, vioarr_memory_pool_t**);
+int      vioarr_memory_pool_acquire(vioarr_memory_pool_t*);
+int      vioarr_memory_destroy_pool(vioarr_memory_pool_t*);
+uint32_t vioarr_memory_pool_id(vioarr_memory_pool_t*);
+UUId_t   vioarr_memory_pool_handle(vioarr_memory_pool_t*);
+void*    vioarr_memory_pool_data(vioarr_memory_pool_t*, int, size_t);
 
-int vioarr_resources_initialize(NVGcontext*);
-
-#endif //!__VIOARR_RSOURCES_H__
+#endif //!__VIOARR_MEMORY_H__

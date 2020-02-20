@@ -29,7 +29,6 @@
 #include <os/mollenos.h>
 #include "vioarr_engine.h"
 #include "vioarr_renderer.h"
-#include "vioarr_resources.h"
 #include "vioarr_screen.h"
 #include "vioarr_utils.h"
 #include <time.h>
@@ -74,13 +73,6 @@ int vioarr_engine_initialize(void)
     if (!nvg_root_context) {
         vioarr_utils_error("[vioarr] [initialize] failed to create the nvg context");
         return -1;
-    }
-    
-    vioarr_utils_trace("[vioarr] [initialize] loading resources");
-    status = vioarr_resources_initialize(nvg_root_context);
-    if (status) {
-        vioarr_utils_error("[vioarr] [initialize] resources failed to load, code %i", status);
-        return status;
     }
     
     vioarr_utils_trace("[vioarr] [initialize] initializing screens");

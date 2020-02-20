@@ -23,6 +23,7 @@
  */
  
 #include "vioarr_region.h"
+#include <stdlib.h>
 
 typedef struct vioarr_region {
     int x;

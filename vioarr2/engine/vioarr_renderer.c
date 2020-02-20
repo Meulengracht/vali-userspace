@@ -25,6 +25,8 @@
 #include "backend/nanovg.h"
 #include <glad/glad.h>
 #include "vioarr_renderer.h"
+#include "vioarr_screen.h"
+#include "vioarr_surface.h"
 #include <stdlib.h>
 
 typedef struct vioarr_renderer_entity {
@@ -45,6 +47,8 @@ typedef struct vioarr_renderer {
 vioarr_renderer_t* vioarr_renderer_create(NVGcontext* context, vioarr_screen_t* screen)
 {
     vioarr_renderer_t* renderer;
+    int                width  = vioarr_region_width(vioarr_screen_region(screen));
+    int                height = vioarr_region_height(vioarr_screen_region(screen));
     
     renderer = (vioarr_renderer_t*)malloc(sizeof(vioarr_renderer_t));
     if (!renderer) {
@@ -52,9 +56,9 @@ vioarr_renderer_t* vioarr_renderer_create(NVGcontext* context, vioarr_screen_t* 
     }
     
     renderer->context     = context;
-    renderer->width       = vioarr_screen_width(screen);
-    renderer->height      = vioarr_screen_height(screen);
-    renderer->pixel_ratio = (float)vioarr_screen_width(screen) / (float)vioarr_screen_height(screen);
+    renderer->width       = width;
+    renderer->height      = height;
+    renderer->pixel_ratio = (float)width / (float)height;
     return renderer;
 }
 
@@ -68,12 +72,12 @@ void vioarr_renderer_set_rotation(vioarr_renderer_t* renderer, int rotation)
     
 }
 
-int vioarr_renderer_scale(vioarr_renderer_t*)
+int vioarr_renderer_scale(vioarr_renderer_t* renderer)
 {
     return 1;
 }
 
-int vioarr_renderer_rotation(vioarr_renderer_t*)
+int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
 {
     return 0;
 }

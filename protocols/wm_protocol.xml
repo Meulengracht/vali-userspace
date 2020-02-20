@@ -116,12 +116,10 @@
                 <function name="create_pool" synchronous="false">
                     <request>
                         <param name="size" type="int" count="1" />
-                        <param name="capacity" type="int" count="1" />
                     </request>
                     <response>
                         <param name="object_id" type="uint32_t" count="1" />
                         <param name="handle" type="UUId_t" count="1" />
-                        <param name="status" type="int" count="1" />
                     </response>
                 </function>
             </functions>
@@ -132,6 +130,7 @@
                 <function name="create_buffer" synchronous="false">
                     <request>
                         <param name="object_id" type="uint32_t" count="1" />
+                        <param name="offset" type="int" count="1" />
                         <param name="width" type="int" count="1" />
                         <param name="height" type="int" count="1" />
                         <param name="stride" type="int" count="1" />
@@ -139,8 +138,6 @@
                     </request>
                     <response>
                         <param name="object_id" type="uint32_t" count="1" />
-                        <param name="status" type="int" count="1" />
-                        <param name="offset" type="int" count="1" />
                     </response>
                 </function>
             </functions>

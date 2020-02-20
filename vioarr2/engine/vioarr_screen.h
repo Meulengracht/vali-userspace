@@ -27,7 +27,7 @@
 
 #include "backend/nanovg.h"
 #include <ddk/contracts/video.h>
-#include "protocols/wm_screen_protocol.h"
+#include "../protocols/wm_screen_protocol.h"
 #include "vioarr_region.h"
 
 typedef struct vioarr_screen vioarr_screen_t;
