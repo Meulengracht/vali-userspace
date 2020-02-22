@@ -25,12 +25,13 @@
 #include "../vioarr_memory.h"
 #include "../vioarr_objects.h"
 #include <os/dmabuf.h>
+#include <os/mollenos.h>
 #include <stdlib.h>
 
 typedef struct vioarr_memory_pool {
-    uint32_t       id;
-    _Atomic(int)   references;
-    dma_attachment attachment;
+    uint32_t              id;
+    _Atomic(int)          references;
+    struct dma_attachment attachment;
 } vioarr_memory_pool_t;
 
 int vioarr_memory_create_pool(size_t size, vioarr_memory_pool_t** pool_out)
@@ -60,8 +61,11 @@ int vioarr_memory_create_pool(size_t size, vioarr_memory_pool_t** pool_out)
         return -1;
     }
     
-    pool->id = vioarr_objects_create_object(pool, object_type_memory_pool);
+    pool->id         = vioarr_objects_create_object(pool, object_type_memory_pool);
+    pool->references = ATOMIC_VAR_INIT(1);
     
+    *pool_out = pool;
+    return 0;
 }
 
 int vioarr_memory_pool_acquire(vioarr_memory_pool_t* pool)
@@ -89,7 +93,7 @@ int vioarr_memory_destroy_pool(vioarr_memory_pool_t* pool)
     
     references = atomic_fetch_sub(&pool->references, 1);
     if (references == 1) {
-        vioarr_utils_remove_object(pool->id);
+        vioarr_objects_remove_object(pool->id);
         dma_attachment_unmap(&pool->attachment);
         dma_detach(&pool->attachment);
         free(pool);
@@ -126,5 +130,5 @@ void* vioarr_memory_pool_data(vioarr_memory_pool_t* pool, int index, size_t size
     }
     
     pointer = (uint8_t*)pool->attachment.buffer;
-    return pointer[index];
+    return (void*)&pointer[index];
 }

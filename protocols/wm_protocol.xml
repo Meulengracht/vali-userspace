@@ -94,6 +94,8 @@
                 <function name="create_surface" synchronous="false">
                     <request>
                         <param name="object_id" type="uint32_t" count="1" />
+                        <param name="width" type="int" count="1" />
+                        <param name="height" type="int" count="1" />
                     </request>
                     <response>
                         <param name="object_id" type="uint32_t" count="1" />
@@ -160,22 +162,45 @@
                         <param name="object_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="set_buffer" synchronous="false" />
+                <function name="set_buffer" synchronous="false">
+                    <request>
+                        <param name="object_id" type="uint32_t" count="1" />
+                        <param name="buffer_id" type="uint32_t" count="1" />
+                    </request>
+                </function>
                 <function name="invalidate" synchronous="false">
                     <request>
+                        <param name="object_id" type="uint32_t" count="1" />
                         <param name="x" type="int"/>
                         <param name="y" type="int"/>
                         <param name="width" type="int"/>
                         <param name="height" type="int"/>
                     </request>
                 </function>
-                <function name="commit" synchronous="false" />
+                <function name="add_subsurface" synchronous="false">
+                    <request>
+                        <param name="parent_id" type="uint32_t" count="1" />
+                        <param name="child_id" type="uint32_t" count="1" />
+                        <param name="x" type="int"/>
+                        <param name="y" type="int"/>
+                    </request>
+                </function>
+                <function name="commit" synchronous="false">
+                    <request>
+                        <param name="object_id" type="uint32_t" count="1" />
+                    </request>
+                </function>
                 <function name="resize" synchronous="false">
                     <request>
+                        <param name="object_id" type="uint32_t" count="1" />
                         <param name="edges" type="edge"/>
                     </request>
                 </function>
-                <function name="destroy" synchronous="false" />
+                <function name="destroy" synchronous="false">
+                    <request>
+                        <param name="object_id" type="uint32_t" count="1" />
+                    </request>
+                </function>
             </functions>
             
             <events>

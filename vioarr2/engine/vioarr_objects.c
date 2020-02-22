@@ -62,7 +62,7 @@ uint32_t vioarr_objects_create_object(void* object, enum wm_core_object_type typ
     return resource->id;
 }
 
-void* vioarr_utils_get_object(uint32_t id)
+void* vioarr_objects_get_object(uint32_t id)
 {
     vioarr_object_t* object = list_find_value(&objects, (void*)(uintptr_t)id);
     if (!object){
@@ -72,7 +72,7 @@ void* vioarr_utils_get_object(uint32_t id)
     return object->object;
 }
 
-int vioarr_utils_remove_object(uint32_t id)
+int vioarr_objects_remove_object(uint32_t id)
 {
     vioarr_object_t* object = list_find_value(&objects, (void*)(uintptr_t)id);
     if (!object){

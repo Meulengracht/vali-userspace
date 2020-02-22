@@ -82,6 +82,22 @@ int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
     return 0;
 }
 
+void vioarr_renderer_register_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
+{
+    if (!renderer || !surface) {
+        return;
+    }
+    
+}
+
+void vioarr_renderer_unregister_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
+{
+    if (!renderer || !surface) {
+        return;
+    }
+    
+}
+
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
     vioarr_renderer_entity_t* entity;

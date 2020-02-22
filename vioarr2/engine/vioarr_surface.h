@@ -26,8 +26,19 @@
 #define __VIOARR_SURFACE_H__
 
 #include "backend/nanovg.h"
+#include <stdint.h>
 
 typedef struct vioarr_surface vioarr_surface_t;
+typedef struct vioarr_screen  vioarr_screen_t;
+typedef struct vioarr_buffer  vioarr_buffer_t;
+
+int      vioarr_surface_create(vioarr_screen_t*, int, int, int, int, vioarr_surface_t**);
+void     vioarr_surface_destroy(vioarr_surface_t*);
+int      vioarr_surface_add_child(vioarr_surface_t*, vioarr_surface_t*, int, int);
+void     vioarr_surface_set_buffer(vioarr_surface_t*, vioarr_buffer_t*);
+void     vioarr_surface_invalidate(vioarr_surface_t*, int, int, int, int);
+void     vioarr_surface_commit(vioarr_surface_t*);
+uint32_t vioarr_surface_id(vioarr_surface_t*);
 
 void vioarr_surface_render(NVGcontext*, vioarr_surface_t*);
 

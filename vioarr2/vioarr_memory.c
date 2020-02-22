@@ -28,7 +28,7 @@
 #include "protocols/wm_buffer_protocol_server.h"
 #include "engine/vioarr_memory.h"
 #include "engine/vioarr_buffer.h"
-#include "engine/vioarr_utils.h"
+#include "engine/vioarr_objects.h"
 #include <errno.h>
 
 void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_args* input, struct wm_memory_create_pool_ret* output)
@@ -51,7 +51,7 @@ void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_arg
 
 void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_create_buffer_args* input, struct wm_memory_pool_create_buffer_ret* output)
 {
-    vioarr_memory_pool_t* pool = vioarr_utils_get_object(input->object_id);
+    vioarr_memory_pool_t* pool = vioarr_objects_get_object(input->object_id);
     vioarr_buffer_t*      buffer;
     int                   status;
     if (!pool) {
@@ -70,7 +70,7 @@ void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_cre
 
 void wm_buffer_destroy_callback(int client, struct wm_buffer_destroy_args* input)
 {
-    vioarr_buffer_t* buffer = vioarr_utils_get_object(input->object_id);
+    vioarr_buffer_t* buffer = vioarr_objects_get_object(input->object_id);
     int              status;
     if (!buffer) {
         wm_core_event_error_single(client, input->object_id, ENOENT, "wm_memory: object does not exist");
