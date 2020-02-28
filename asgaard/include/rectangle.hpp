@@ -25,8 +25,14 @@
 namespace Asgaard {
     class Rectangle {
     public:
-        Rectangle(int x, int y, int width, int height);
+        Rectangle(int x, int y, int width, int height)
+            : m_X(x), m_Y(y), m_Width(width), m_Height(height) { }
         virtual ~Rectangle() { }
+        
+        int X() const { return m_X; }
+        int Y() const { return m_Y; }
+        int Width() const { return m_Width; };
+        int Height() const { return m_Height; };
         
     private:
         int m_X;

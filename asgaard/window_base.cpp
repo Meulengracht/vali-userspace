@@ -57,63 +57,77 @@ namespace Asgaard {
                 m_SupportedFormats.push_back(event->format);
             } break;
             
+            case SURFACE_RESIZE: {
+                
+            } break;
+            
             case SYNC: {
-                // Create the window memory pool we're going to use
-                m_Memory = OM.CreateClientObject<WindowMemory, const Rectangle&>(m_Screen->Dimensions());
-                m_Memory.Subscribe(this);
+                OnCreated(this);
             } break;
         }
     }
     
     void WindowBase::Notification(Publisher* source, int event, void* data)
     {
-        if (source == m_Memory.get())
+        auto memoryObject = dynamic_cast<WindowMemory*>(source);
+        if (memoryObject != nullptr)
         {
             switch (event)
             {
                 case WindowMemory::Event::POOL_CREATED: {
-                    // The pool was created, now we request a buffer
-                    enum PixelFormat format = GetPrefferedPixelFormat(m_SupportedFormats);
-                    m_Buffer = OM.CreateClientObject<WindowBuffer, int, const Rectangle&, enum PixelFormat>(
-                        m_Memory->Id(), 0, m_Screen->Dimensions(), format);
-                    m_Buffer.Subscribe(this);
+                    OnCreated(source);
                 } break;
             }
         }
         
-        if (source == m_Buffer.get())
+        auto bufferObject = dynamic_cast<WindowBuffer*>(source);
+        if (bufferObject != nullptr)
         {
             switch (event)
             {
+                case WindowBuffer::Event::BUFFER_CREATED: {
+                    OnCreated(source);
+                } break;
                 case WindowBuffer::Event::BUFFER_REFRESHED: {
-                    OnRefreshed(dynamic_cast<WindowBuffer*>(source));
+                    OnRefreshed(bufferObject);
                 } break;
             }
         }
     }
     
-    enum PixelFormat WindowBase::GetPrefferedPixelFormat(std::vector<enum PixelFormat>& availableFormats)
+    std::shared_ptr<WindowMemory> WindowBase::CreateMemory(std::size_t size)
     {
-        // select system preferable
-        return PixelFormat::A8R8G8B8;
+        // Create the window memory pool we're going to use
+        auto memory = OM.CreateClientObject<WindowMemory, const Rectangle&>(m_Screen->Dimensions());
+        memory->Subscribe(this);
+        return memory;
     }
     
-    void WindowBase::Shutdown()
+    std::shared_ptr<WindowBuffer> CreateBuffer(std::shared_ptr<WindowMemory> memory,
+        int memoryOffset, int width, int height, enum PixelFormat format)
+    {
+        auto buffer = OM.CreateClientObject<WindowBuffer, int, int, int, enum PixelFormat>(
+            memory->Id(), memoryOffset, width, height, format);
+        buffer->Subscribe(this);
+        return buffer;
+    }
+
+    void WindowBase::SetBuffer(std::shared_ptr<WindowBuffer> buffer)
     {
         
     }
-
-    WindowContent* WindowBase::CreateContent(const Rectangle&)
-    {
-        return nullptr;
-    }
     
-    void WindowBase::SetContent(WindowContent*)
+    void WindowBase::SetTitle(const std::string& title)
     {
         
     }
     
     void WindowBase::ApplyChanges()
+    {
+        
+    }
+    
+    void WindowBase::Shutdown()
     {
         
     }

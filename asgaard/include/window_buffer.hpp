@@ -25,7 +25,7 @@
 namespace Asgaard {
     class Rectangle;
     
-    class WindowMemoryPool {
+    class WindowBuffer {
     public:
         WindowMemoryPool(const Rectangle&);
         ~WindowMemoryPool();

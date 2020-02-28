@@ -44,29 +44,31 @@ namespace Asgaard {
         static void *operator new   (size_t) = delete;
         static void *operator new[] (size_t) = delete;
 
+    // Window events that can/should be reacted on.
     protected:
-        virtual enum PixelFormat GetPrefferedPixelFormat(std::vector<enum PixelFormat>&);
-    
-        virtual void Setup() = 0;
+        virtual void OnCreated(Object*) = 0;
         virtual void OnRefreshed(WindowBuffer*) = 0;
+        virtual void OnResized() = 0;
         virtual void Teardown() = 0;
 
+    // Window functions that can be called to configure this window 
     protected:
-        void           Shutdown();
-        WindowContent* CreateContent(const Rectangle&);
+        std::shared_ptr<WindowMemory> CreateMemory(std::size_t size);
+        std::shared_ptr<WindowBuffer> CreateBuffer(std::shared_ptr<WindowMemory>,
+            int memoryOffset, int width, int height, enum PixelFormat format);
         
-        void           SetContent(WindowContent*);
-        void           SetTitle(const std::string&);
-        void           ApplyChanges();
+        void SetBuffer(std::shared_ptr<WindowBuffer>);
+        void SetTitle(const std::string&);
+        void ApplyChanges();
+        void Shutdown();
         
     private:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
+        Rectangle                     m_Dimensions;
         std::vector<enum PixelFormat> m_SupportedFormats;
-        std::shared_ptr<WindowMemory> m_Memory;
-        std::shared_ptr<WindowBuffer> m_Buffer;
         std::shared_ptr<Screen>       m_Screen;
         bool                          m_Invalidated;
     };

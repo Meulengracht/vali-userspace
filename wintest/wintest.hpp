@@ -25,8 +25,8 @@
 
 class TestWindow : public WindowBase {
 public:
-    TestWindow(uint32_t id, const Rectangle& dimensions, const std::string& title)
-        : WindowBase(id, dimensions, title)
+    TestWindow(uint32_t id, const Rectangle& dimensions)
+        : WindowBase(id, dimensions)
     {
         
     }
@@ -37,27 +37,45 @@ public:
     }
     
 protected:
-    void Setup() override
+    void OnCreated(Object* createdObject) override
     {
-        
-    }
-    
-    void ExternalEvent(enum ObjectEvent event, void* data = 0) override
-    {
-        switch (event)
+        if (createdObject == this)
         {
-            case BUFFER_RELEASE: {
-                Redraw();
-            } break;
-            
-            default:
-                break;
+            // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
+            auto screenSize = m_Screen->Dimensions()->Width() * m_Screen->Dimensions()->Height() * 4;
+            m_Memory = CreateMemory(screenSize);
         }
-        
-        // Let the base class also have a shot at handling the event
-        WindowBase::ExternalEvent(event, data);
+        else if (createdObject == m_Memory.get())
+        {
+            // Create initial buffer the size of this surface
+            m_Buffer = CreateBuffer(m_Memory, 0, m_Dimensions.Width(),
+                m_Dimensions.Height(), PixelFormat::A8R8G8B8);
+        }
+        else if (createdObject == m_Buffer.get())
+        {
+            // Now all resources are created
+            SetBuffer(m_Buffer);
+            SetTitle("Window Test Application");
+            
+            // Draw initial scene
+            Redraw();
+            
+            // Then update all the changes we've made
+            ApplyChanges();
+        }
     }
     
+    void OnRefreshed(WindowBuffer* buffer) override
+    {
+        // The window manager has released the buffer
+        Redraw();
+    }
+    
+    void OnResized() override
+    {
+        
+    }
+
     void Teardown() override
     {
         
@@ -72,4 +90,8 @@ private:
         // invalidate content
         
     }
+    
+private:
+    std::shared_ptr<WindowMemory> m_Memory;
+    std::shared_ptr<WindowBuffer> m_Buffer;
 };
