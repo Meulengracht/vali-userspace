@@ -1,6 +1,6 @@
 /* MollenOS
  *
- * Copyright 2020, Philip Meulengracht
+ * Copyright 2011 - 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,9 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * Vioarr - Vali Compositor
- * - Implements the default system compositor for Vali. It utilizies the gracht library
- *   for communication between compositor clients and the server. The server renders
- *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
+ * MollenOS
  */
 
-#include "protocols/wm_core_protocol_server.h"
-#include "engine/vioarr_objects.h"
-
-void wm_core_sync_callback(int client, struct wm_core_sync_args* input)
-{
-    wm_core_event_sync_single(client, input->serial);
-}
-
-void wm_core_get_objects_callback(int client)
-{
-    vioarr_objects_publish(client);
+void dllmain(int action) {
+    (void)action;
 }

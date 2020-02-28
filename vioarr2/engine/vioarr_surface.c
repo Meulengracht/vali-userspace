@@ -231,6 +231,9 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
     if (vioarr_region_is_zero(surface->properties.dirt)) {
         nvgUpdateImage(context, surface->properties.resource_id,
             (const uint8_t*)vioarr_buffer_data(surface->properties.content));
+        
+        // Now we are done with the user-buffer, send the release event
+        
     }
     
     // Determine other attributes about this surface. Is it visible?

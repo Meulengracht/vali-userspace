@@ -22,44 +22,33 @@
  */
 #pragma once
 
-#include "object_manager.hpp"
-#include "window_base.hpp"
+#include <cstdint>
+#include "utils/publisher.hpp"
+#include "utils/subscriber.hpp"
 
 namespace Asgaard {
-    class Application {
+    class Object : public Utils::Publisher, public Utils::Subscriber {
     public:
-        enum ApplicationEvent {
+        enum ObjectEvent {
             ERROR,
-            SCREEN_REGISTERED,
-            SCREEN_REGISTERED_COMPLETE
+            SYNC,
+            CREATION,
+            SCREEN_PROPERTIES,
+            SCREEN_MODE,
+            SURFACE_FORMAT,
+            SURFACE_RESIZE,
+            BUFFER_RELEASE
         };
         
     public:
-        Application();
-        ~Application();
-        
-        int Execute();
-        
-    public:
-        template<class WC, typename... Params>
-        void CreateWindow(Params... parameters) {
-            if (!std::is_base_of<WindowBase, WC>::value) {
-                return;
-            }
-            m_Window = OM.CreateClientObject<WC, Params...>(parameters...);
-        }
-        
-        void ExternalEvent(enum ApplicationEvent);
-        
-    public:
-        static void *operator new   (size_t)   = delete;
-        static void *operator new[] (size_t)   = delete;
-        static void  operator delete(void*)    = delete;
-        static void  operator delete[] (void*) = delete;
+        Object(uint32_t id) : m_Id(id) { }
+        virtual ~Object() { }
 
+    public:
+        uint32_t     Id() const { return m_Id; }
+        virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
+        
     private:
-        WindowBase* m_Window;
+        uint32_t m_Id;
     };
-    
-    extern Application APP;
 }

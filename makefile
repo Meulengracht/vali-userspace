@@ -32,7 +32,7 @@ export AS := nasm
 export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/cxx -I$(VALI_SDK_PATH)/include -I$(VALI_APPLICATION_PATH)/include
 export VALI_LIBRARIES = -LIBPATH:$(VALI_SDK_PATH)/lib -LIBPATH:$(VALI_APPLICATION_PATH)/lib
 export VALI_SDK_CLIBS = crt.lib compiler-rt.lib c.lib m.lib
-export VALI_SDK_CXXLIBS = static_c++.lib static_c++abi.lib unwind.lib $(VALI_SDK_CLIBS)
+export VALI_SDK_CXXLIBS = $(VALI_SDK_CLIBS) static_c++.lib static_c++abi.lib unwind.lib
 
 # Setup default build rules
 include config/$(VALI_ARCH).mk
@@ -45,7 +45,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_macia build_llvm build_mesa build_glm
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_asgaard build_macia build_llvm build_mesa build_glm build_vioarr
 	
 .PHONY: package
 package: build
@@ -72,6 +72,11 @@ build_libpng:
 build_libfreetype:
 	@printf "%b" "\033[1;35mChecking if freetype needs to be built\033[m\n"
 	@$(MAKE) -s -C freetype -f makefile
+
+.PHONY: build_asgaard
+build_asgaard:
+	@printf "%b" "\033[1;35mChecking if asgaard needs to be built\033[m\n"
+	@$(MAKE) -s -C asgaard -f makefile
 
 .PHONY: build_wintest
 build_wintest:
@@ -109,27 +114,13 @@ build_glm:
 	@cp -r glm/glm/. $(VALI_APPLICATION_PATH)/include/glm
 	@rm $(VALI_APPLICATION_PATH)/include/glm/CMakeLists.txt
 
-.PHONY: build_vioarr_soft
-build_vioarr_soft:
-	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr -f makefile soft
-
 .PHONY: build_vioarr
 build_vioarr:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr -f makefile osmesa
+	@$(MAKE) -s -C vioarr2 -f makefile
 
 .PHONY: clean_vioarr
 clean_vioarr:
-	@$(MAKE) -s -C vioarr -f makefile clean
-
-.PHONY: build_vioarr2
-build_vioarr2:
-	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr2 -f makefile
-
-.PHONY: clean_vioarr2
-clean_vioarr2:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
 	@$(MAKE) -s -C vioarr2 -f makefile clean
 
@@ -138,10 +129,11 @@ clean:
 	@$(MAKE) -s -C zlib -f makefile clean
 	@$(MAKE) -s -C libpng -f makefile clean
 	@$(MAKE) -s -C freetype -f makefile clean
+	@$(MAKE) -s -C asgaard -f makefile clean
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C mesa -f makefile clean
-	@$(MAKE) -s -C vioarr -f makefile clean
+	@$(MAKE) -s -C vioarr2 -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf llvm-build
 	@rm -rf $(VALI_APPLICATION_PATH)

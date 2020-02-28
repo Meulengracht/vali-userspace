@@ -29,44 +29,42 @@
 #include "engine/vioarr_objects.h"
 #include <gracht/server.h>
 
-void wm_screen_get_properties_callback(int client, struct wm_screen_get_properties_args* input, struct wm_screen_get_properties_ret* output)
+void wm_screen_get_properties_callback(int client, struct wm_screen_get_properties_args* input)
 {
-    vioarr_screen_t* screen = vioarr_objects_get_object(input->object_id);
+    vioarr_screen_t* screen = vioarr_objects_get_object(input->screen_id);
     vioarr_region_t* region;
     
     if (!screen) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        wm_core_event_error_single(client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;
     }
     
     region = vioarr_screen_region(screen);
-    output->object_id = input->object_id;
-    output->x = vioarr_region_x(region);
-    output->y = vioarr_region_y(region);
-    output->transform = vioarr_screen_transform(screen);
-    output->scale = vioarr_screen_scale(screen);
+    wm_screen_event_screen_properties_single(client,
+        input->screen_id, vioarr_region_x(region), vioarr_region_y(region),
+        vioarr_screen_transform(screen), vioarr_screen_scale(screen));
 }
 
 void wm_screen_get_modes_callback(int client, struct wm_screen_get_modes_args* input)
 {
-    vioarr_screen_t* screen = vioarr_objects_get_object(input->object_id);
+    vioarr_screen_t* screen = vioarr_objects_get_object(input->screen_id);
     int              status;
     if (!screen) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        wm_core_event_error_single(client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;
     }
     
     status = vioarr_screen_publish_modes(screen, client);
     if (status) {
-        wm_core_event_error_single(client, input->object_id, status, "wm_screen: failed to publish modes");
+        wm_core_event_error_single(client, input->screen_id, status, "wm_screen: failed to publish modes");
     }
 }
 
 void wm_screen_set_scale_callback(int client, struct wm_screen_set_scale_args* input)
 {
-    vioarr_screen_t* screen = vioarr_objects_get_object(input->object_id);
+    vioarr_screen_t* screen = vioarr_objects_get_object(input->screen_id);
     if (!screen) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        wm_core_event_error_single(client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;
     }
     
@@ -75,30 +73,30 @@ void wm_screen_set_scale_callback(int client, struct wm_screen_set_scale_args* i
 
 void wm_screen_set_transform_callback(int client, struct wm_screen_set_transform_args* input)
 {
-    vioarr_screen_t* screen = vioarr_objects_get_object(input->object_id);
+    vioarr_screen_t* screen = vioarr_objects_get_object(input->screen_id);
     if (!screen) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        wm_core_event_error_single(client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;
     }
     
     vioarr_screen_set_transform(screen, input->transform);
 }
 
-void wm_screen_create_surface_callback(int client, struct wm_screen_create_surface_args* input, struct wm_screen_create_surface_ret* output)
+void wm_screen_create_surface_callback(int client, struct wm_screen_create_surface_args* input)
 {
-    vioarr_screen_t*  screen = vioarr_objects_get_object(input->object_id);
+    vioarr_screen_t*  screen = vioarr_objects_get_object(input->screen_id);
     vioarr_surface_t* surface;
     int               status;
     if (!screen) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_screen: object does not exist");
+        wm_core_event_error_single(client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;
     }
     
     status = vioarr_surface_create(screen, 100, 100, input->width, input->height, &surface);
     if (status) {
-        wm_core_event_error_single(client, input->object_id, status, "wm_screen: failed to create surface");
+        wm_core_event_error_single(client, input->screen_id, status, "wm_screen: failed to create surface");
         return;
     }
     
-    output->object_id = vioarr_surface_id(surface);
+    wm_core_event_object_single(client, vioarr_surface_id(surface), UUID_INVALID, object_type_surface);
 }

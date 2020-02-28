@@ -27,10 +27,17 @@
 #include <GL/osmesa.h>
 #include "../vioarr_renderer.h"
 #include "../vioarr_screen.h"
+#include "../vioarr_utils.h"
 #include "../../protocols/wm_screen_protocol_server.h"
 #include <stdlib.h>
 
+// Define a screen at 640*320*32 for headless environment
+#define SCREEN_DEPTH  32
+#define SCREEN_WIDTH  640
+#define SCREEN_HEIGHT 320
+
 typedef struct vioarr_screen {
+    uint32_t           id;
     OSMesaContext      context;
     void*              backbuffer;
     size_t             backbuffer_size;
@@ -43,6 +50,12 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
 {
     vioarr_screen_t* screen;
     int attributes[100], n = 0;
+    int status;
+    
+    screen = malloc(sizeof(vioarr_screen_t));
+    if (!screen) {
+        return NULL;
+    }
 
     attributes[n++] = OSMESA_FORMAT;
     attributes[n++] = OSMESA_BGRA;
@@ -60,21 +73,57 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     attributes[n++] = 3;
     attributes[n++] = 0;
     
+    vioarr_utils_trace("[vioarr] [screen] [create] creating os_mesa context, version 3.3");
     screen->context = OSMesaCreateContextAttribs(&attributes[0], NULL);
-    screen->dimensions = vioarr_region_create();
-    screen->depth_bits = video->Depth;
-    vioarr_region_add(screen->dimensions, 0, 0, video->Width, video->Height);
-    
-    screen->backbuffer_size = video->Width * video->Height * 4 * sizeof(GLubyte);
-    screen->backbuffer      = aligned_alloc(32, screen->backbuffer_size);
-    if (!screen->backbuffer) {
+    if (!screen->context) {
         free(screen);
         return NULL;
     }
     
+    vioarr_utils_trace("[vioarr] [screen] [create] allocating screen resources");
+    screen->dimensions = vioarr_region_create();
+    if (!screen->dimensions) {
+        OSMesaDestroyContext(screen->context);
+        free(screen);
+        return NULL;
+    }
+    
+    screen->depth_bits = SCREEN_DEPTH;
+    vioarr_region_add(screen->dimensions, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    
+    screen->backbuffer_size = SCREEN_WIDTH * SCREEN_HEIGHT * 4 * sizeof(GLubyte);
+    screen->backbuffer      = aligned_alloc(32, screen->backbuffer_size);
+    if (!screen->backbuffer) {
+        OSMesaDestroyContext(screen->context);
+        free(screen->dimensions);
+        free(screen);
+        return NULL;
+    }
+    
+    status = OSMesaMakeCurrent(screen->context, screen->backbuffer, GL_UNSIGNED_BYTE,
+        SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (status == GL_FALSE) {
+        vioarr_utils_error("[vioarr] [initialize] failed to set the os_mesa context");
+        OSMesaDestroyContext(screen->context);
+        free(screen);
+        return NULL;
+    }
+    
+    vioarr_utils_trace("[vioarr] [screen] [create] loading gl extensions");
+    status = gladLoadGLLoader((GLADloadproc)OSMesaGetProcAddress, 3, 3);
+    if (!status) {
+        OSMesaDestroyContext(screen->context);
+        free(screen);
+        vioarr_utils_error("[vioarr] [initialize] failed to load gl extensions, code %i", status);
+        return NULL;
+    }
+    
+    vioarr_utils_trace("[vioarr] [screen] [create] initializing renderer");
     screen->renderer = vioarr_renderer_create(context, screen);
     if (!screen->renderer) {
+        OSMesaDestroyContext(screen->context);
         free(screen->backbuffer);
+        free(screen->dimensions);
         free(screen);
         return NULL;
     }
@@ -119,8 +168,8 @@ int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
     }
     
     // One hardcoded format
-    return wm_screen_event_mode_single(client, mode_current | mode_preferred,
-        vioarr_region_width(screen->dimensions), vioarr_region_height(screen->dimensions), 60);
+    return wm_screen_event_mode_single(client, screen->id, mode_current | mode_preferred,
+        SCREEN_WIDTH, SCREEN_HEIGHT, 60);
 }
 
 void vioarr_screen_register_surface(vioarr_screen_t* screen, vioarr_surface_t* surface)
@@ -141,8 +190,6 @@ void vioarr_screen_unregister_surface(vioarr_screen_t* screen, vioarr_surface_t*
 
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
-    OSMesaMakeCurrent(screen->context, screen->backbuffer,
-        GL_UNSIGNED_BYTE, vioarr_region_width(screen->dimensions), vioarr_region_height(screen->dimensions));
     vioarr_renderer_render(screen->renderer);
     // no present logic in headless
 }

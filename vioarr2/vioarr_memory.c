@@ -31,7 +31,7 @@
 #include "engine/vioarr_objects.h"
 #include <errno.h>
 
-void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_args* input, struct wm_memory_create_pool_ret* output)
+void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_args* input)
 {
     vioarr_memory_pool_t* pool;
     int                   status;
@@ -45,35 +45,34 @@ void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_arg
         return;
     }
     
-    output->object_id = vioarr_memory_pool_id(pool);
-    output->handle    = vioarr_memory_pool_handle(pool);
+    wm_core_event_object_single(client, vioarr_memory_pool_id(pool), vioarr_memory_pool_handle(pool), object_type_memory_pool);
 }
 
-void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_create_buffer_args* input, struct wm_memory_pool_create_buffer_ret* output)
+void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_create_buffer_args* input)
 {
-    vioarr_memory_pool_t* pool = vioarr_objects_get_object(input->object_id);
+    vioarr_memory_pool_t* pool = vioarr_objects_get_object(input->pool_id);
     vioarr_buffer_t*      buffer;
     int                   status;
     if (!pool) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_memory: object does not exist");
+        wm_core_event_error_single(client, input->pool_id, ENOENT, "wm_memory: object does not exist");
         return;
     }
     
     status = vioarr_buffer_create(pool, input->offset, input->width, input->height, input->stride, input->format, &buffer);
     if (status) {
-        wm_core_event_error_single(client, input->object_id, status, "wm_memory: failed to create memory buffer");
+        wm_core_event_error_single(client, input->pool_id, status, "wm_memory: failed to create memory buffer");
         return;
     }
     
-    output->object_id = vioarr_buffer_id(buffer);
+    wm_core_event_object_single(client, vioarr_memory_pool_id(pool), UUID_INVALID, object_type_buffer);
 }
 
 void wm_buffer_destroy_callback(int client, struct wm_buffer_destroy_args* input)
 {
-    vioarr_buffer_t* buffer = vioarr_objects_get_object(input->object_id);
+    vioarr_buffer_t* buffer = vioarr_objects_get_object(input->buffer_id);
     int              status;
     if (!buffer) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_memory: object does not exist");
+        wm_core_event_error_single(client, input->buffer_id, ENOENT, "wm_memory: object does not exist");
         return;
     }
     

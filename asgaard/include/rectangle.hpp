@@ -16,26 +16,22 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * ValiOS - Application Framework (Asgard)
+ * ValiOS - Application Framework (Asgaard)
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
+#pragma once
 
-#include "include/semaphore.hpp"
-
-namespace Asgard {
-    void Semaphore::Signal() {
-        std::unique_lock<std::mutex> l(m_mtx);
-        m_cnd.notify_one();
-    }
-
-    void Semaphore::Wait() {
-        std::unique_lock<std::mutex> l(m_mtx);
-        m_cnd.wait(l);
-    }
-
-    void Semaphore::WaitFor(std::chrono::milliseconds mils) {
-        std::unique_lock<std::mutex> l(m_mtx);
-        m_cnd.wait_for(l, mils);
-    }
+namespace Asgaard {
+    class Rectangle {
+    public:
+        Rectangle(int x, int y, int width, int height);
+        virtual ~Rectangle() { }
+        
+    private:
+        int m_X;
+        int m_Y;
+        int m_Width;
+        int m_Height;
+    };
 }

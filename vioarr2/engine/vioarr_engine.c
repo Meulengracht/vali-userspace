@@ -38,13 +38,6 @@
 #include "backend/nanovg.h"
 #include "backend/nanovg_gl.h"
 
-#if defined(__VIOARR_CONFIG_RENDERER_OSMESA) || defined(__VIOARR_CONFIG_RENDERER_HEADLESS)
-#include <GL/osmesa.h>
-#define glGetProcAddress OSMesaGetProcAddress
-#else
-#error "You must define a default renderer for vioarr to use"
-#endif
-
 static int vioarr_engine_setup_screens(void);
 static int vioarr_engine_update(void*);
 
@@ -56,12 +49,11 @@ int vioarr_engine_initialize(void)
 {
     int status;
     
-    vioarr_utils_trace("[vioarr] [initialize] loading gl extensions");
-    // Initialize the GL loader library, it returns 1 on success
-    status = gladLoadGLLoader((GLADloadproc)glGetProcAddress);
-    if (!status) {
-        vioarr_utils_error("[vioarr] [initialize] failed to load gl extensions, code %i", status);
-        return -1;
+    vioarr_utils_trace("[vioarr] [initialize] initializing screens");
+    status = vioarr_engine_setup_screens();
+    if (status) {
+        vioarr_utils_error("[vioarr] [initialize] failed to initialize screens, code %i", status);
+        return status;
     }
     
     vioarr_utils_trace("[vioarr] [initialize] creating nvg context");
@@ -75,14 +67,10 @@ int vioarr_engine_initialize(void)
         return -1;
     }
     
-    vioarr_utils_trace("[vioarr] [initialize] initializing screens");
-    status = vioarr_engine_setup_screens();
-    if (status) {
-        vioarr_utils_error("[vioarr] [initialize] failed to initialize screens, code %i", status);
-        return status;
-    }
-    
-    return 0;
+    // Spawn the renderer thread, this will update the screen at a 60 hz frequency
+    // and handle all redrawing
+    vioarr_utils_trace("[vioarr] [initialize] creating screen renderer thread");
+    return thrd_create(&screen_thread, vioarr_engine_update, primary_screen);
 }
 
 static int vioarr_engine_setup_screens(void)
@@ -107,11 +95,7 @@ static int vioarr_engine_setup_screens(void)
         vioarr_utils_error("[vioarr] [initialize] failed to create primary screen object");
         return -1;
     }
-    
-    vioarr_utils_trace("[vioarr] [initialize] creating screen renderer thread");
-    // Spawn the renderer thread, this will update the screen at a 60 hz frequency
-    // and handle all redrawing
-    return thrd_create(&screen_thread, vioarr_engine_update, primary_screen);
+    return 0;
 }
 
 static int vioarr_engine_update(void* context)

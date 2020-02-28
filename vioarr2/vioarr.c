@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <gracht/os.h>
 #include <gracht/server.h>
+#include <os/services/process.h>
 #include <stdio.h>
 
 #include "protocols/hid_events_protocol_server.h"
@@ -53,7 +54,11 @@ int server_initialize(void)
 
 int server_run(void)
 {
-    return gracht_server_main_loop();    
+    // Spawn the launcher application
+    ProcessSpawn("$bin/wintest.app", NULL);
+    
+    // Call the main sever loop
+    return gracht_server_main_loop();
 }
 
 /*******************************************

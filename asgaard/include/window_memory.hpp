@@ -16,27 +16,24 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * ValiOS - Application Framework (Asgard)
+ * ValiOS - Application Framework (Asgaard)
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
 #pragma once
 
-#include <condition_variable>
-#include <mutex>
+#include "object_manager.hpp"
 
-namespace Asgard {
-    class Semaphore {
+namespace Asgaard {
+    class WindowMemory : public Object {
     public:
-        Semaphore()    = default;
-        ~Semaphore()   = default;
-
-        void Signal();
-        void Wait();
-        void WaitFor(std::chrono::milliseconds mils);
-
+        WindowMemory(uint32_t id);
+        ~WindowMemory();
+        
+    public:
+        uint32_t Id() const { return m_Id; }
+        
     private:
-        std::mutex              m_mtx;
-        std::condition_variable m_cnd;
+        uint32_t m_Id;
     };
 }

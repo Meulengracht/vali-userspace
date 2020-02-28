@@ -32,11 +32,12 @@ typedef struct vioarr_object {
     uint32_t                 id;
     enum wm_core_object_type type;
     void*                    object;
+    UUId_t                   handle;
     
     element_t link;
 } vioarr_object_t;
  
-static _Atomic(uint32_t) object_id = ATOMIC_VAR_INIT(0x100);
+static _Atomic(uint32_t) object_id = ATOMIC_VAR_INIT(0x80000000);
 static list_t            objects   = LIST_INIT;
  
 static uint32_t vioarr_utils_get_object_id(void)
@@ -89,6 +90,6 @@ void vioarr_objects_publish(int client)
 {
     foreach (i, &objects) {
         vioarr_object_t* object = i->value;
-        wm_core_event_object_single(client, object->id, object->type);
+        wm_core_event_object_single(client, object->id, object->handle, object->type);
     }
 }

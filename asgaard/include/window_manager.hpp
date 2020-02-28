@@ -22,44 +22,43 @@
  */
 #pragma once
 
-#include "object_manager.hpp"
-#include "window_base.hpp"
+#include <cstdint>
+#include <gracht/client.h>
+#include <map>
+#include <string>
 
 namespace Asgaard {
-    class Application {
+    class WindowManager {
     public:
-        enum ApplicationEvent {
-            ERROR,
-            SCREEN_REGISTERED,
-            SCREEN_REGISTERED_COMPLETE
+        using WmEventData = void*;
+        enum WmEvent {
+            WM_SYNC,
+            WM_ERROR
         };
         
     public:
-        Application();
-        ~Application();
+        WindowManager();
+        ~WindowManager();
         
-        int Execute();
-        
+        int  Initialize();
+        void Shutdown();
+        int  Run();
+
     public:
-        template<class WC, typename... Params>
-        void CreateWindow(Params... parameters) {
-            if (!std::is_base_of<WindowBase, WC>::value) {
-                return;
-            }
-            m_Window = OM.CreateClientObject<WC, Params...>(parameters...);
-        }
-        
-        void ExternalEvent(enum ApplicationEvent);
+        void ExternalEvent(enum WmEvent, WmEventData);
+        gracht_client_t* GrachtClient() const { return m_Client; }
         
     public:
         static void *operator new   (size_t)   = delete;
         static void *operator new[] (size_t)   = delete;
         static void  operator delete(void*)    = delete;
         static void  operator delete[] (void*) = delete;
-
+        
     private:
-        WindowBase* m_Window;
+        gracht_client_t* m_Client;
+        bool             m_Running;
     };
     
-    extern Application APP;
+    // Global instance of the window manager
+    extern WindowManager WM;
 }

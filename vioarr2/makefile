@@ -25,7 +25,7 @@ APP_PROTOCOLS_C := protocols/wm_core_protocol_server.c \
 				   protocols/wm_surface_protocol_server.c \
 				   protocols/hid_events_protocol_server.c
 
-APP_DEFINES := -DGL_VIOARR_LOADER -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
+APP_DEFINES := -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
 ifdef VALI_HEADLESS
 APP_SOURCES_C += engine/screen/vioarr_screen_headless.c
 APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_HEADLESS

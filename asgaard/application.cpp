@@ -16,19 +16,21 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * ValiOS - Application Framework (Asgard)
+ * ValiOS - Application Framework (Asgaard)
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
 
 #include "include/application.hpp"
-#include "include/eventqueue.hpp"
+#include "include/window_manager.hpp"
 
-namespace Asgard {
-    Application::Application(const Rectangle& SurfaceArea, const std::string& Name)
-        : m_EventQueue(nullptr), m_Invalidated(false), m_WmEventThread(nullptr),
-          m_KeyEventThread(nullptr)
+namespace Asgaard {
+    Application APP;
+    
+    Application::Application()
+        : m_Window(nullptr)
     {
+        
     }
 
     Application::~Application()
@@ -38,55 +40,29 @@ namespace Asgard {
 
     int Application::Execute()
     {
-        if (m_Running) {
-            return -1;
-        }
-
-        m_Running           = true;
-        m_EventQueue        = new EventQueue();
-        //m_WmEventThread     = new std::thread(std::bind(&Application::WindowEventWorker, this));
-        m_KeyEventThread    = new std::thread(std::bind(&Application::KeyEventWorker, this));
+        // Initialize global classes
+        WM.Initialize();
         
-        int ReturnCode = Entry();
-        m_Running = false;
-        
-        return ReturnCode;
-    }
-
-    int Application::Entry()
-    {
-        return 0;
-    }
-
-    void Application::WindowEvent()
-    {
-
-    }
-
-    void Application::KeyEvent(SystemKey_t* Key)
-    {
-
-    }
-
-    void Application::Invalidate()
-    {
-
-    }
-
-    void Application::WindowEventWorker()
-    {
-        while (m_Running) {
-            WindowEvent();
-        }
+        // The main loop is in the window manager which might be a bit wierd
+        // but the window manager runs the window manager protocol client
+        return WM.Run();
     }
     
-    void Application::KeyEventWorker()
+    void Application::ExternalEvent(enum ApplicationEvent event)
     {
-        SystemKey_t Key;
-        while (m_Running) {
-            if (ReadSystemKey(&Key) == OsSuccess) {
-                KeyEvent(&Key);
-            }
+        switch (event)
+        {
+            case ERROR: {
+                
+            } break;
+            case SCREEN_REGISTERED: {
+                
+            } break;
+            case SCREEN_REGISTERED_COMPLETE: {
+                
+                
+                // If all screens are setup, then we can create the window
+            } break;
         }
     }
 }
