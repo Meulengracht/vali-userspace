@@ -22,35 +22,12 @@
  */
 #pragma once
 
-#include <cstdint>
-#include "utils/publisher.hpp"
-#include "utils/subscriber.hpp"
-
 namespace Asgaard {
-    class Object : public Utils::Publisher, public Utils::Subscriber {
+    class Surface;
+    
+    class WindowDecoration : public Surface {
     public:
-        enum class ObjectEvent {
-            ERROR,
-            SYNC,
-            CREATION,
-            SCREEN_PROPERTIES,
-            SCREEN_MODE,
-            SURFACE_FORMAT,
-            SURFACE_RESIZE,
-            SURFACE_FOCUSED,
-            SURFACE_UNFOCUSED,
-            BUFFER_RELEASE
-        };
-        
-    public:
-        Object(uint32_t id) : m_Id(id) { }
-        virtual ~Object() { }
-
-    public:
-        uint32_t     Id() const { return m_Id; }
-        virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
-        
-    private:
-        uint32_t m_Id;
+        WindowDecoration(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parent_id, const Rectangle&);
+        ~WindowDecoration();
     };
 }

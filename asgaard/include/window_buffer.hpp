@@ -22,21 +22,32 @@
  */
 #pragma once
 
-namespace Asgaard {
-    class Rectangle;
-    
-    class WindowBuffer {
-    public:
-        WindowMemoryPool(const Rectangle&);
-        ~WindowMemoryPool();
-        
-        WindowBuffer CreateWindowBuffer();
-        
+#include "pixel_format.hpp"
 
+namespace Asgaard {
+    class WindowMemory;
+    
+    class WindowBuffer final : public Object {
     public:
-        uint32_t Id() const { return m_Id; }
+        enum class BufferEvent : int {
+            CREATED,
+            REFRESHED
+        };
+        
+    public:
+        WindowBuffer(uint32_t id, std::shared_ptr<WindowMemory> memory, int memoryOffset, int width, int height, enum PixelFormat format);
+        ~WindowBuffer();
+        
+        void* Buffer() { return m_Buffer; }
+        
+    public:
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
         
     private:
-        uint32_t m_Id;
+        std::shared_ptr<WindowMemory> m_Memory;
+        int                           m_Width;
+        int                           m_Height;
+        enum PixelFormat              m_Format;
+        void*                         m_Buffer;
     };
 }

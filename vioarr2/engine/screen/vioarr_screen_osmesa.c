@@ -28,6 +28,7 @@
 #include "../vioarr_renderer.h"
 #include "../vioarr_screen.h"
 #include "../vioarr_utils.h"
+#include "../vioarr_objects.h"
 #include "../../protocols/wm_screen_protocol_server.h"
 #include <stdlib.h>
 
@@ -182,6 +183,8 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
         free(screen)
         return NULL;
     }
+    
+    screen->id = vioarr_objects_create_object(screen, object_type_screen);
     return screen;
 }
 

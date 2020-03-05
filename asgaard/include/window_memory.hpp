@@ -23,17 +23,26 @@
 #pragma once
 
 #include "object_manager.hpp"
+#include <os/dmabuf.h>
 
 namespace Asgaard {
     class WindowMemory : public Object {
     public:
-        WindowMemory(uint32_t id);
+        enum class MemoryEvent : int {
+            CREATED,
+            ERROR
+        };
+    public:
+        WindowMemory(uint32_t id, int size);
         ~WindowMemory();
         
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
+        
     public:
-        uint32_t Id() const { return m_Id; }
+        void* CreateBufferPointer(int memoryOffset);
         
     private:
-        uint32_t m_Id;
+        int                   m_Size;
+        struct dma_attachment m_Attachment;
     };
 }

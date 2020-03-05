@@ -21,11 +21,14 @@
  */
 #pragma once
 
+#include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
+#include <asgaard/window_memory.hpp>
+#include <asgaard/window_buffer.hpp>
 
-class TestWindow : public WindowBase {
+class TestWindow : public Asgaard::WindowBase {
 public:
-    TestWindow(uint32_t id, const Rectangle& dimensions)
+    TestWindow(uint32_t id, const Asgaard::Rectangle& dimensions)
         : WindowBase(id, dimensions)
     {
         
@@ -37,25 +40,24 @@ public:
     }
     
 protected:
-    void OnCreated(Object* createdObject) override
+    void OnCreated(Asgaard::Object* createdObject) override
     {
-        if (createdObject == this)
+        if (createdObject->Id() == Id())
         {
             // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-            auto screenSize = m_Screen->Dimensions()->Width() * m_Screen->Dimensions()->Height() * 4;
+            auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
             m_Memory = CreateMemory(screenSize);
         }
-        else if (createdObject == m_Memory.get())
+        else if (createdObject->Id() == m_Memory->Id())
         {
             // Create initial buffer the size of this surface
             m_Buffer = CreateBuffer(m_Memory, 0, m_Dimensions.Width(),
-                m_Dimensions.Height(), PixelFormat::A8R8G8B8);
+                m_Dimensions.Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
-        else if (createdObject == m_Buffer.get())
+        else if (createdObject->Id() == m_Buffer->Id())
         {
             // Now all resources are created
             SetBuffer(m_Buffer);
-            SetTitle("Window Test Application");
             
             // Draw initial scene
             Redraw();
@@ -65,13 +67,13 @@ protected:
         }
     }
     
-    void OnRefreshed(WindowBuffer* buffer) override
+    void OnRefreshed(Asgaard::WindowBuffer* buffer) override
     {
         // The window manager has released the buffer
         Redraw();
     }
     
-    void OnResized() override
+    void OnResized(enum Asgaard::Surface::SurfaceEdges edges, int width, int height) override
     {
         
     }
@@ -92,6 +94,6 @@ private:
     }
     
 private:
-    std::shared_ptr<WindowMemory> m_Memory;
-    std::shared_ptr<WindowBuffer> m_Buffer;
+    std::shared_ptr<Asgaard::WindowMemory> m_Memory;
+    std::shared_ptr<Asgaard::WindowBuffer> m_Buffer;
 };

@@ -27,7 +27,13 @@ namespace Asgaard {
     public:
         Rectangle(int x, int y, int width, int height)
             : m_X(x), m_Y(y), m_Width(width), m_Height(height) { }
+        Rectangle(const Rectangle& rectangle)
+            : Rectangle(rectangle.X(), rectangle.Y(), 
+                rectangle.Width(), rectangle.Height()) { }
         virtual ~Rectangle() { }
+        
+        void SetWidth(int width) { m_Width = width; }
+        void SetHeight(int height) { m_Height = height; }
         
         int X() const { return m_X; }
         int Y() const { return m_Y; }

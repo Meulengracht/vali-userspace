@@ -35,7 +35,7 @@ namespace Asgaard {
 
     ObjectManager::~ObjectManager() { }
     
-    Object* ObjectManager::operator[](uint32_t index)
+    std::shared_ptr<Object> ObjectManager::operator[](uint32_t index)
     {
         std::map<uint32_t, std::shared_ptr<Object>>::iterator it = m_Objects.find(index);
         if (it != m_Objects.end()) {

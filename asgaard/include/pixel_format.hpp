@@ -1,6 +1,6 @@
-/* MollenOS
+/* ValiOS
  *
- * Copyright 2011 - 2018, Philip Meulengracht
+ * Copyright 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,15 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS
+ * ValiOS - Application Framework (Asgaard)
+ *  - Contains the implementation of the application framework used for building
+ *    graphical applications.
  */
+#pragma once
 
-void dllmain(int action) {
-    (void)action;
+namespace Asgaard {
+    enum class PixelFormat {
+        A8R8G8B8,
+        X8R8G8B8
+    };
 }

@@ -30,9 +30,9 @@
 
 void wm_surface_get_formats_callback(int client, struct wm_surface_get_formats_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
@@ -41,10 +41,10 @@ void wm_surface_get_formats_callback(int client, struct wm_surface_get_formats_a
 
 void wm_surface_set_buffer_callback(int client, struct wm_surface_set_buffer_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     vioarr_buffer_t*  buffer  = vioarr_objects_get_object(input->buffer_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
@@ -58,9 +58,9 @@ void wm_surface_set_buffer_callback(int client, struct wm_surface_set_buffer_arg
 
 void wm_surface_invalidate_callback(int client, struct wm_surface_invalidate_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
@@ -91,9 +91,9 @@ void wm_surface_add_subsurface_callback(int client, struct wm_surface_add_subsur
 
 void wm_surface_commit_callback(int client, struct wm_surface_commit_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
@@ -102,20 +102,32 @@ void wm_surface_commit_callback(int client, struct wm_surface_commit_args* input
 
 void wm_surface_resize_callback(int client, struct wm_surface_resize_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
     // todo
 }
 
+void wm_surface_move_callback(int client, struct wm_surface_move_args* input)
+{
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    
+    // todo
+}
+
 void wm_surface_destroy_callback(int client, struct wm_surface_destroy_args* input)
 {
-    vioarr_surface_t* surface = vioarr_objects_get_object(input->object_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
     if (!surface) {
-        wm_core_event_error_single(client, input->object_id, ENOENT, "wm_surface: object does not exist");
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     

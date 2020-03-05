@@ -192,6 +192,11 @@
                         <param name="edges" type="edge"/>
                     </request>
                 </function>
+                <function name="move" synchronous="false">
+                    <request>
+                        <param name="surface_id" type="uint32_t" count="1" />
+                    </request>
+                </function>
                 <function name="destroy" synchronous="false">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />

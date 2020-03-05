@@ -39,9 +39,9 @@ namespace Asgaard {
                 m_Subscribers.remove(subscriber);
             }
             
-            void Notify(void* data = 0) {
+            void Notify(int event = 0, void* data = 0) {
                 for (auto subscriber : m_Subscribers) {
-                    subscriber.Notification(this, data);
+                    subscriber->Notification(this, event, data);
                 }
             }
             

@@ -21,20 +21,27 @@
  *    graphical applications.
  */
 
+#include "include/application.hpp"
 #include "include/window_base.hpp"
-#include "inclued/object_manager.hpp"
+#include "include/object_manager.hpp"
+#include "include/window_memory.hpp"
+#include "include/window_buffer.hpp"
+
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_screen_protocol_client.h"
 #include "protocols/wm_memory_protocol_client.h"
+#include "protocols/wm_surface_protocol_client.h"
+
+static enum Asgaard::Surface::SurfaceEdges GetWindowEdges(enum wm_surface_edge edges)
+{
+    return Asgaard::Surface::SurfaceEdges::NONE;
+}
 
 namespace Asgaard {
-    WindowBase::WindowBase(uint32_t id, std::shared_ptr<Screen> screen, const Rectangle& dimensions)
-        : Object(id), m_Invalidated(false), m_Screen(screen), m_Memory(nullptr)
+    WindowBase::WindowBase(uint32_t id, const Rectangle& dimensions)
+        : Surface(id, dimensions), m_Invalidated(false)
     {
-        // Create a new surface with the window manager
-        wm_screen_create_surface(WM.GetGrachtClient(), screen->Id(), id,    
-            dimensions.Width(), dimensions.Height());
-        wm_core_sync(WM.GetGrachtClient(), id);
+        
     }
 
     WindowBase::~WindowBase()
@@ -46,25 +53,28 @@ namespace Asgaard {
     {
         switch (event)
         {
-            case CREATION: {
+            case ObjectEvent::CREATION: {
                 // retrieve a list of supported window content formats
-                wm_surface_get_formats(WM.GetGrachtClient(), Id());
+                wm_surface_get_formats(APP.GrachtClient(), Id());
+                wm_core_sync(APP.GrachtClient(), Id());
             } break;
             
-            case SURFACE_FORMAT: {
+            case ObjectEvent::SURFACE_FORMAT: {
                 struct wm_surface_format_event* event = 
                     (struct wm_surface_format_event*)data;
-                m_SupportedFormats.push_back(event->format);
+                m_SupportedFormats.push_back((enum PixelFormat)event->format);
             } break;
             
-            case SURFACE_RESIZE: {
-                
-            } break;
-            
-            case SYNC: {
+            case ObjectEvent::SYNC: {
                 OnCreated(this);
             } break;
+            
+            default:
+                break;
         }
+        
+        // Run the base class events as well
+        Surface::ExternalEvent(event, data);
     }
     
     void WindowBase::Notification(Publisher* source, int event, void* data)
@@ -72,10 +82,14 @@ namespace Asgaard {
         auto memoryObject = dynamic_cast<WindowMemory*>(source);
         if (memoryObject != nullptr)
         {
-            switch (event)
+            switch (static_cast<WindowMemory::MemoryEvent>(event))
             {
-                case WindowMemory::Event::POOL_CREATED: {
-                    OnCreated(source);
+                case WindowMemory::MemoryEvent::CREATED: {
+                    OnCreated(memoryObject);
+                } break;
+                
+                case WindowMemory::MemoryEvent::ERROR: {
+                    
                 } break;
             }
         }
@@ -83,12 +97,12 @@ namespace Asgaard {
         auto bufferObject = dynamic_cast<WindowBuffer*>(source);
         if (bufferObject != nullptr)
         {
-            switch (event)
+            switch (static_cast<WindowBuffer::BufferEvent>(event))
             {
-                case WindowBuffer::Event::BUFFER_CREATED: {
-                    OnCreated(source);
+                case WindowBuffer::BufferEvent::CREATED: {
+                    OnCreated(bufferObject);
                 } break;
-                case WindowBuffer::Event::BUFFER_REFRESHED: {
+                case WindowBuffer::BufferEvent::REFRESHED: {
                     OnRefreshed(bufferObject);
                 } break;
             }
@@ -98,37 +112,28 @@ namespace Asgaard {
     std::shared_ptr<WindowMemory> WindowBase::CreateMemory(std::size_t size)
     {
         // Create the window memory pool we're going to use
-        auto memory = OM.CreateClientObject<WindowMemory, const Rectangle&>(m_Screen->Dimensions());
+        auto memory = OM.CreateClientObject<WindowMemory, std::size_t>(size);
         memory->Subscribe(this);
         return memory;
     }
     
-    std::shared_ptr<WindowBuffer> CreateBuffer(std::shared_ptr<WindowMemory> memory,
+    std::shared_ptr<WindowBuffer> WindowBase::CreateBuffer(std::shared_ptr<WindowMemory> memory,
         int memoryOffset, int width, int height, enum PixelFormat format)
     {
-        auto buffer = OM.CreateClientObject<WindowBuffer, int, int, int, enum PixelFormat>(
-            memory->Id(), memoryOffset, width, height, format);
+        auto buffer = OM.CreateClientObject<
+            WindowBuffer, std::shared_ptr<WindowMemory>, int, int, int, enum PixelFormat>(
+                memory, memoryOffset, width, height, format);
         buffer->Subscribe(this);
         return buffer;
     }
-
-    void WindowBase::SetBuffer(std::shared_ptr<WindowBuffer> buffer)
+    
+    void WindowBase::InititateResize(enum SurfaceEdges)
     {
-        
+        // todo
     }
     
-    void WindowBase::SetTitle(const std::string& title)
+    void WindowBase::InitiateMove()
     {
-        
-    }
-    
-    void WindowBase::ApplyChanges()
-    {
-        
-    }
-    
-    void WindowBase::Shutdown()
-    {
-        
+        // todo
     }
 }

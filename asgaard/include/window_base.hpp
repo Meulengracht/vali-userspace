@@ -23,53 +23,43 @@
 #pragma once
 
 #include <string>
-#include "object.hpp"
-#include "window_memory.hpp"
+#include <vector>
+#include "pixel_format.hpp"
+#include "rectangle.hpp"
+#include "surface.hpp"
+#include "screen.hpp"
 
 namespace Asgaard {
-    class Rectangle;
-    class WindowContent;
+    class WindowMemory;
+    class WindowBuffer;
     
-    class WindowBase : public Object {
-    public:
-        enum class PixelFormat {
-            A8R8G8B8,
-            X8R8G8B8
-        }; 
+    class WindowBase : public Surface {
     public:
         WindowBase(uint32_t, const Rectangle&);
         ~WindowBase();
-
-    public:
-        static void *operator new   (size_t) = delete;
-        static void *operator new[] (size_t) = delete;
+        
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
 
     // Window events that can/should be reacted on.
     protected:
         virtual void OnCreated(Object*) = 0;
         virtual void OnRefreshed(WindowBuffer*) = 0;
-        virtual void OnResized() = 0;
         virtual void Teardown() = 0;
 
     // Window functions that can be called to configure this window 
     protected:
-        std::shared_ptr<WindowMemory> CreateMemory(std::size_t size);
-        std::shared_ptr<WindowBuffer> CreateBuffer(std::shared_ptr<WindowMemory>,
+        std::shared_ptr<WindowMemory>  CreateMemory(std::size_t size);
+        std::shared_ptr<WindowBuffer>  CreateBuffer(std::shared_ptr<WindowMemory>,
             int memoryOffset, int width, int height, enum PixelFormat format);
         
-        void SetBuffer(std::shared_ptr<WindowBuffer>);
-        void SetTitle(const std::string&);
-        void ApplyChanges();
-        void Shutdown();
-        
+        void InititateResize(enum SurfaceEdges);
+        void InitiateMove();
+
     private:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        Rectangle                     m_Dimensions;
         std::vector<enum PixelFormat> m_SupportedFormats;
-        std::shared_ptr<Screen>       m_Screen;
         bool                          m_Invalidated;
     };
 }

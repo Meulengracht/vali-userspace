@@ -22,11 +22,12 @@
  */
 #pragma once
 
+#include <gracht/client.h>
 #include "object_manager.hpp"
 #include "window_base.hpp"
 
 namespace Asgaard {
-    class Application {
+    class Application final {
     public:
         enum ApplicationEvent {
             ERROR,
@@ -38,7 +39,9 @@ namespace Asgaard {
         Application();
         ~Application();
         
+        int Initialize();
         int Execute();
+        int Shutdown();
         
     public:
         template<class WC, typename... Params>
@@ -49,16 +52,12 @@ namespace Asgaard {
             m_Window = OM.CreateClientObject<WC, Params...>(parameters...);
         }
         
-        void ExternalEvent(enum ApplicationEvent);
-        
-    public:
-        static void *operator new   (size_t)   = delete;
-        static void *operator new[] (size_t)   = delete;
-        static void  operator delete(void*)    = delete;
-        static void  operator delete[] (void*) = delete;
+        void ExternalEvent(enum ApplicationEvent, void* = 0);
+        gracht_client_t* GrachtClient() { return m_Client; }
 
     private:
-        WindowBase* m_Window;
+        gracht_client_t*            m_Client;
+        std::shared_ptr<WindowBase> m_Window;
     };
     
     extern Application APP;

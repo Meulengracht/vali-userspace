@@ -23,7 +23,6 @@
 
 #include "include/application.hpp"
 #include "include/screen.hpp"
-#include "include/window_manager.hpp"
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_screen_protocol_client.h"
 
@@ -61,7 +60,7 @@ namespace Asgaard {
         APP.ExternalEvent(Application::SCREEN_REGISTERED);
                 
         // Get properties of the screen
-        wm_screen_get_properties(WM.GrachtClient(), id);
+        wm_screen_get_properties(APP.GrachtClient(), id);
     }
 
     Screen::~Screen()
@@ -103,7 +102,7 @@ namespace Asgaard {
     {
         switch (event)
         {
-            case Object::ERROR: {
+            case Object::ObjectEvent::ERROR: {
                 struct wm_core_error_event* error = 
                     (struct wm_core_error_event*)data;
                 
@@ -111,12 +110,12 @@ namespace Asgaard {
                 APP.ExternalEvent(Application::ERROR);
             } break;
                 
-            case Object::SYNC: {
+            case Object::ObjectEvent::SYNC: {
                 // Now this chain of events are done and we are ready
                 APP.ExternalEvent(Application::SCREEN_REGISTERED_COMPLETE);
             } break;
             
-            case Object::SCREEN_PROPERTIES: {
+            case Object::ObjectEvent::SCREEN_PROPERTIES: {
                 struct wm_screen_screen_properties_event* properties = 
                     (struct wm_screen_screen_properties_event*)data;
                 
@@ -127,11 +126,11 @@ namespace Asgaard {
                 m_Transform   = ConvertProtocolTransform(properties->transform);
                 
                 // continue this charade and ask for modes, end with a sync
-                wm_screen_get_modes(WM.GrachtClient(), Id());
-                wm_core_sync(WM.GrachtClient(), Id());
+                wm_screen_get_modes(APP.GrachtClient(), Id());
+                wm_core_sync(APP.GrachtClient(), Id());
             } break;
             
-            case Object::SCREEN_MODE: {
+            case Object::ObjectEvent::SCREEN_MODE: {
                 struct wm_screen_mode_event* mode = 
                     (struct wm_screen_mode_event*)data;
                 

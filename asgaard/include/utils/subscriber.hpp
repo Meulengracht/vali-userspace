@@ -29,7 +29,7 @@ namespace Asgaard {
         class Subscriber {
         public:
             virtual ~Subscriber() { }
-            virtual void Notification(Publisher*, int = 0, void* = 0) = 0;
+            virtual void Notification(Publisher*, int = 0, void* = 0) { }
         };
     }
 }

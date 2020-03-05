@@ -4,8 +4,8 @@
 INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
 LFLAGS := ddk.lib libgracht.lib
 
-APP_SOURCES_C := main.c
-APP_SOURCES_CXX := window_manager.cpp object_manager.cpp screen.cpp window_base.cpp application.cpp
+APP_SOURCES_C :=
+APP_SOURCES_CXX := object_manager.cpp screen.cpp window_base.cpp application.cpp surface.cpp window_memory.cpp window_buffer.cpp
 		         
 APP_PROTOCOLS_C := protocols/wm_core_protocol_client.c \
 				   protocols/wm_screen_protocol_client.c \
@@ -19,12 +19,17 @@ APP_DEFINES := -DGL_VIOARR_LOADER -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTAT
 
 APP_CFLAGS = $(VALI_CFLAGS) $(CFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
 APP_CXXFLAGS = $(VALI_CXXFLAGS) $(CXXFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
-APP_LFLAGS = /version:0.1 /entry:__CrtLibraryEntry /dll $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS) $(LFLAGS)
+APP_LFLAGS = /lib
 
 APP_OBJECTS = $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_CXX:.cpp=.o) $(APP_SOURCES_C:.c=.o)
 
-.PHONE: all
-all: protocols $(VALI_APPLICATION_PATH)/lib/asgaard.lib
+.PHONY: all
+all: protocols $(VALI_APPLICATION_PATH)/lib/asgaard.lib install
+
+.PHONY: install
+install:
+	@mkdir -p $(VALI_APPLICATION_PATH)/include/asgaard
+	@cp -r include/* $(VALI_APPLICATION_PATH)/include/asgaard/
 
 $(VALI_APPLICATION_PATH)/lib/asgaard.lib: $(APP_OBJECTS)
 	@printf "%b" "\033[0;36mCreating application " $@ "\033[m\n"
