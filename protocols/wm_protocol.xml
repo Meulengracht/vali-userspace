@@ -173,12 +173,26 @@
                         <param name="height" type="int"/>
                     </request>
                 </function>
+                <function name="set_input_region" synchronous="false">
+                    <request>
+                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="x" type="int"/>
+                        <param name="y" type="int"/>
+                        <param name="width" type="int"/>
+                        <param name="height" type="int"/>
+                    </request>
+                </function>
                 <function name="add_subsurface" synchronous="false">
                     <request>
                         <param name="parent_id" type="uint32_t" count="1" />
                         <param name="child_id" type="uint32_t" count="1" />
                         <param name="x" type="int"/>
                         <param name="y" type="int"/>
+                    </request>
+                </function>
+                <function name="request_frame" synchronous="false">
+                    <request>
+                        <param name="surface_id" type="uint32_t" count="1" />
                     </request>
                 </function>
                 <function name="commit" synchronous="false">
@@ -208,6 +222,9 @@
                 <event name="format">
                     <param name="surface_id" type="uint32_t" count="1" />
                     <param name="format" type="pixel_format" count="1" />
+                </event>
+                <event name="frame">
+                    <param name="surface_id" type="uint32_t" count="1" />
                 </event>
                 <event name="resize">
                     <param name="surface_id" type="uint32_t" count="1" />

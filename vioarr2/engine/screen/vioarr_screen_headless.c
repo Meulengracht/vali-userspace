@@ -129,7 +129,7 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
         return NULL;
     }
     
-    screen->id = vioarr_objects_create_object(screen, object_type_screen);
+    screen->id = vioarr_objects_create_server_object(screen, object_type_screen);
     return screen;
 }
 

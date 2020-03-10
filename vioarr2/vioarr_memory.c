@@ -39,13 +39,13 @@ void wm_memory_create_pool_callback(int client, struct wm_memory_create_pool_arg
     // get memory subsystem
     // TODO
     
-    status = vioarr_memory_create_pool(input->size, &pool);
+    status = vioarr_memory_create_pool(input->pool_id, input->size, &pool);
     if (status) {
         wm_core_event_error_single(client, 0 /* input->object_id */, status, "wm_memory: failed to create memory pool");
         return;
     }
     
-    wm_core_event_object_single(client, vioarr_memory_pool_id(pool), vioarr_memory_pool_handle(pool), object_type_memory_pool);
+    wm_core_event_object_single(client, input->pool_id, vioarr_memory_pool_handle(pool), object_type_memory_pool);
 }
 
 void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_create_buffer_args* input)
@@ -58,13 +58,13 @@ void wm_memory_pool_create_buffer_callback(int client, struct wm_memory_pool_cre
         return;
     }
     
-    status = vioarr_buffer_create(pool, input->offset, input->width, input->height, input->stride, input->format, &buffer);
+    status = vioarr_buffer_create(input->buffer_id, pool, input->offset, input->width, input->height, input->stride, input->format, &buffer);
     if (status) {
         wm_core_event_error_single(client, input->pool_id, status, "wm_memory: failed to create memory buffer");
         return;
     }
     
-    wm_core_event_object_single(client, vioarr_memory_pool_id(pool), UUID_INVALID, object_type_buffer);
+    wm_core_event_object_single(client, input->buffer_id, UUID_INVALID, object_type_buffer);
 }
 
 void wm_buffer_destroy_callback(int client, struct wm_buffer_destroy_args* input)

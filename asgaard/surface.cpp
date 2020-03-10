@@ -63,7 +63,7 @@ namespace Asgaard {
             wm_screen_create_surface(APP.GrachtClient(), screen->Id(), Id(),    
                 m_Dimensions.Width(), m_Dimensions.Height());
             if (m_Parent != nullptr) {
-                // wm_surface_set_child(APP.GrachtClient(), m_Parent->Id(), Id(), m_Dimensions.X(), m_Dimensions.Y());
+                wm_surface_add_subsurface(APP.GrachtClient(), m_Parent->Id(), Id(), m_Dimensions.X(), m_Dimensions.Y());
             }
         }
         m_Screen = screen;
@@ -71,8 +71,7 @@ namespace Asgaard {
     
     void Surface::ExternalEvent(enum ObjectEvent event, void* data)
     {
-        switch (event)
-        {
+        switch (event) {
             case ObjectEvent::SURFACE_RESIZE: {
                 struct wm_surface_resize_event* event = 
                     (struct wm_surface_resize_event*)data;
@@ -84,6 +83,10 @@ namespace Asgaard {
                 OnResized(GetSurfaceEdges(event->edges), event->width, event->height);
                 m_Dimensions.SetWidth(event->width);
                 m_Dimensions.SetHeight(event->height);
+            } break;
+            
+            case ObjectEvent::SURFACE_FRAME: {
+                OnFrame();
             } break;
             
             default:
@@ -104,13 +107,33 @@ namespace Asgaard {
         wm_surface_set_buffer(APP.GrachtClient(), Id(), buffer->Id());
     }
     
+    void Surface::MarkDamaged(const Rectangle& dimensions)
+    {
+        wm_surface_invalidate(APP.GrachtClient(), Id(),
+            dimensions.X(), dimensions.Y(),
+            dimensions.Width(), dimensions.Height());
+    }
+    
+    void Surface::MarkInputRegion(const Rectangle& dimensions)
+    {
+        wm_surface_set_input_region(APP.GrachtClient(), Id(),
+            dimensions.X(), dimensions.Y(),
+            dimensions.Width(), dimensions.Height());
+    }
+    
     void Surface::ApplyChanges()
     {
         wm_surface_commit(APP.GrachtClient(), Id());
     }
     
+    void Surface::RequestFrame()
+    {
+        wm_surface_request_frame(APP.GrachtClient(), Id());
+    }
+    
     void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }
     void Surface::OnFocus(bool focus) { }
+    void Surface::OnFrame() { }
     void Surface::OnMouseMove() { }
     void Surface::OnMouseDown() { }
     void Surface::OnMouseUp() { }

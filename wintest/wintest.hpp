@@ -42,35 +42,36 @@ public:
 protected:
     void OnCreated(Asgaard::Object* createdObject) override
     {
-        if (createdObject->Id() == Id())
-        {
+        if (createdObject->Id() == Id()) {
             // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-            auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
-            m_Memory = CreateMemory(screenSize);
+            //auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
+            //m_Memory = CreateMemory(screenSize);
         }
-        else if (createdObject->Id() == m_Memory->Id())
-        {
+        else if (createdObject->Id() == m_Memory->Id()) {
             // Create initial buffer the size of this surface
             m_Buffer = CreateBuffer(m_Memory, 0, m_Dimensions.Width(),
                 m_Dimensions.Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
-        else if (createdObject->Id() == m_Buffer->Id())
-        {
+        else if (createdObject->Id() == m_Buffer->Id()) {
             // Now all resources are created
             SetBuffer(m_Buffer);
-            
-            // Draw initial scene
             Redraw();
-            
-            // Then update all the changes we've made
-            ApplyChanges();
+            OnFrame();
         }
     }
     
     void OnRefreshed(Asgaard::WindowBuffer* buffer) override
     {
-        // The window manager has released the buffer
-        Redraw();
+        if (buffer->Id() == m_Buffer->Id()) {
+            Redraw();
+        }
+    }
+    
+    void OnFrame() override
+    {
+        MarkDamaged(m_Dimensions);
+        RequestFrame();
+        ApplyChanges();
     }
     
     void OnResized(enum Asgaard::Surface::SurfaceEdges edges, int width, int height) override
@@ -87,10 +88,6 @@ private:
     void Redraw()
     {
         // Update window content data
-        
-        
-        // invalidate content
-        
     }
     
 private:

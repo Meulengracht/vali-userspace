@@ -30,7 +30,7 @@
 
 typedef struct vioarr_buffer vioarr_buffer_t;
 
-int      vioarr_buffer_create(vioarr_memory_pool_t*, int, int, int, int, enum wm_pixel_format, vioarr_buffer_t**);
+int      vioarr_buffer_create(uint32_t, vioarr_memory_pool_t*, int, int, int, int, enum wm_pixel_format, vioarr_buffer_t**);
 int      vioarr_buffer_acquire(vioarr_buffer_t*);
 int      vioarr_buffer_destroy(vioarr_buffer_t*);
 uint32_t vioarr_buffer_id(vioarr_buffer_t*);

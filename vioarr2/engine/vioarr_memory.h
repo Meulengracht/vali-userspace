@@ -29,7 +29,7 @@
 
 typedef struct vioarr_memory_pool vioarr_memory_pool_t;
 
-int      vioarr_memory_create_pool(size_t, vioarr_memory_pool_t**);
+int      vioarr_memory_create_pool(uint32_t, size_t, vioarr_memory_pool_t**);
 int      vioarr_memory_pool_acquire(vioarr_memory_pool_t*);
 int      vioarr_memory_destroy_pool(vioarr_memory_pool_t*);
 uint32_t vioarr_memory_pool_id(vioarr_memory_pool_t*);

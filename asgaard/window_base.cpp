@@ -37,6 +37,11 @@ static enum Asgaard::Surface::SurfaceEdges GetWindowEdges(enum wm_surface_edge e
     return Asgaard::Surface::SurfaceEdges::NONE;
 }
 
+static enum wm_surface_edge ToWindowEdges(enum Asgaard::Surface::SurfaceEdges edges)
+{
+    return no_edges;
+}
+
 namespace Asgaard {
     WindowBase::WindowBase(uint32_t id, const Rectangle& dimensions)
         : Surface(id, dimensions), m_Invalidated(false)
@@ -127,13 +132,13 @@ namespace Asgaard {
         return buffer;
     }
     
-    void WindowBase::InititateResize(enum SurfaceEdges)
+    void WindowBase::InititateResize(enum SurfaceEdges edges)
     {
-        // todo
+        wm_surface_resize(APP.GrachtClient(), Id(), ToWindowEdges(edges));
     }
     
     void WindowBase::InitiateMove()
     {
-        // todo
+        wm_surface_move(APP.GrachtClient(), Id());
     }
 }

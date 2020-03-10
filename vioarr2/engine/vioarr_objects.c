@@ -45,7 +45,24 @@ static uint32_t vioarr_utils_get_object_id(void)
     return atomic_fetch_add(&object_id, 1);
 }
 
-uint32_t vioarr_objects_create_object(void* object, enum wm_core_object_type type)
+void vioarr_objects_create_client_object(uint32_t id, void* object, enum wm_core_object_type type)
+{
+    vioarr_object_t* resource;
+    
+    resource = malloc(sizeof(vioarr_object_t));
+    if (!resource) {
+        return;
+    }
+    
+    resource->id     = id;
+    resource->object = object;
+    resource->type   = type;
+    ELEMENT_INIT(&resource->link, (uintptr_t)resource->id, resource);
+    
+    list_append(&objects, &resource->link);
+}
+
+uint32_t vioarr_objects_create_server_object(void* object, enum wm_core_object_type type)
 {
     vioarr_object_t* resource;
     
@@ -88,7 +105,7 @@ int vioarr_objects_remove_object(uint32_t id)
 
 void vioarr_objects_publish(int client)
 {
-    foreach (i, &objects) {
+    foreach(i, &objects) {
         vioarr_object_t* object = i->value;
         wm_core_event_object_single(client, object->id, object->handle, object->type);
     }

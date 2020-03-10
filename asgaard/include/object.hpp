@@ -37,6 +37,7 @@ namespace Asgaard {
             SCREEN_MODE,
             SURFACE_FORMAT,
             SURFACE_RESIZE,
+            SURFACE_FRAME,
             SURFACE_FOCUSED,
             SURFACE_UNFOCUSED,
             BUFFER_RELEASE

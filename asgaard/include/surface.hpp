@@ -52,7 +52,11 @@ namespace Asgaard {
         
         std::shared_ptr<Surface> CreateSubSurface(const Rectangle&);
         void SetBuffer(std::shared_ptr<WindowBuffer>);
+        void MarkDamaged(const Rectangle&);
+        void MarkInputRegion(const Rectangle&);
         void ApplyChanges();
+        
+        void RequestFrame();
         
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
@@ -60,6 +64,7 @@ namespace Asgaard {
     protected:
         virtual void OnResized(enum SurfaceEdges, int width, int height);
         virtual void OnFocus(bool);
+        virtual void OnFrame();
         virtual void OnMouseMove();
         virtual void OnMouseDown();
         virtual void OnMouseUp();

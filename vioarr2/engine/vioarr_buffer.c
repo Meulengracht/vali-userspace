@@ -36,10 +36,10 @@ typedef struct vioarr_buffer {
     void*                 data;
 } vioarr_buffer_t;
 
-int vioarr_buffer_create(vioarr_memory_pool_t* pool, int pool_index, int width, int height, int stride, enum wm_pixel_format format, vioarr_buffer_t** buffer_out)
+int vioarr_buffer_create(uint32_t id, vioarr_memory_pool_t* pool, int pool_index,
+    int width, int height, int stride, enum wm_pixel_format format, vioarr_buffer_t** buffer_out)
 {
     vioarr_buffer_t* buffer;
-    uint32_t         id;
     size_t           size;
     
     // id is optional
@@ -52,7 +52,7 @@ int vioarr_buffer_create(vioarr_memory_pool_t* pool, int pool_index, int width, 
         return -1;
     }
     
-    buffer->id         = vioarr_objects_create_object(buffer, object_type_buffer);
+    buffer->id         = id;
     buffer->pool       = pool;
     buffer->references = ATOMIC_VAR_INIT(1);
     buffer->width      = width;
@@ -64,6 +64,7 @@ int vioarr_buffer_create(vioarr_memory_pool_t* pool, int pool_index, int width, 
         return -1;
     }
     
+    vioarr_objects_create_client_object(id, buffer, object_type_buffer);
     *buffer_out = buffer;
     return 0;
 }

@@ -56,6 +56,26 @@ void wm_surface_set_buffer_callback(int client, struct wm_surface_set_buffer_arg
     vioarr_surface_set_buffer(surface, buffer);
 }
 
+void wm_surface_set_input_region_callback(int client, struct wm_surface_set_input_region_args* input)
+{
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+}
+
+void wm_surface_request_frame_callback(int client, struct wm_surface_request_frame_args* input)
+{
+    vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+}
+
 void wm_surface_invalidate_callback(int client, struct wm_surface_invalidate_args* input)
 {
     vioarr_surface_t* surface = vioarr_objects_get_object(input->surface_id);

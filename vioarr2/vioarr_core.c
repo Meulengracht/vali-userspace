@@ -24,13 +24,16 @@
 
 #include "protocols/wm_core_protocol_server.h"
 #include "engine/vioarr_objects.h"
+#include "engine/vioarr_utils.h"
 
 void wm_core_sync_callback(int client, struct wm_core_sync_args* input)
 {
+    vioarr_utils_trace("[wm_core_sync_callback] client %i", client);
     wm_core_event_sync_single(client, input->serial);
 }
 
 void wm_core_get_objects_callback(int client)
 {
+    vioarr_utils_trace("[wm_core_get_objects_callback] client %i", client);
     vioarr_objects_publish(client);
 }

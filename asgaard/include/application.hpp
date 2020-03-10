@@ -27,14 +27,7 @@
 #include "window_base.hpp"
 
 namespace Asgaard {
-    class Application final {
-    public:
-        enum ApplicationEvent {
-            ERROR,
-            SCREEN_REGISTERED,
-            SCREEN_REGISTERED_COMPLETE
-        };
-        
+    class Application final : public Object {
     public:
         Application();
         ~Application();
@@ -52,8 +45,11 @@ namespace Asgaard {
             m_Window = OM.CreateClientObject<WC, Params...>(parameters...);
         }
         
-        void ExternalEvent(enum ApplicationEvent, void* = 0);
         gracht_client_t* GrachtClient() { return m_Client; }
+
+    public:
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
+        void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
         gracht_client_t*            m_Client;

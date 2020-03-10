@@ -37,6 +37,11 @@ namespace Asgaard {
             ROTATE_270,
         };
         
+        enum class ScreenEvent {
+            ERROR,
+            CREATED
+        };
+        
     public:
         class ScreenMode {
         public:

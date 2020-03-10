@@ -55,7 +55,8 @@ typedef struct vioarr_surface {
 static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface);
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
-int vioarr_surface_create(vioarr_screen_t* screen, int x, int y, int width, int height, vioarr_surface_t** surface_out)
+int vioarr_surface_create(uint32_t id, vioarr_screen_t* screen, int x, int y,
+    int width, int height, vioarr_surface_t** surface_out)
 {
     vioarr_surface_t* surface;
     
@@ -92,7 +93,7 @@ int vioarr_surface_create(vioarr_screen_t* screen, int x, int y, int width, int 
         return -1;
     }
     
-    surface->id     = vioarr_objects_create_object(surface, object_type_surface);
+    surface->id     = id;
     surface->screen = screen;
 
     vioarr_screen_register_surface(screen, surface);

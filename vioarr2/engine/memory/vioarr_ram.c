@@ -34,7 +34,7 @@ typedef struct vioarr_memory_pool {
     struct dma_attachment attachment;
 } vioarr_memory_pool_t;
 
-int vioarr_memory_create_pool(size_t size, vioarr_memory_pool_t** pool_out)
+int vioarr_memory_create_pool(uint32_t id, size_t size, vioarr_memory_pool_t** pool_out)
 {
     vioarr_memory_pool_t*  pool;
     struct dma_buffer_info dma_info;
@@ -61,9 +61,10 @@ int vioarr_memory_create_pool(size_t size, vioarr_memory_pool_t** pool_out)
         return -1;
     }
     
-    pool->id         = vioarr_objects_create_object(pool, object_type_memory_pool);
+    pool->id         = id;
     pool->references = ATOMIC_VAR_INIT(1);
     
+    vioarr_objects_create_client_object(id, pool, object_type_memory_pool);
     *pool_out = pool;
     return 0;
 }

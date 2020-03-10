@@ -56,9 +56,6 @@ static Asgaard::Screen::ScreenMode::ModeFlags ConvertProtocolMode(enum wm_screen
 namespace Asgaard {
     Screen::Screen(uint32_t id) : Object(id)
     {
-        // Register screen that is in setup phase
-        APP.ExternalEvent(Application::SCREEN_REGISTERED);
-                
         // Get properties of the screen
         wm_screen_get_properties(APP.GrachtClient(), id);
     }
@@ -97,22 +94,20 @@ namespace Asgaard {
         }
         return -1;
     }
-        
+    
     void Screen::ExternalEvent(enum ObjectEvent event, void* data)
     {
-        switch (event)
-        {
+        switch (event) {
             case Object::ObjectEvent::ERROR: {
                 struct wm_core_error_event* error = 
                     (struct wm_core_error_event*)data;
                 
                 // In case of fatal events:
-                APP.ExternalEvent(Application::ERROR);
+                Notify(static_cast<int>(ScreenEvent::ERROR));
             } break;
-                
+            
             case Object::ObjectEvent::SYNC: {
-                // Now this chain of events are done and we are ready
-                APP.ExternalEvent(Application::SCREEN_REGISTERED_COMPLETE);
+                Notify(static_cast<int>(ScreenEvent::CREATED));
             } break;
             
             case Object::ObjectEvent::SCREEN_PROPERTIES: {

@@ -51,6 +51,10 @@ int gracht_os_get_server_client_address(struct sockaddr_storage* address, int* a
 
 namespace Asgaard {
     Application APP;
+    
+    Application::Application() 
+        : Object(0), m_Client(nullptr), m_Window(nullptr) { }
+    Application::~Application() { }
 
     int Application::Initialize()
     {
@@ -79,7 +83,7 @@ namespace Asgaard {
     {
         char* messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
-        while (m_Running) {
+        while (true) {
             if (!gracht_client_wait_message(m_Client, messageBuffer)) {
                 gracht_client_process_message(m_Client, messageBuffer);
             }
@@ -97,22 +101,50 @@ namespace Asgaard {
         return 0;
     }
     
-    void Application::ExternalEvent(enum ApplicationEvent event, void* data)
+    void Application::ExternalEvent(enum ObjectEvent event, void* data)
     {
-        switch (event)
-        {
-            case ERROR: {
+        switch (event) {
+            case ObjectEvent::CREATION: {
+                struct wm_core_object_event* event =
+                    (struct wm_core_object_event*)data;
                 
-            } break;
-            case SCREEN_REGISTERED: {
-                
-            } break;
-            case SCREEN_REGISTERED_COMPLETE: {
-                // If all screens are setup, then we can create the window
-                if (m_Window != nullptr) {
-                    m_Window->ExternalEvent(Object::ObjectEvent::CREATION);
+                // Handle new server objects
+                switch (event->type) {
+                    case object_type_screen: {
+                        auto screen = Asgaard::OM.CreateServerObject<Asgaard::Screen>(event->object_id);
+                        screen->Subscribe(this);
+                    } break;
+                    
+                    default:
+                        break;
                 }
+                
+            }
+            case ObjectEvent::ERROR: {
+                // todo app error for those who listen
             } break;
+            
+            default:
+                break;
+        }
+    }
+    
+    void Application::Notification(Publisher* source, int event, void* data)
+    {
+        auto screenObject = dynamic_cast<Screen*>(source);
+        if (screenObject) {
+            switch (static_cast<Screen::ScreenEvent>(event)) {
+                case Screen::ScreenEvent::CREATED: {
+                    if (m_Window != nullptr) {
+                        auto screenPtr = std::static_pointer_cast<Screen>(OM[screenObject->Id()]);
+                        m_Window->BindToScreen(screenPtr);
+                    }
+                } break;
+                
+                case Screen::ScreenEvent::ERROR: {
+                    
+                } break;
+            }
         }
     }
 }
@@ -137,7 +169,7 @@ extern "C"
         auto object = Asgaard::OM[input->object_id];
         if (!object) {
             // Global error, this must be handled on application level
-            Asgaard::APP.ExternalEvent(Asgaard::Application::ERROR, input);
+            Asgaard::APP.ExternalEvent(Asgaard::Object::ObjectEvent::ERROR, input);
             return;
         }
         
@@ -147,16 +179,19 @@ extern "C"
     
     void wm_core_event_object_callback(struct wm_core_object_event* input)
     {
-        switch (input->type)
-        {
+        switch (input->type) {
             // Handle new server objects
             case object_type_screen: {
-                auto screen = Asgaard::OM.CreateServerObject<Asgaard::Screen>(input->object_id);
+                Asgaard::APP.ExternalEvent(Asgaard::Object::ObjectEvent::CREATION, input);
             } break;
             
             // Handle client completion objects
             default: {
                 auto object = Asgaard::OM[input->object_id];
+                if (object == nullptr) {
+                    // log
+                    return;
+                }
                 object->ExternalEvent(Asgaard::Object::ObjectEvent::CREATION, input);
             } break;
         }
@@ -167,13 +202,6 @@ extern "C"
     {
         auto object = Asgaard::OM[input->screen_id];
         if (!object) {
-            // log
-            return;
-        }
-        
-        // verify object is a screen object
-        auto screen = dynamic_cast<Asgaard::Screen*>(object.get());
-        if (!screen) {
             // log
             return;
         }
@@ -190,14 +218,6 @@ extern "C"
             return;
         }
         
-        // verify object is a screen object
-        auto screen = dynamic_cast<Asgaard::Screen*>(object.get());
-        if (!screen) {
-            // log
-            return;
-        }
-        
-        // publish to object
         object->ExternalEvent(Asgaard::Object::ObjectEvent::SCREEN_MODE, input);
     }
     
@@ -210,15 +230,18 @@ extern "C"
             return;
         }
         
-        // verify object is a window object
-        auto window = dynamic_cast<Asgaard::WindowBase*>(object.get());
-        if (!window) {
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_FORMAT, input);
+    }
+    
+    void wm_surface_event_frame_callback(struct wm_surface_frame_event* input)
+    {
+        auto object = Asgaard::OM[input->surface_id];
+        if (!object) {
             // log
             return;
         }
         
-        // publish to object
-        object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_FORMAT, input);
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_FRAME, input);
     }
     
     void wm_surface_event_resize_callback(struct wm_surface_resize_event* input)
@@ -229,14 +252,6 @@ extern "C"
             return;
         }
         
-        // verify object is a window object
-        auto window = dynamic_cast<Asgaard::WindowBase*>(object.get());
-        if (!window) {
-            // log
-            return;
-        }
-        
-        // publish to object
         object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_RESIZE, input);
     }
     
@@ -249,14 +264,6 @@ extern "C"
             return;
         }
         
-        // verify object is a window object
-        auto buffer = dynamic_cast<Asgaard::WindowBase*>(object.get());
-        if (!buffer) {
-            // log
-            return;
-        }
-        
-        // publish to object
         object->ExternalEvent(Asgaard::Object::ObjectEvent::BUFFER_RELEASE, input);
     }
 }
