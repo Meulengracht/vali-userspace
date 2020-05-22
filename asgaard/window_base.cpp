@@ -60,8 +60,8 @@ namespace Asgaard {
         {
             case ObjectEvent::CREATION: {
                 // retrieve a list of supported window content formats
-                wm_surface_get_formats(APP.GrachtClient(), Id());
-                wm_core_sync(APP.GrachtClient(), Id());
+                wm_surface_get_formats(APP.GrachtClient(), nullptr, Id());
+                wm_core_sync(APP.GrachtClient(), nullptr, Id());
             } break;
             
             case ObjectEvent::SURFACE_FORMAT: {
@@ -134,11 +134,11 @@ namespace Asgaard {
     
     void WindowBase::InititateResize(enum SurfaceEdges edges)
     {
-        wm_surface_resize(APP.GrachtClient(), Id(), ToWindowEdges(edges));
+        wm_surface_resize(APP.GrachtClient(), nullptr, Id(), ToWindowEdges(edges));
     }
     
     void WindowBase::InitiateMove()
     {
-        wm_surface_move(APP.GrachtClient(), Id());
+        wm_surface_move(APP.GrachtClient(), nullptr, Id());
     }
 }

@@ -60,10 +60,11 @@ namespace Asgaard {
         // If we previously were not attached to a screen and now are attaching
         // then we need to provide an underlying surface
         if (m_Screen == nullptr && screen != nullptr) {
-            wm_screen_create_surface(APP.GrachtClient(), screen->Id(), Id(),    
+            wm_screen_create_surface(APP.GrachtClient(), nullptr, screen->Id(), Id(),    
                 m_Dimensions.Width(), m_Dimensions.Height());
             if (m_Parent != nullptr) {
-                wm_surface_add_subsurface(APP.GrachtClient(), m_Parent->Id(), Id(), m_Dimensions.X(), m_Dimensions.Y());
+                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, m_Parent->Id(),
+                    Id(), m_Dimensions.X(), m_Dimensions.Y());
             }
         }
         m_Screen = screen;
@@ -104,31 +105,31 @@ namespace Asgaard {
     
     void Surface::SetBuffer(std::shared_ptr<WindowBuffer> buffer)
     {
-        wm_surface_set_buffer(APP.GrachtClient(), Id(), buffer->Id());
+        wm_surface_set_buffer(APP.GrachtClient(), nullptr, Id(), buffer->Id());
     }
     
     void Surface::MarkDamaged(const Rectangle& dimensions)
     {
-        wm_surface_invalidate(APP.GrachtClient(), Id(),
+        wm_surface_invalidate(APP.GrachtClient(), nullptr, Id(),
             dimensions.X(), dimensions.Y(),
             dimensions.Width(), dimensions.Height());
     }
     
     void Surface::MarkInputRegion(const Rectangle& dimensions)
     {
-        wm_surface_set_input_region(APP.GrachtClient(), Id(),
+        wm_surface_set_input_region(APP.GrachtClient(), nullptr, Id(),
             dimensions.X(), dimensions.Y(),
             dimensions.Width(), dimensions.Height());
     }
     
     void Surface::ApplyChanges()
     {
-        wm_surface_commit(APP.GrachtClient(), Id());
+        wm_surface_commit(APP.GrachtClient(), nullptr, Id());
     }
     
     void Surface::RequestFrame()
     {
-        wm_surface_request_frame(APP.GrachtClient(), Id());
+        wm_surface_request_frame(APP.GrachtClient(), nullptr, Id());
     }
     
     void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }

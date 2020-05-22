@@ -31,7 +31,7 @@ namespace Asgaard {
     WindowMemory::WindowMemory(uint32_t id, int size)
         : Object(id), m_Size(size)
     {
-        wm_memory_create_pool(APP.GrachtClient(), 0 /* memory_system_id */, id, size);
+        wm_memory_create_pool(APP.GrachtClient(), nullptr, 0 /* memory_system_id */, id, size);
     }
     
     WindowMemory::~WindowMemory()

@@ -24,7 +24,6 @@
 #include "include/object_manager.hpp"
 #include "include/object.hpp"
 #include <gracht/client.h>
-#include <gracht/os.h>
 #include <type_traits>
 
 namespace Asgaard {

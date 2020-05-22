@@ -23,6 +23,7 @@
 
 #include <cstring>
 #include <gracht/client.h>
+#include <gracht/link/socket.h>
 #include "include/application.hpp"
 #include "include/screen.hpp"
 #include "include/object_manager.hpp"
@@ -58,14 +59,16 @@ namespace Asgaard {
 
     int Application::Initialize()
     {
-        gracht_client_configuration_t Configuration;
-        int                           Status;
+        struct socket_client_configuration linkConfiguration;
+        struct gracht_client_configuration clientConfiguration;
+        int                                status;
         
-        Configuration.type = gracht_client_stream_based;
-        gracht_os_get_server_client_address(&Configuration.address, &Configuration.address_length);
+        linkConfiguration.type = gracht_link_stream_based;
+        gracht_os_get_server_client_address(&linkConfiguration.address, &linkConfiguration.address_length);
         
-        Status = gracht_client_create(&Configuration, &m_Client);
-        if (Status) {
+        gracht_link_socket_client_create(&clientConfiguration.link, &linkConfiguration);
+        status = gracht_client_create(&clientConfiguration, &m_Client);
+        if (status) {
             // log
             return -1;
         }
@@ -76,7 +79,7 @@ namespace Asgaard {
         gracht_client_register_protocol(m_Client, &wm_buffer_protocol);
         
         // kick off a chain reaction by asking for all objects
-        return wm_core_get_objects(m_Client);
+        return wm_core_get_objects(m_Client, nullptr);
     }
     
     int Application::Execute()
@@ -84,8 +87,8 @@ namespace Asgaard {
         char* messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
         while (true) {
-            if (!gracht_client_wait_message(m_Client, messageBuffer)) {
-                gracht_client_process_message(m_Client, messageBuffer);
+            if (gracht_client_wait_message(m_Client, messageBuffer)) {
+                // todo log it
             }
         }
         

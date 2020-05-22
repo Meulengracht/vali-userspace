@@ -56,7 +56,8 @@ namespace Asgaard {
         enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
         int                  stride   = CalculateStride(width, format);
         
-        wm_memory_pool_create_buffer(APP.GrachtClient(), memory->Id(), id, memoryOffset, width, height, stride, wmFormat);
+        wm_memory_pool_create_buffer(APP.GrachtClient(), nullptr, memory->Id(),
+            id, memoryOffset, width, height, stride, wmFormat);
     }
     
     WindowBuffer::~WindowBuffer()

@@ -23,12 +23,12 @@
             </enums>
             
             <functions>
-                <function name="sync" synchronous="false">
+                <function name="sync">
                     <request>
                         <param name="serial" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="get_objects" synchronous="false" />
+                <function name="get_objects" />
             </functions>
             
             <events>
@@ -63,29 +63,29 @@
             </enums>
 
             <functions>
-                <function name="get_properties" synchronous="false">
+                <function name="get_properties">
                     <request>
                         <param name="screen_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="get_modes" synchronous="false">
+                <function name="get_modes">
                     <request>
                         <param name="screen_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="set_scale" synchronous="false">
+                <function name="set_scale">
                     <request>
                         <param name="screen_id" type="uint32_t" count="1" />
                         <param name="scale" type="int" count="1" />
                     </request>
                 </function>
-                <function name="set_transform" synchronous="false">
+                <function name="set_transform">
                     <request>
                         <param name="screen_id" type="uint32_t" count="1" />
                         <param name="transform" type="transform" count="1" />
                     </request>
                 </function>
-                <function name="create_surface" synchronous="false">
+                <function name="create_surface">
                     <request>
                         <param name="screen_id" type="uint32_t" count="1" />
                         <param name="surface_id" type="uint32_t" count="1" />
@@ -115,7 +115,7 @@
         
         <protocol name="memory" id="0x12">
             <functions>
-                <function name="create_pool" synchronous="false">
+                <function name="create_pool">
                     <request>
                         <param name="memory_id" type="uint32_t" count="1" />
                         <param name="pool_id" type="uint32_t" count="1" />
@@ -127,7 +127,7 @@
         
         <protocol name="memory_pool" id="0x13">
             <functions>
-                <function name="create_buffer" synchronous="false">
+                <function name="create_buffer">
                     <request>
                         <param name="pool_id" type="uint32_t" count="1" />
                         <param name="buffer_id" type="uint32_t" count="1" />
@@ -153,18 +153,18 @@
             </enums>
             
             <functions>
-                <function name="get_formats" synchronous="false">
+                <function name="get_formats">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="set_buffer" synchronous="false">
+                <function name="set_buffer">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                         <param name="buffer_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="invalidate" synchronous="false">
+                <function name="invalidate">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                         <param name="x" type="int"/>
@@ -173,7 +173,7 @@
                         <param name="height" type="int"/>
                     </request>
                 </function>
-                <function name="set_input_region" synchronous="false">
+                <function name="set_input_region">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                         <param name="x" type="int"/>
@@ -182,7 +182,7 @@
                         <param name="height" type="int"/>
                     </request>
                 </function>
-                <function name="add_subsurface" synchronous="false">
+                <function name="add_subsurface">
                     <request>
                         <param name="parent_id" type="uint32_t" count="1" />
                         <param name="child_id" type="uint32_t" count="1" />
@@ -190,28 +190,28 @@
                         <param name="y" type="int"/>
                     </request>
                 </function>
-                <function name="request_frame" synchronous="false">
+                <function name="request_frame">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="commit" synchronous="false">
+                <function name="commit">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="resize" synchronous="false">
+                <function name="resize">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                         <param name="edges" type="edge"/>
                     </request>
                 </function>
-                <function name="move" synchronous="false">
+                <function name="move">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                     </request>
                 </function>
-                <function name="destroy" synchronous="false">
+                <function name="destroy">
                     <request>
                         <param name="surface_id" type="uint32_t" count="1" />
                     </request>
@@ -237,7 +237,7 @@
         
         <protocol name="buffer" id="0x15">
             <functions>
-                <function name="destroy" synchronous="false">
+                <function name="destroy">
                     <request>
                         <param name="buffer_id" type="uint32_t" count="1" />
                     </request>
