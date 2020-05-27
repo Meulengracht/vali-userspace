@@ -26,14 +26,14 @@
 #include "engine/vioarr_objects.h"
 #include "engine/vioarr_utils.h"
 
-void wm_core_sync_callback(int client, struct wm_core_sync_args* input)
+void wm_core_sync_callback(struct gracht_recv_message* message, struct wm_core_sync_args* input)
 {
-    vioarr_utils_trace("[wm_core_sync_callback] client %i", client);
-    wm_core_event_sync_single(client, input->serial);
+    vioarr_utils_trace("[wm_core_sync_callback] client %i", message->client);
+    wm_core_event_sync_single(message->client, input->serial);
 }
 
-void wm_core_get_objects_callback(int client)
+void wm_core_get_objects_callback(struct gracht_recv_message* message)
 {
-    vioarr_utils_trace("[wm_core_get_objects_callback] client %i", client);
-    vioarr_objects_publish(client);
+    vioarr_utils_trace("[wm_core_get_objects_callback] client %i", message->client);
+    vioarr_objects_publish(message->client);
 }

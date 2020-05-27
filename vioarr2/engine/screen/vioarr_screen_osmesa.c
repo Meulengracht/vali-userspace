@@ -22,7 +22,7 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include <ddk/contracts/video.h>
+#include <ddk/video.h>
 #include <glad/glad.h>
 #include <GL/osmesa.h>
 #include "../vioarr_renderer.h"

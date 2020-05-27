@@ -25,7 +25,7 @@
 #define ENGINE_SCREEN_REFRESH_HZ 60
 #define ENGINE_SCREEN_REFRESH_MS (1000 / ENGINE_SCREEN_REFRESH_HZ)
 
-#include <ddk/contracts/video.h>
+#include <ddk/video.h>
 #include <os/mollenos.h>
 #include "vioarr_engine.h"
 #include "vioarr_renderer.h"

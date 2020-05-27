@@ -23,9 +23,10 @@
  */
 
 #include <errno.h>
-#include <gracht/os.h>
+#include <gracht/link/socket.h>
+#include <gracht/link/vali.h>
 #include <gracht/server.h>
-#include <os/services/process.h>
+#include <os/process.h>
 #include <stdio.h>
 
 #include "protocols/hid_events_protocol_server.h"
@@ -40,12 +41,15 @@
 
 int server_initialize(void)
 {
-    gracht_server_configuration_t configuration;
-    int                           status;
+    struct socket_server_configuration linkConfiguration;
+    struct gracht_server_configuration serverConfiguration;
+    int                                status;
     
-    gracht_os_get_server_client_address(&configuration.server_address, &configuration.server_address_length);
-    gracht_os_get_server_packet_address(&configuration.dgram_address, &configuration.dgram_address_length);
-    status = gracht_server_initialize(&configuration);
+    gracht_os_get_server_client_address(&linkConfiguration.server_address, &linkConfiguration.server_address_length);
+    gracht_os_get_server_packet_address(&linkConfiguration.dgram_address, &linkConfiguration.dgram_address_length);
+    gracht_link_socket_server_create(&serverConfiguration.link, &linkConfiguration);
+    
+    status = gracht_server_initialize(&serverConfiguration);
     if (status) {
         printf("error initializing server library %i", errno);
     }
@@ -54,8 +58,10 @@ int server_initialize(void)
 
 int server_run(void)
 {
+    UUId_t pid;
+    
     // Spawn the launcher application
-    ProcessSpawn("$bin/wintest.app", NULL);
+    ProcessSpawn("$bin/wintest.app", NULL, &pid);
     
     // Call the main sever loop
     return gracht_server_main_loop();

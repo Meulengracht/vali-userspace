@@ -35,7 +35,7 @@
                 <event name="error">
                     <param name="object_id" type="uint32_t" count="1" />
                     <param name="error_id" type="int" count="1" />
-                    <param name="error_description" type="string" count="64" />
+                    <param name="error_description" type="string" />
                 </event>
                 <event name="sync">
                     <param name="serial" type="uint32_t" count="1" />

@@ -26,7 +26,7 @@
 #define __VIOARR_SCREEN_H__
 
 #include "backend/nanovg.h"
-#include <ddk/contracts/video.h>
+#include <ddk/video.h>
 #include "../protocols/wm_screen_protocol.h"
 #include "vioarr_region.h"
 #include "vioarr_surface.h"
