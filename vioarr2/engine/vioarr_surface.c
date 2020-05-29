@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../protocols/wm_buffer_protocol_server.h"
+
 typedef struct vioarr_surface_properties {
     int drop_shadow;
     int corner_radius;
@@ -42,6 +44,7 @@ typedef struct vioarr_surface_properties {
 } vioarr_surface_properties_t;
 
 typedef struct vioarr_surface {
+    int              client;
     uint32_t         id;
     vioarr_screen_t* screen;
     vioarr_region_t* dimensions;
@@ -55,7 +58,7 @@ typedef struct vioarr_surface {
 static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface);
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
-int vioarr_surface_create(uint32_t id, vioarr_screen_t* screen, int x, int y,
+int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int x, int y,
     int width, int height, vioarr_surface_t** surface_out)
 {
     vioarr_surface_t* surface;
@@ -93,6 +96,7 @@ int vioarr_surface_create(uint32_t id, vioarr_screen_t* screen, int x, int y,
         return -1;
     }
     
+    surface->client = client;
     surface->id     = id;
     surface->screen = screen;
 
@@ -234,7 +238,7 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
             (const uint8_t*)vioarr_buffer_data(surface->properties.content));
         
         // Now we are done with the user-buffer, send the release event
-        
+        wm_buffer_event_release_single(surface->client, vioarr_buffer_id(surface->properties.content));
     }
     
     // Determine other attributes about this surface. Is it visible?

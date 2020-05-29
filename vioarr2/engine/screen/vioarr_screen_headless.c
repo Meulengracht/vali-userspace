@@ -47,7 +47,7 @@ typedef struct vioarr_screen {
     vioarr_renderer_t* renderer;
 } vioarr_screen_t;
 
-vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* video)
+vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
 {
     vioarr_screen_t* screen;
     int attributes[100], n = 0;
@@ -120,7 +120,7 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     }
     
     vioarr_utils_trace("[vioarr] [screen] [create] initializing renderer");
-    screen->renderer = vioarr_renderer_create(context, screen);
+    screen->renderer = vioarr_renderer_create(screen);
     if (!screen->renderer) {
         OSMesaDestroyContext(screen->context);
         free(screen->backbuffer);

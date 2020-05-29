@@ -22,11 +22,13 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "backend/nanovg.h"
 #include <glad/glad.h>
+#include "backend/nanovg.h"
+#include "backend/nanovg_gl.h"
 #include "vioarr_renderer.h"
 #include "vioarr_screen.h"
 #include "vioarr_surface.h"
+#include "vioarr_utils.h"
 #include <stdlib.h>
 
 typedef struct vioarr_renderer_entity {
@@ -44,7 +46,7 @@ typedef struct vioarr_renderer {
     vioarr_renderer_entity_t* front_entities;
 } vioarr_renderer_t;
 
-vioarr_renderer_t* vioarr_renderer_create(NVGcontext* context, vioarr_screen_t* screen)
+vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
 {
     vioarr_renderer_t* renderer;
     int                width  = vioarr_region_width(vioarr_screen_region(screen));
@@ -55,10 +57,24 @@ vioarr_renderer_t* vioarr_renderer_create(NVGcontext* context, vioarr_screen_t* 
         return NULL;
     }
     
-    renderer->context     = context;
+    vioarr_utils_trace("[vioarr] [renderer] creating nvg context");
+#ifdef __VIOARR_CONFIG_RENDERER_MSAA
+	renderer->context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+#else
+	renderer->context = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
+#endif
+    if (!renderer->context) {
+        vioarr_utils_error("[vioarr] [renderer] failed to create the nvg context");
+        free(renderer);
+        return NULL;
+    }
+    
     renderer->width       = width;
     renderer->height      = height;
     renderer->pixel_ratio = (float)width / (float)height;
+    
+    renderer->entities       = NULL;
+    renderer->front_entities = NULL;
     return renderer;
 }
 

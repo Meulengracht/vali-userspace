@@ -44,8 +44,8 @@ protected:
     {
         if (createdObject->Id() == Id()) {
             // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-            //auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
-            //m_Memory = CreateMemory(screenSize);
+            auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
+            m_Memory = CreateMemory(screenSize);
         }
         else if (createdObject->Id() == m_Memory->Id()) {
             // Create initial buffer the size of this surface
@@ -56,7 +56,8 @@ protected:
             // Now all resources are created
             SetBuffer(m_Buffer);
             Redraw();
-            OnFrame();
+            MarkDamaged(m_Dimensions);
+            ApplyChanges();
         }
     }
     
@@ -64,14 +65,14 @@ protected:
     {
         if (buffer->Id() == m_Buffer->Id()) {
             Redraw();
+            MarkDamaged(m_Dimensions);
+            ApplyChanges();
         }
     }
     
     void OnFrame() override
     {
-        MarkDamaged(m_Dimensions);
-        RequestFrame();
-        ApplyChanges();
+        
     }
     
     void OnResized(enum Asgaard::Surface::SurfaceEdges edges, int width, int height) override

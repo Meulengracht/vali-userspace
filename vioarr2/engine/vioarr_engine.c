@@ -34,16 +34,11 @@
 #include <time.h>
 #include <threads.h>
 
-#include <glad/glad.h>
-#include "backend/nanovg.h"
-#include "backend/nanovg_gl.h"
-
 static int vioarr_engine_setup_screens(void);
 static int vioarr_engine_update(void*);
 
 static vioarr_screen_t* primary_screen;
 static thrd_t           screen_thread;
-static NVGcontext*      nvg_root_context;
 
 int vioarr_engine_initialize(void)
 {
@@ -54,17 +49,6 @@ int vioarr_engine_initialize(void)
     if (status) {
         vioarr_utils_error("[vioarr] [initialize] failed to initialize screens, code %i", status);
         return status;
-    }
-    
-    vioarr_utils_trace("[vioarr] [initialize] creating nvg context");
-#ifdef __VIOARR_CONFIG_RENDERER_MSAA
-	nvg_root_context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
-#else
-	nvg_root_context = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
-#endif
-    if (!nvg_root_context) {
-        vioarr_utils_error("[vioarr] [initialize] failed to create the nvg context");
-        return -1;
     }
     
     // Spawn the renderer thread, this will update the screen at a 60 hz frequency
@@ -90,7 +74,7 @@ static int vioarr_engine_setup_screens(void)
     vioarr_utils_trace("[vioarr] [initialize] creating primary screen object");
     // Create the primary screen object. In the future we will support
     // multiple displays and also listen for screen hotplugs
-    primary_screen = vioarr_screen_create(nvg_root_context, &video);
+    primary_screen = vioarr_screen_create(&video);
     if (!primary_screen) {
         vioarr_utils_error("[vioarr] [initialize] failed to create primary screen object");
         return -1;

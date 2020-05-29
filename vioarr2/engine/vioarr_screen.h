@@ -25,7 +25,6 @@
 #ifndef __VIOARR_SCREEN_H__
 #define __VIOARR_SCREEN_H__
 
-#include "backend/nanovg.h"
 #include <ddk/video.h>
 #include "../protocols/wm_screen_protocol.h"
 #include "vioarr_region.h"
@@ -33,7 +32,7 @@
 
 typedef struct vioarr_screen vioarr_screen_t;
 
-vioarr_screen_t*         vioarr_screen_create(NVGcontext*, VideoDescriptor_t*);
+vioarr_screen_t*         vioarr_screen_create(VideoDescriptor_t*);
 void                     vioarr_screen_set_scale(vioarr_screen_t*, int);
 void                     vioarr_screen_set_transform(vioarr_screen_t*, enum wm_screen_transform);
 vioarr_region_t*         vioarr_screen_region(vioarr_screen_t*);

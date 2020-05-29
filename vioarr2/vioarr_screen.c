@@ -99,7 +99,8 @@ void wm_screen_create_surface_callback(struct gracht_recv_message* message, stru
         return;
     }
     
-    status = vioarr_surface_create(input->surface_id, screen, 100, 100, input->width, input->height, &surface);
+    status = vioarr_surface_create(message->client, input->surface_id, screen,
+        100, 100, input->width, input->height, &surface);
     if (status) {
         wm_core_event_error_single(message->client, input->screen_id, status, "wm_screen: failed to create surface");
         return;
