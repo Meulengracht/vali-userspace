@@ -5,7 +5,7 @@ INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/incl
 LFLAGS := ddk.lib libgracht.lib
 
 APP_SOURCES_C :=
-APP_SOURCES_CXX := object_manager.cpp screen.cpp window_base.cpp application.cpp surface.cpp window_memory.cpp window_buffer.cpp
+APP_SOURCES_CXX := object_manager.cpp screen.cpp window_base.cpp application.cpp surface.cpp memory_pool.cpp memory_buffer.cpp
 		         
 APP_PROTOCOLS_C := protocols/wm_core_protocol_client.c \
 				   protocols/wm_screen_protocol_client.c \

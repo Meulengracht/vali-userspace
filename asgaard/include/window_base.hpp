@@ -30,8 +30,8 @@
 #include "screen.hpp"
 
 namespace Asgaard {
-    class WindowMemory;
-    class WindowBuffer;
+    class MemoryPool;
+    class MemoryBuffer;
     
     class WindowBase : public Surface {
     public:
@@ -43,15 +43,11 @@ namespace Asgaard {
     // Window events that can/should be reacted on.
     protected:
         virtual void OnCreated(Object*) = 0;
-        virtual void OnRefreshed(WindowBuffer*) = 0;
+        virtual void OnRefreshed(MemoryBuffer*) = 0;
         virtual void Teardown() = 0;
 
     // Window functions that can be called to configure this window 
     protected:
-        std::shared_ptr<WindowMemory>  CreateMemory(std::size_t size);
-        std::shared_ptr<WindowBuffer>  CreateBuffer(std::shared_ptr<WindowMemory>,
-            int memoryOffset, int width, int height, enum PixelFormat format);
-        
         void InititateResize(enum SurfaceEdges);
         void InitiateMove();
 

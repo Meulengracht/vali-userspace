@@ -22,24 +22,24 @@
  */
 
 #include "include/application.hpp"
-#include "include/window_memory.hpp"
+#include "include/memory_pool.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_memory_protocol_client.h"
 
 namespace Asgaard {
-    WindowMemory::WindowMemory(uint32_t id, int size)
+    MemoryPool::MemoryPool(uint32_t id, int size)
         : Object(id), m_Size(size)
     {
         wm_memory_create_pool(APP.GrachtClient(), nullptr, 0 /* memory_system_id */, id, size);
     }
     
-    WindowMemory::~WindowMemory()
+    MemoryPool::~MemoryPool()
     {
         
     }
     
-    void WindowMemory::ExternalEvent(enum ObjectEvent event, void* data)
+    void MemoryPool::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event)
         {
@@ -68,7 +68,7 @@ namespace Asgaard {
         }
     }
     
-    void* WindowMemory::CreateBufferPointer(int memoryOffset)
+    void* MemoryPool::CreateBufferPointer(int memoryOffset)
     {
         uint8_t* bufferPointer = static_cast<uint8_t*>(m_Attachment.buffer);
         if (bufferPointer == nullptr) {

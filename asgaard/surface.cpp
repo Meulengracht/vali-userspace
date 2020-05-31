@@ -23,7 +23,7 @@
 
 #include "include/application.hpp"
 #include "include/object_manager.hpp"
-#include "include/window_buffer.hpp"
+#include "include/memory_buffer.hpp"
 #include "include/surface.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
@@ -95,15 +95,7 @@ namespace Asgaard {
         }
     }
     
-    std::shared_ptr<Surface> Surface::CreateSubSurface(const Rectangle& dimensions)
-    {
-        auto surface = OM.CreateClientObject<Surface, std::shared_ptr<Screen>, uint32_t, const Rectangle&>(
-            m_Screen, Id(), dimensions);
-        surface->Subscribe(this);
-        return surface;
-    }
-    
-    void Surface::SetBuffer(std::shared_ptr<WindowBuffer> buffer)
+    void Surface::SetBuffer(std::shared_ptr<MemoryBuffer> buffer)
     {
         wm_surface_set_buffer(APP.GrachtClient(), nullptr, Id(), buffer->Id());
     }

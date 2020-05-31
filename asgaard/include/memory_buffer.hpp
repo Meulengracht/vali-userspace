@@ -23,11 +23,13 @@
 #pragma once
 
 #include "pixel_format.hpp"
+#include "object_manager.hpp"
+#include "object.hpp"
 
 namespace Asgaard {
-    class WindowMemory;
+    class MemoryPool;
     
-    class WindowBuffer final : public Object {
+    class MemoryBuffer final : public Object {
     public:
         enum class BufferEvent : int {
             CREATED,
@@ -35,19 +37,30 @@ namespace Asgaard {
         };
         
     public:
-        WindowBuffer(uint32_t id, std::shared_ptr<WindowMemory> memory, int memoryOffset, int width, int height, enum PixelFormat format);
-        ~WindowBuffer();
+        MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format);
+        ~MemoryBuffer();
         
         void* Buffer() { return m_Buffer; }
         
     public:
+        static std::shared_ptr<MemoryBuffer> Create(Object* owner, std::shared_ptr<MemoryPool> memory,
+            int memoryOffset, int width, int height, enum PixelFormat format)
+        {
+            auto buffer = OM.CreateClientObject<
+                MemoryBuffer, std::shared_ptr<MemoryPool>, int, int, int, enum PixelFormat>(
+                    memory, memoryOffset, width, height, format);
+            buffer->Subscribe(owner);
+            return buffer;
+        }
+    
+    public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
         
     private:
-        std::shared_ptr<WindowMemory> m_Memory;
-        int                           m_Width;
-        int                           m_Height;
-        enum PixelFormat              m_Format;
-        void*                         m_Buffer;
+        std::shared_ptr<MemoryPool> m_Memory;
+        int                         m_Width;
+        int                         m_Height;
+        enum PixelFormat            m_Format;
+        void*                       m_Buffer;
     };
 }

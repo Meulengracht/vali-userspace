@@ -4,15 +4,15 @@
             "name": "MollenOS-i386",
             "includePath": [
                 "${workspaceFolder}/alumni/**",
-                "${workspaceFolder}/asgaard/**",
+                "${workspaceFolder}/asgaard/include/",
                 "${workspaceFolder}/freetype/include/**",
                 "${workspaceFolder}/glm/**",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",
                 "${workspaceFolder}/vioarr/**",
                 "${workspaceFolder}/wintest/**",
-                "${VALI_SDK_PATH}/include/**",
-                "${VALI_DDK_PATH}/include/**"
+                "${env:VALI_SDK_PATH}/include/",
+                "${env:VALI_DDK_PATH}/include/"
             ],
             "defines": [
                 "__STDC_VERSION__=201112L",
@@ -58,15 +58,15 @@
             "name": "MollenOS-amd64",
             "includePath": [
                 "${workspaceFolder}/alumni/**",
-                "${workspaceFolder}/asgaard/**",
+                "${workspaceFolder}/asgaard/include/",
                 "${workspaceFolder}/freetype/include/**",
                 "${workspaceFolder}/glm/**",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",
                 "${workspaceFolder}/vioarr/**",
                 "${workspaceFolder}/wintest/**",
-                "${VALI_SDK_PATH}/include/**",
-                "${VALI_DDK_PATH}/include/**"
+                "${env:VALI_SDK_PATH}/include/",
+                "${env:VALI_DDK_PATH}/include/"
             ],
             "defines": [
                 "__STDC_VERSION__=201112L",

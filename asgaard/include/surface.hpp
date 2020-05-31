@@ -22,12 +22,13 @@
  */
 #pragma once
 
+#include "object_manager.hpp"
 #include "rectangle.hpp"
 #include "object.hpp"
 
 namespace Asgaard {
     class Screen;
-    class WindowBuffer;
+    class MemoryBuffer;
     
     class Surface : public Object {
     public:
@@ -50,8 +51,7 @@ namespace Asgaard {
         
         void BindToScreen(std::shared_ptr<Screen>);
         
-        std::shared_ptr<Surface> CreateSubSurface(const Rectangle&);
-        void SetBuffer(std::shared_ptr<WindowBuffer>);
+        void SetBuffer(std::shared_ptr<MemoryBuffer>);
         void MarkDamaged(const Rectangle&);
         void MarkInputRegion(const Rectangle&);
         void ApplyChanges();

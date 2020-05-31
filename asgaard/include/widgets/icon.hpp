@@ -1,6 +1,6 @@
 /* ValiOS
  *
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2020, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,27 +22,39 @@
  */
 #pragma once
 
-#include "object_manager.hpp"
-#include <os/dmabuf.h>
+#include <memory>
+#include "../surface.hpp"
 
 namespace Asgaard {
-    class WindowMemory : public Object {
+    class Surface;
+    class MemoryPool;
+    class MemoryBuffer;
+    
+    class Icon : public Surface {
     public:
-        enum class MemoryEvent : int {
-            CREATED,
-            ERROR
+        enum class IconState {
+            NORMAL = 0,
+            HOVERING,
+            ACTIVE,
+            DISABLED,
+
+            COUNT
         };
     public:
-        WindowMemory(uint32_t id, int size);
-        ~WindowMemory();
+        Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+        ~Icon();
         
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
-        
+        void LoadIcon(IconState state, std::string& path);
+        void SetState(IconState state);
+
     public:
-        void* CreateBufferPointer(int memoryOffset);
-        
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+
     private:
-        int                   m_Size;
-        struct dma_attachment m_Attachment;
+        void Notification(Publisher*, int = 0, void* = 0) override;
+
+    private:
+        std::shared_ptr<Asgaard::MemoryPool> m_memory;
+        std::shared_ptr<Asgaard::MemoryBuffer> m_buffers[static_cast<int>(IconState::COUNT)];
     };
 }

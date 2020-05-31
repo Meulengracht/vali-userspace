@@ -46,9 +46,9 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-extern "C" void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
-extern "C" void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
-extern "C" void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
+void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
+void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
+void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
 
 typedef struct vioarr_screen {
     uint32_t           id;
@@ -67,7 +67,7 @@ typedef struct vioarr_screen {
     void              (*present)(void*, void*, int, int, int, int);
 } vioarr_screen_t;
 
-vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* video)
+vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
 {
     vioarr_screen_t* screen;
     int registers[4] = { 0 };
@@ -127,7 +127,7 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     }
     
     screen->framebuffer     = CreateDisplayFramebuffer();
-    screen->framebuffer_end = ((char*)_Framebuffer + (video->BytesPerScanline * (video->Height - 1)));
+    screen->framebuffer_end = ((char*)screen->framebuffer + (video->BytesPerScanline * (video->Height - 1)));
     
     // Set the newly created context as current for now. We must have one pretty quickly
     status = OSMesaMakeCurrent(screen->context, screen->backbuffer, GL_UNSIGNED_BYTE,
@@ -175,12 +175,12 @@ vioarr_screen_t* vioarr_screen_create(NVGcontext* context, VideoDescriptor_t* vi
     screen->bytes_remaining = bytes_to_copy % bytes_step;
     
     vioarr_utils_trace("[vioarr] [screen] [create] initializing renderer");
-    screen->renderer = vioarr_renderer_create(context, screen);
+    screen->renderer = vioarr_renderer_create(screen);
     if (!screen->renderer) {
         OSMesaDestroyContext(screen->context);
         free(screen->dimensions);
         free(screen->backbuffer);
-        free(screen)
+        free(screen);
         return NULL;
     }
     
@@ -239,8 +239,10 @@ int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
     }
     
     // One hardcoded format
-    return wm_screen_event_mode_single(client, mode_current | mode_preferred,
-        vioarr_region_width(screen->dimensions), vioarr_region_height(screen->dimensions), 60);
+    return wm_screen_event_mode_single(client, screen->id,
+        mode_current | mode_preferred,
+        vioarr_region_width(screen->dimensions),
+        vioarr_region_height(screen->dimensions), 60);
 }
 
 void vioarr_screen_register_surface(vioarr_screen_t* screen, vioarr_surface_t* surface)

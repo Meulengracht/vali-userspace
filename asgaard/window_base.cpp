@@ -24,8 +24,8 @@
 #include "include/application.hpp"
 #include "include/window_base.hpp"
 #include "include/object_manager.hpp"
-#include "include/window_memory.hpp"
-#include "include/window_buffer.hpp"
+#include "include/memory_pool.hpp"
+#include "include/memory_buffer.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_screen_protocol_client.h"
@@ -84,52 +84,34 @@ namespace Asgaard {
     
     void WindowBase::Notification(Publisher* source, int event, void* data)
     {
-        auto memoryObject = dynamic_cast<WindowMemory*>(source);
+        auto memoryObject = dynamic_cast<MemoryPool*>(source);
         if (memoryObject != nullptr)
         {
-            switch (static_cast<WindowMemory::MemoryEvent>(event))
+            switch (static_cast<MemoryPool::MemoryEvent>(event))
             {
-                case WindowMemory::MemoryEvent::CREATED: {
+                case MemoryPool::MemoryEvent::CREATED: {
                     OnCreated(memoryObject);
                 } break;
                 
-                case WindowMemory::MemoryEvent::ERROR: {
+                case MemoryPool::MemoryEvent::ERROR: {
                     
                 } break;
             }
         }
         
-        auto bufferObject = dynamic_cast<WindowBuffer*>(source);
+        auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
         if (bufferObject != nullptr)
         {
-            switch (static_cast<WindowBuffer::BufferEvent>(event))
+            switch (static_cast<MemoryBuffer::BufferEvent>(event))
             {
-                case WindowBuffer::BufferEvent::CREATED: {
+                case MemoryBuffer::BufferEvent::CREATED: {
                     OnCreated(bufferObject);
                 } break;
-                case WindowBuffer::BufferEvent::REFRESHED: {
+                case MemoryBuffer::BufferEvent::REFRESHED: {
                     OnRefreshed(bufferObject);
                 } break;
             }
         }
-    }
-    
-    std::shared_ptr<WindowMemory> WindowBase::CreateMemory(std::size_t size)
-    {
-        // Create the window memory pool we're going to use
-        auto memory = OM.CreateClientObject<WindowMemory, std::size_t>(size);
-        memory->Subscribe(this);
-        return memory;
-    }
-    
-    std::shared_ptr<WindowBuffer> WindowBase::CreateBuffer(std::shared_ptr<WindowMemory> memory,
-        int memoryOffset, int width, int height, enum PixelFormat format)
-    {
-        auto buffer = OM.CreateClientObject<
-            WindowBuffer, std::shared_ptr<WindowMemory>, int, int, int, enum PixelFormat>(
-                memory, memoryOffset, width, height, format);
-        buffer->Subscribe(this);
-        return buffer;
     }
     
     void WindowBase::InititateResize(enum SurfaceEdges edges)

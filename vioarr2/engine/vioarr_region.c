@@ -57,6 +57,28 @@ void vioarr_region_zero(vioarr_region_t* region)
     region->height = 0;
 }
 
+void vioarr_region_copy(vioarr_region_t* target, vioarr_region_t* source)
+{
+    if (!target || !source) {
+        return;
+    }
+
+    target->x = source->x;
+    target->y = source->y;
+    target->width = source->width;
+    target->height = source->height;
+}
+
+void vioarr_region_set_position(vioarr_region_t* region, int x, int y)
+{
+    if (!region) {
+        return;
+    }
+
+    region->x = x;
+    region->y = y;
+}
+
 void vioarr_region_add(vioarr_region_t* region, int x, int y, int width, int height)
 {
     if (!region) {

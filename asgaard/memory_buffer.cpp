@@ -22,8 +22,8 @@
  */
 
 #include "include/application.hpp"
-#include "include/window_memory.hpp"
-#include "include/window_buffer.hpp"
+#include "include/memory_pool.hpp"
+#include "include/memory_buffer.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_memory_pool_protocol_client.h"
@@ -50,7 +50,7 @@ static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
 }
 
 namespace Asgaard {
-    WindowBuffer::WindowBuffer(uint32_t id, std::shared_ptr<WindowMemory> memory, int memoryOffset, int width, int height, enum PixelFormat format)
+    MemoryBuffer::MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format)
         : Object(id), m_Memory(memory), m_Width(width), m_Height(height), m_Format(format), m_Buffer(memory->CreateBufferPointer(memoryOffset))
     {
         enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
@@ -60,12 +60,12 @@ namespace Asgaard {
             id, memoryOffset, width, height, stride, wmFormat);
     }
     
-    WindowBuffer::~WindowBuffer()
+    MemoryBuffer::~MemoryBuffer()
     {
         
     }
     
-    void WindowBuffer::ExternalEvent(enum ObjectEvent event, void* data)
+    void MemoryBuffer::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event)
         {

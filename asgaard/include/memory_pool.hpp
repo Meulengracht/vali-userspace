@@ -22,29 +22,35 @@
  */
 #pragma once
 
-#include <memory>
-#include "surface.hpp"
+#include "object_manager.hpp"
+#include <os/dmabuf.h>
 
 namespace Asgaard {
-    class Surface;
-    class Icon;
-    
-    class WindowDecoration : public Surface {
+    class MemoryPool : public Object {
     public:
-        WindowDecoration(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
-        ~WindowDecoration();
-
+        enum class MemoryEvent : int {
+            CREATED,
+            ERROR
+        };
     public:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+        MemoryPool(uint32_t id, int size);
+        ~MemoryPool();
+        
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
 
+    static std::shared_ptr<MemoryPool> Create(Object* owner, std::size_t size)
+    {
+        // Create the memory pool we're going to use
+        auto memory = OM.CreateClientObject<MemoryPool, std::size_t>(size);
+        memory->Subscribe(owner);
+        return memory;
+    }
+        
+    public:
+        void* CreateBufferPointer(int memoryOffset);
+        
     private:
-        // consists of multiple resources;
-        // a buffer with the header color
-        // a buffer with the application title
-        // a buffer with the application icon
-        // a buffer with the close icon
-        std::shared_ptr<Asgaard::MemoryBuffer> m_backgroundBuffer;
-        std::shared_ptr<Asgaard::Icon>         m_appIcon;
-        std::shared_ptr<Asgaard::Icon>         m_closeIcon;
+        int                   m_Size;
+        struct dma_attachment m_Attachment;
     };
 }

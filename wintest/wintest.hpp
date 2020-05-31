@@ -23,15 +23,17 @@
 
 #include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
-#include <asgaard/window_memory.hpp>
-#include <asgaard/window_buffer.hpp>
+#include <asgaard/memory_pool.hpp>
+#include <asgaard/memory_buffer.hpp>
 
 class TestWindow : public Asgaard::WindowBase {
 public:
     TestWindow(uint32_t id, const Asgaard::Rectangle& dimensions)
         : WindowBase(id, dimensions)
     {
-        
+        r = 32;
+        g = 32;
+        b = 32;
     }
     
     ~TestWindow()
@@ -45,11 +47,11 @@ protected:
         if (createdObject->Id() == Id()) {
             // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
             auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
-            m_Memory = CreateMemory(screenSize);
+            m_Memory = Asgaard::MemoryPool::Create(this, screenSize);
         }
         else if (createdObject->Id() == m_Memory->Id()) {
             // Create initial buffer the size of this surface
-            m_Buffer = CreateBuffer(m_Memory, 0, m_Dimensions.Width(),
+            m_Buffer = Asgaard::MemoryBuffer::Create(this, m_Memory, 0, m_Dimensions.Width(),
                 m_Dimensions.Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
         else if (createdObject->Id() == m_Buffer->Id()) {
@@ -61,7 +63,7 @@ protected:
         }
     }
     
-    void OnRefreshed(Asgaard::WindowBuffer* buffer) override
+    void OnRefreshed(Asgaard::MemoryBuffer* buffer) override
     {
         if (buffer->Id() == m_Buffer->Id()) {
             Redraw();
@@ -86,12 +88,28 @@ protected:
     }
 
 private:
+    void PixelFill(unsigned int color) {
+        std::size_t size = m_Dimensions.Width() * m_Dimensions.Height();
+        uint32_t*   pointer = static_cast<uint32_t*>(m_Buffer->Buffer());
+        for (std::size_t i = 0; i < size; i++) {
+            pointer[i] = color;
+        }
+    }
+
     void Redraw()
     {
         // Update window content data
+        unsigned int color = 0xFF000000 | (r << 16) | (g << 8) | b;
+        PixelFill(color);
+        
+        r++;
+        g++;
+        b++;
     }
     
 private:
-    std::shared_ptr<Asgaard::WindowMemory> m_Memory;
-    std::shared_ptr<Asgaard::WindowBuffer> m_Buffer;
+    std::shared_ptr<Asgaard::MemoryPool> m_Memory;
+    std::shared_ptr<Asgaard::MemoryBuffer> m_Buffer;
+
+    uint8_t r,g,b;
 };
