@@ -30,23 +30,11 @@ namespace Asgaard {
     class MemoryPool;
     class MemoryBuffer;
     
-    class Icon : public Surface {
+    class Label : public Surface {
     public:
-        enum class IconState {
-            NORMAL = 0,
-            HOVERING,
-            ACTIVE,
-            DISABLED,
-
-            COUNT
-        };
-    public:
-        Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
-        ~Icon();
+        Label(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+        ~Label();
         
-        bool LoadIcon(std::string& path);
-        void SetState(IconState state);
-
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
 
@@ -55,10 +43,6 @@ namespace Asgaard {
 
     private:
         std::shared_ptr<Asgaard::MemoryPool>   m_memory;
-        std::shared_ptr<Asgaard::MemoryBuffer> m_buffers[static_cast<int>(IconState::COUNT)];
-
-        int         m_originalWidth;
-        int         m_originalHeight;
-        std::string m_originalPath;
+        std::shared_ptr<Asgaard::MemoryBuffer> m_buffer;
     };
 }

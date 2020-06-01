@@ -24,37 +24,87 @@
 #include "../include/widgets/icon.hpp"
 #include "../include/memory_pool.hpp"
 #include "../include/memory_buffer.hpp"
-#include <fstream>
-#include <vector>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+static std::string iconStateExtensions[static_cast<int>(Asgaard::Icon::IconState::COUNT)] = {
+    ""
+    "_hover",
+    "_active",
+    "_disabled"
+};
+
+std::string ExtendFilename(std::string& path, std::string& extension)
+{
+    if (extension == "") {
+        return path;
+    }
+
+    auto lastTokenPos = path.find_last_of("/\\");
+    auto lastDotPos = path.find_last_of(".");
+    if (lastDotPos == std::string::npos) {
+        // filepath with no extension 
+        return path + extension;
+    }
+    else {
+        auto fileExtension = path.substr(lastDotPos);
+
+        if (lastTokenPos != std::string::npos) {
+            if (lastDotPos > lastTokenPos) {
+                // seperator comes before the last '.', which means the file has an extension
+                return path.substr(0, lastDotPos) + extension + fileExtension;
+            }
+            else {
+                // the dot is in a previous path token, which means no file extension
+                return path + extension;
+            }
+        }
+
+        // there is a dot but no seperator
+        return path.substr(0, lastDotPos) + extension + fileExtension;
+    }
+}
 
 namespace Asgaard {
     Icon::Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
         : Surface(id, screen, parentId, dimensions)
+        , m_originalPath("")
+        , m_originalWidth(0)
+        , m_originalHeight(0)
     {
 
     }
 
-    Icon::~Icon() {
-
+    Icon::~Icon()
+    {
     }
 
-    void Icon::LoadIcon(IconState state, std::string& path)
+    bool Icon::LoadIcon(std::string& path)
     {
-        std::ifstream file(path, std::ios::binary | std::ios::ate);
-        std::streamsize size = file.tellg();
-        file.seekg(0, std::ios::beg);
+        int numComponents;
 
-        std::vector<char> buffer(size);
-        if (!file.read(buffer.data(), size)) {
-            // publish error
+        if (m_memory) {
+            return false;
         }
-        file.close();
 
-        // use libpng
+        int status = stbi_info(path.c_str(), &m_originalWidth, &m_originalHeight, &numComponents);
+        if (!status) {
+            return false;
+        }
+
+        m_originalPath = path;
+
+        auto poolSize = (m_originalWidth * m_originalHeight * 4) * static_cast<int>(IconState::COUNT);
+        m_memory = MemoryPool::Create(this, poolSize);
     }
 
     void Icon::SetState(IconState state)
     {
+        if (m_buffers[static_cast<int>(state)] == nullptr) {
+            return;
+        }
+
         SetBuffer(m_buffers[static_cast<int>(state)]);
         ApplyChanges();
     }
@@ -64,9 +114,6 @@ namespace Asgaard {
         switch (event)
         {
             case ObjectEvent::CREATION: {
-                auto poolSize = (m_Dimensions.Height() * m_Dimensions.Width() * 4) *
-                    static_cast<int>(IconState::COUNT);
-                m_memory = MemoryPool::Create(this, poolSize);
             } break;
 
             default:
@@ -85,10 +132,10 @@ namespace Asgaard {
             switch (static_cast<MemoryPool::MemoryEvent>(event))
             {
                 case MemoryPool::MemoryEvent::CREATED: {
-                    auto bufferSize = m_Dimensions.Height() * m_Dimensions.Width() * 4;
+                    auto bufferSize = m_originalWidth * m_originalHeight * 4;
                     for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
                         m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
-                            m_Dimensions.Width(), m_Dimensions.Height(), PixelFormat::A8R8G8B8);
+                            m_originalWidth, m_originalHeight, PixelFormat::A8R8G8B8);
                     }
                 } break;
                 
@@ -104,7 +151,33 @@ namespace Asgaard {
             switch (static_cast<MemoryBuffer::BufferEvent>(event))
             {
                 case MemoryBuffer::BufferEvent::CREATED: {
-                    // when the last buffer is created the icon is "ready"
+                    auto bufferSize = m_originalWidth * m_originalHeight * 4;
+                    int loadedWidth, loadedHeight, loadedComponents;
+                    std::string extension = "";
+
+                    if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
+                        extension = iconStateExtensions[static_cast<int>(IconState::NORMAL)];
+                    }
+                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
+                        extension = iconStateExtensions[static_cast<int>(IconState::HOVERING)];
+                    }
+                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::ACTIVE)]->Id()) {
+                        extension = iconStateExtensions[static_cast<int>(IconState::ACTIVE)];
+                    }
+                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
+                        extension = iconStateExtensions[static_cast<int>(IconState::DISABLED)];
+                    }
+
+                    auto path   = ExtendFilename(m_originalPath, extension);
+                    auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
+                    if (buffer != nullptr) {
+                        if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
+                            // TODO log
+                            break;
+                        }
+                        memcpy(bufferObject->Buffer(), buffer, bufferSize);
+                        stbi_image_free(buffer);
+                    }
                 } break;
             }
         }
