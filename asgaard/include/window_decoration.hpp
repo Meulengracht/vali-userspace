@@ -36,11 +36,22 @@ namespace Asgaard {
     
     class WindowDecoration : public Surface {
     public:
+        enum class Event {
+            CREATED,
+            ERROR
+        };
+    public:
         WindowDecoration(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
         ~WindowDecoration();
+        
+        void SetTitle(const std::string& title);
+        void SetIcon(const std::string& iconPath);
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+    
+    private:
+        void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
         // consists of multiple resources;

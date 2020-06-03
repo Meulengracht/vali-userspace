@@ -41,6 +41,11 @@ namespace Asgaard {
     
                 COUNT
             };
+            
+            enum class IconEvent {
+                CREATED,
+                ERROR
+            };
         public:
             Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
             ~Icon();

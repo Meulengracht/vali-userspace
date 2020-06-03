@@ -24,27 +24,45 @@
 
 #include <memory>
 #include "../surface.hpp"
+#include <string>
 
 namespace Asgaard {
     class Surface;
     class MemoryPool;
     class MemoryBuffer;
     
+    namespace Drawing {
+        class Font;
+    }
+    
     namespace Widgets {
         class Label : public Surface {
         public:
+            enum class LabelEvent {
+                CREATED,
+                ERROR
+            };
+        public:
             Label(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
             ~Label();
+            
+            void SetFont(std::shared_ptr<Drawing::Font>& font);
+            void SetText(const std::string& text);
             
         public:
             void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
     
         private:
             void Notification(Publisher*, int = 0, void* = 0) override;
+            
+        private:
+            void Redraw();
     
         private:
             std::shared_ptr<Asgaard::MemoryPool>   m_memory;
             std::shared_ptr<Asgaard::MemoryBuffer> m_buffer;
+            std::shared_ptr<Drawing::Font>         m_font;
+            std::string                            m_text;
         };
     }
 }

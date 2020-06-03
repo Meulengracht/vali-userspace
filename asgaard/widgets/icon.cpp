@@ -109,6 +109,7 @@ namespace Asgaard {
             }
     
             SetBuffer(m_buffers[static_cast<int>(state)]);
+            MarkDamaged(Dimensions());
             ApplyChanges();
         }
     
@@ -117,6 +118,11 @@ namespace Asgaard {
             switch (event)
             {
                 case ObjectEvent::CREATION: {
+                    Notify(static_cast<int>(IconEvent::CREATED));
+                } break;
+                
+                case ObjectEvent::ERROR: {
+                    Notify(static_cast<int>(IconEvent::ERROR));
                 } break;
     
                 default:
@@ -143,7 +149,7 @@ namespace Asgaard {
                     } break;
                     
                     case MemoryPool::MemoryEvent::ERROR: {
-                        
+                        Notify(static_cast<int>(IconEvent::ERROR));
                     } break;
                 }
             }
@@ -175,7 +181,7 @@ namespace Asgaard {
                         auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
                         if (buffer != nullptr) {
                             if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
-                                // TODO log
+                                Notify(static_cast<int>(IconEvent::ERROR) /*, error text*/);
                                 break;
                             }
                             memcpy(bufferObject->Buffer(), buffer, bufferSize);

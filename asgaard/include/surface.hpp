@@ -58,6 +58,8 @@ namespace Asgaard {
         
         void RequestFrame();
         
+        const Rectangle& Dimensions() const { return m_Dimensions; }
+        
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         

@@ -42,6 +42,16 @@ namespace Asgaard {
         
     }
     
+    void WindowDecoration::SetTitle(const std::string& title)
+    {
+        
+    }
+    
+    void WindowDecoration::SetIcon(const std::string& iconPath)
+    {
+        
+    }
+    
     void WindowDecoration::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event)
@@ -51,11 +61,11 @@ namespace Asgaard {
                 Rectangle appIconSize(8, 8, 32, 32);
                 
                 // right corner
-                Rectangle closeIconSize(m_Dimensions.Width() - (8 + 32), 8, 32, 32);
+                Rectangle closeIconSize(Dimensions().Width() - (8 + 32), 8, 32, 32);
                 
                 // next to app
                 Rectangle labelSize(8 + 8 + 32, 8, 128, 32);
-                auto      poolSize = (m_Dimensions.Width() * m_Dimensions.Height() * 4);
+                auto      poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
                 
                 // create resources
                 m_memory = MemoryPool::Create(this, poolSize);
@@ -68,7 +78,10 @@ namespace Asgaard {
                 
                 m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_Screen, Id(), closeIconSize);
                 m_closeIcon->Subscribe(this);
-                
+            } break;
+            
+            case ObjectEvent::ERROR: {
+                Notify(static_cast<int>(Event::ERROR));
             } break;
             
             default:
@@ -77,5 +90,25 @@ namespace Asgaard {
         
         // Run the base class events as well
         Surface::ExternalEvent(event, data);
+    }
+    
+    void WindowDecoration::Notification(Publisher* source, int event, void* data)
+    {
+        auto memoryObject = dynamic_cast<MemoryPool*>(source);
+        if (memoryObject != nullptr)
+        {
+            switch (static_cast<MemoryPool::MemoryEvent>(event))
+            {
+                case MemoryPool::MemoryEvent::CREATED: {
+                    auto bufferSize = Dimensions().Width() * Dimensions().Height() * 4;
+                    m_buffer = MemoryBuffer::Create(this, m_memory, bufferSize,
+                        Dimensions().Width(), Dimensions().Height(), PixelFormat::A8R8G8B8);
+                } break;
+                
+                case MemoryPool::MemoryEvent::ERROR: {
+                    Notify(static_cast<int>(Event::ERROR));
+                } break;
+            }
+        }
     }
 }

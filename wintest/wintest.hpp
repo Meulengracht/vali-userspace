@@ -25,6 +25,7 @@
 #include <asgaard/window_base.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
+#include <asgaard/drawing/painter.hpp>
 
 class TestWindow : public Asgaard::WindowBase {
 public:
@@ -51,14 +52,14 @@ protected:
         }
         else if (createdObject->Id() == m_Memory->Id()) {
             // Create initial buffer the size of this surface
-            m_Buffer = Asgaard::MemoryBuffer::Create(this, m_Memory, 0, m_Dimensions.Width(),
-                m_Dimensions.Height(), Asgaard::PixelFormat::A8R8G8B8);
+            m_Buffer = Asgaard::MemoryBuffer::Create(this, m_Memory, 0, Dimensions().Width(),
+                Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
         else if (createdObject->Id() == m_Buffer->Id()) {
             // Now all resources are created
             SetBuffer(m_Buffer);
             Redraw();
-            MarkDamaged(m_Dimensions);
+            MarkDamaged(Dimensions());
             ApplyChanges();
         }
     }
@@ -67,7 +68,7 @@ protected:
     {
         if (buffer->Id() == m_Buffer->Id()) {
             Redraw();
-            MarkDamaged(m_Dimensions);
+            MarkDamaged(Dimensions());
             ApplyChanges();
         }
     }
@@ -89,7 +90,7 @@ protected:
 
 private:
     void PixelFill(unsigned int color) {
-        std::size_t size = m_Dimensions.Width() * m_Dimensions.Height();
+        std::size_t size = Dimensions().Width() * Dimensions().Height();
         uint32_t*   pointer = static_cast<uint32_t*>(m_Buffer->Buffer());
         for (std::size_t i = 0; i < size; i++) {
             pointer[i] = color;
@@ -98,13 +99,12 @@ private:
 
     void Redraw()
     {
-        // Update window content data
-        unsigned int color = 0xFF000000 | (r << 16) | (g << 8) | b;
-        PixelFill(color);
+        Drawing::Painter paint(m_Buffer);
         
-        r++;
-        g++;
-        b++;
+        paint.SetColor(r, g, b);
+        paint.RenderFill();
+        
+        r++; g++; b++;
     }
     
 private:
