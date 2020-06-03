@@ -1,6 +1,6 @@
 /* ValiOS
  *
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2020, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,22 +20,32 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
-#pragma once
+
+#include "../include/drawing/font_manager.hpp"
+#include "../include/drawing/font.hpp"
+#include "../include/utils/freetype.hpp"
 
 namespace Asgaard {
-    enum class PixelFormat {
-        A8R8G8B8,
-        X8R8G8B8
-    };
+    namespace Drawing {
+        FontManager FM;
     
-    static int GetBytesPerPixel(enum PixelFormat format) {
-        int byteCount = 0;
-        switch (format) {
-            case Asgaard::PixelFormat::A8R8G8B8:
-            case Asgaard::PixelFormat::X8R8G8B8:
-                byteCount = 4;
-                break;
+        FontManager::FontManager()
+        {
+            m_freetype = std::shared_ptr<Utils::FreeType>(new Utils::FreeType());
         }
-        return byteCount;
+        
+        FontManager::~FontManager()
+        {
+            
+        }
+        
+        std::shared_ptr<Font> FontManager::CreateFont(std::string& path, int pixelSize)
+        {
+            auto font = std::shared_ptr<Font>(new Font(m_freetype, pixelSize));
+            if (!font->Initialize(path)) {
+                return std::shared_ptr<Font>(nullptr);
+            }
+            return font;
+        }
     }
 }

@@ -31,14 +31,7 @@
 
 static int CalculateStride(int width, enum Asgaard::PixelFormat format)
 {
-    int bytesPerPixel = 0;
-    switch (format) {
-        case Asgaard::PixelFormat::A8R8G8B8:
-        case Asgaard::PixelFormat::X8R8G8B8:
-            bytesPerPixel = 4;
-            break;
-    }
-    return width * bytesPerPixel;
+    return width * GetBytesPerPixel(format);
 }
 
 static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
@@ -51,7 +44,12 @@ static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
 
 namespace Asgaard {
     MemoryBuffer::MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format)
-        : Object(id), m_Memory(memory), m_Width(width), m_Height(height), m_Format(format), m_Buffer(memory->CreateBufferPointer(memoryOffset))
+        : Object(id)
+        , m_memory(memory)
+        , m_width(width)
+        , m_height(height)
+        , m_format(format)
+        , m_buffer(memory->CreateBufferPointer(memoryOffset))
     {
         enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
         int                  stride   = CalculateStride(width, format);
@@ -63,6 +61,14 @@ namespace Asgaard {
     MemoryBuffer::~MemoryBuffer()
     {
         
+    }
+    
+    void* MemoryBuffer::Buffer(int x, int y) {
+        uint8_t* pointer       = static_cast<uint8_t*>(m_buffer);
+        int      bytesPerPixel = GetBytesPerPixel(m_format);
+        
+        pointer += ((y * (m_width * bytesPerPixel)) + (x * bytesPerPixel));
+        return pointer;
     }
     
     void MemoryBuffer::ExternalEvent(enum ObjectEvent event, void* data)

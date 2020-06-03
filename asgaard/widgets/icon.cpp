@@ -28,14 +28,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-static std::string iconStateExtensions[static_cast<int>(Asgaard::Icon::IconState::COUNT)] = {
+static std::string iconStateExtensions[static_cast<int>(
+    Asgaard::Widgets::Icon::IconState::COUNT)] = {
     ""
     "_hover",
     "_active",
     "_disabled"
 };
 
-std::string ExtendFilename(std::string& path, std::string& extension)
+static std::string ExtendFilename(std::string& path, std::string& extension)
 {
     if (extension == "") {
         return path;
@@ -67,118 +68,124 @@ std::string ExtendFilename(std::string& path, std::string& extension)
 }
 
 namespace Asgaard {
-    Icon::Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
-        : Surface(id, screen, parentId, dimensions)
-        , m_originalPath("")
-        , m_originalWidth(0)
-        , m_originalHeight(0)
-    {
-
-    }
-
-    Icon::~Icon()
-    {
-    }
-
-    bool Icon::LoadIcon(std::string& path)
-    {
-        int numComponents;
-
-        if (m_memory) {
-            return false;
-        }
-
-        int status = stbi_info(path.c_str(), &m_originalWidth, &m_originalHeight, &numComponents);
-        if (!status) {
-            return false;
-        }
-
-        m_originalPath = path;
-
-        auto poolSize = (m_originalWidth * m_originalHeight * 4) * static_cast<int>(IconState::COUNT);
-        m_memory = MemoryPool::Create(this, poolSize);
-    }
-
-    void Icon::SetState(IconState state)
-    {
-        if (m_buffers[static_cast<int>(state)] == nullptr) {
-            return;
-        }
-
-        SetBuffer(m_buffers[static_cast<int>(state)]);
-        ApplyChanges();
-    }
-
-    void Icon::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        switch (event)
+    namespace Widgets {
+        Icon::Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
+            : Surface(id, screen, parentId, dimensions)
+            , m_originalPath("")
+            , m_originalWidth(0)
+            , m_originalHeight(0)
         {
-            case ObjectEvent::CREATION: {
-            } break;
-
-            default:
-                break;
+    
         }
-        
-        // Run the base class events as well
-        Surface::ExternalEvent(event, data);
-    }
-
-    void Icon::Notification(Publisher* source, int event, void* data)
-    {
-        auto memoryObject = dynamic_cast<MemoryPool*>(source);
-        if (memoryObject != nullptr)
+    
+        Icon::~Icon()
         {
-            switch (static_cast<MemoryPool::MemoryEvent>(event))
-            {
-                case MemoryPool::MemoryEvent::CREATED: {
-                    auto bufferSize = m_originalWidth * m_originalHeight * 4;
-                    for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
-                        m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
-                            m_originalWidth, m_originalHeight, PixelFormat::A8R8G8B8);
-                    }
-                } break;
-                
-                case MemoryPool::MemoryEvent::ERROR: {
-                    
-                } break;
+        }
+    
+        bool Icon::LoadIcon(std::string& path)
+        {
+            int numComponents;
+    
+            if (m_memory) {
+                return false;
             }
+    
+            int status = stbi_info(path.c_str(), &m_originalWidth, &m_originalHeight, &numComponents);
+            if (!status) {
+                return false;
+            }
+    
+            m_originalPath = path;
+    
+            auto poolSize = (m_originalWidth * m_originalHeight * 4) * static_cast<int>(IconState::COUNT);
+            m_memory = MemoryPool::Create(this, poolSize);
+            return true;
         }
-        
-        auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
-        if (bufferObject != nullptr)
+    
+        void Icon::SetState(IconState state)
         {
-            switch (static_cast<MemoryBuffer::BufferEvent>(event))
+            if (m_buffers[static_cast<int>(state)] == nullptr) {
+                return;
+            }
+    
+            SetBuffer(m_buffers[static_cast<int>(state)]);
+            ApplyChanges();
+        }
+    
+        void Icon::ExternalEvent(enum ObjectEvent event, void* data)
+        {
+            switch (event)
             {
-                case MemoryBuffer::BufferEvent::CREATED: {
-                    auto bufferSize = m_originalWidth * m_originalHeight * 4;
-                    int loadedWidth, loadedHeight, loadedComponents;
-                    std::string extension = "";
-
-                    if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
-                        extension = iconStateExtensions[static_cast<int>(IconState::NORMAL)];
-                    }
-                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
-                        extension = iconStateExtensions[static_cast<int>(IconState::HOVERING)];
-                    }
-                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::ACTIVE)]->Id()) {
-                        extension = iconStateExtensions[static_cast<int>(IconState::ACTIVE)];
-                    }
-                    else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
-                        extension = iconStateExtensions[static_cast<int>(IconState::DISABLED)];
-                    }
-
-                    auto path   = ExtendFilename(m_originalPath, extension);
-                    auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
-                    if (buffer != nullptr) {
-                        if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
-                            // TODO log
-                            break;
-                        }
-                        memcpy(bufferObject->Buffer(), buffer, bufferSize);
-                        stbi_image_free(buffer);
-                    }
+                case ObjectEvent::CREATION: {
                 } break;
+    
+                default:
+                    break;
+            }
+            
+            // Run the base class events as well
+            Surface::ExternalEvent(event, data);
+        }
+    
+        void Icon::Notification(Publisher* source, int event, void* data)
+        {
+            auto memoryObject = dynamic_cast<MemoryPool*>(source);
+            if (memoryObject != nullptr)
+            {
+                switch (static_cast<MemoryPool::MemoryEvent>(event))
+                {
+                    case MemoryPool::MemoryEvent::CREATED: {
+                        auto bufferSize = m_originalWidth * m_originalHeight * 4;
+                        for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
+                            m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
+                                m_originalWidth, m_originalHeight, PixelFormat::A8R8G8B8);
+                        }
+                    } break;
+                    
+                    case MemoryPool::MemoryEvent::ERROR: {
+                        
+                    } break;
+                }
+            }
+            
+            auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
+            if (bufferObject != nullptr)
+            {
+                switch (static_cast<MemoryBuffer::BufferEvent>(event))
+                {
+                    case MemoryBuffer::BufferEvent::CREATED: {
+                        auto bufferSize = m_originalWidth * m_originalHeight * 4;
+                        int loadedWidth, loadedHeight, loadedComponents;
+                        std::string extension = "";
+    
+                        if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
+                            extension = iconStateExtensions[static_cast<int>(IconState::NORMAL)];
+                        }
+                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
+                            extension = iconStateExtensions[static_cast<int>(IconState::HOVERING)];
+                        }
+                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::ACTIVE)]->Id()) {
+                            extension = iconStateExtensions[static_cast<int>(IconState::ACTIVE)];
+                        }
+                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
+                            extension = iconStateExtensions[static_cast<int>(IconState::DISABLED)];
+                        }
+    
+                        auto path   = ExtendFilename(m_originalPath, extension);
+                        auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
+                        if (buffer != nullptr) {
+                            if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
+                                // TODO log
+                                break;
+                            }
+                            memcpy(bufferObject->Buffer(), buffer, bufferSize);
+                            stbi_image_free(buffer);
+                        }
+                    } break;
+                    
+                    default:
+                        break;
+                }
             }
         }
     }

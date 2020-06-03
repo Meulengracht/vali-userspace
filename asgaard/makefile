@@ -2,10 +2,12 @@
 # Include all the definitions for os
 
 INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
-LFLAGS := ddk.lib libgracht.lib
+LFLAGS := ddk.lib libgracht.lib libfreetype.lib
 
 APP_SOURCES_C :=
-APP_SOURCES_CXX := object_manager.cpp screen.cpp window_base.cpp application.cpp surface.cpp memory_pool.cpp memory_buffer.cpp
+APP_SOURCES_CXX := $(wildcard drawing/*.cpp) \
+				   $(wildcard widgets/*.cpp) \
+				   $(wildcard *.cpp)
 		         
 APP_PROTOCOLS_C := protocols/wm_core_protocol_client.c \
 				   protocols/wm_screen_protocol_client.c \

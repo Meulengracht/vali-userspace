@@ -1,6 +1,6 @@
 /* ValiOS
  *
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2020, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,36 +22,32 @@
  */
 #pragma once
 
-#include "object_manager.hpp"
-#include "object.hpp"
-#include <os/dmabuf.h>
+#include <string>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+#include FT_STROKER_H
+#include FT_GLYPH_H
+#include FT_TRUETYPE_IDS_H
+#include <cassert>
 
 namespace Asgaard {
-    class MemoryPool : public Object {
-    public:
-        enum class MemoryEvent : int {
-            CREATED,
-            ERROR
+    namespace Utils {
+        class FreeType {
+        public:
+            FreeType() {
+                bool Status = FT_Init_FreeType(&m_FreeType) == 0;
+                assert(Status);
+            }
+        
+            ~FreeType() {
+                FT_Done_FreeType(m_FreeType);
+            }
+        
+            FT_Library GetLibrary() const { return m_FreeType; }
+        
+        private:
+            FT_Library m_FreeType;
         };
-    public:
-        MemoryPool(uint32_t id, int size);
-        ~MemoryPool();
-        
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
-
-    static std::shared_ptr<MemoryPool> Create(Object* owner, std::size_t size)
-    {
-        // Create the memory pool we're going to use
-        auto memory = OM.CreateClientObject<MemoryPool, std::size_t>(size);
-        memory->Subscribe(owner);
-        return memory;
     }
-        
-    public:
-        void* CreateBufferPointer(int memoryOffset);
-        
-    private:
-        int                   m_Size;
-        struct dma_attachment m_Attachment;
-    };
 }

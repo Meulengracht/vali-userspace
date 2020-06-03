@@ -40,7 +40,12 @@ namespace Asgaard {
         MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format);
         ~MemoryBuffer();
         
-        void* Buffer() { return m_Buffer; }
+        void* Buffer() const { return m_buffer; }
+        void* Buffer(int x, int y);
+        
+        int   Width()  const { return m_width; }
+        int   Height() const { return m_height; }
+        int   Stride() const { return m_width * GetBytesPerPixel(m_format); }
         
     public:
         static std::shared_ptr<MemoryBuffer> Create(Object* owner, std::shared_ptr<MemoryPool> memory,
@@ -57,10 +62,10 @@ namespace Asgaard {
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
         
     private:
-        std::shared_ptr<MemoryPool> m_Memory;
-        int                         m_Width;
-        int                         m_Height;
-        enum PixelFormat            m_Format;
-        void*                       m_Buffer;
+        std::shared_ptr<MemoryPool> m_memory;
+        int                         m_width;
+        int                         m_height;
+        enum PixelFormat            m_format;
+        void*                       m_buffer;
     };
 }

@@ -1,6 +1,6 @@
 /* ValiOS
  *
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2020, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,13 @@
 #include "surface.hpp"
 
 namespace Asgaard {
-    class Surface;
-    class Icon;
+    class MemoryPool;
+    class MemoryBuffer;
+    
+    namespace Widgets {
+        class Icon;
+        class Label;
+    }
     
     class WindowDecoration : public Surface {
     public:
@@ -43,8 +48,10 @@ namespace Asgaard {
         // a buffer with the application title
         // a buffer with the application icon
         // a buffer with the close icon
-        std::shared_ptr<Asgaard::MemoryBuffer> m_backgroundBuffer;
-        std::shared_ptr<Asgaard::Icon>         m_appIcon;
-        std::shared_ptr<Asgaard::Icon>         m_closeIcon;
+        std::shared_ptr<Asgaard::MemoryPool>     m_memory;
+        std::shared_ptr<Asgaard::MemoryBuffer>   m_buffer;
+        std::shared_ptr<Asgaard::Widgets::Label> m_appTitle;
+        std::shared_ptr<Asgaard::Widgets::Icon>  m_appIcon;
+        std::shared_ptr<Asgaard::Widgets::Icon>  m_closeIcon;
     };
 }

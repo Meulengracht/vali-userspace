@@ -24,41 +24,43 @@
 
 #include <memory>
 #include "../surface.hpp"
+#include <string>
 
 namespace Asgaard {
-    class Surface;
     class MemoryPool;
     class MemoryBuffer;
     
-    class Icon : public Surface {
-    public:
-        enum class IconState {
-            NORMAL = 0,
-            HOVERING,
-            ACTIVE,
-            DISABLED,
-
-            COUNT
+    namespace Widgets {
+        class Icon : public Surface {
+        public:
+            enum class IconState {
+                NORMAL = 0,
+                HOVERING,
+                ACTIVE,
+                DISABLED,
+    
+                COUNT
+            };
+        public:
+            Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+            ~Icon();
+            
+            bool LoadIcon(std::string& path);
+            void SetState(IconState state);
+    
+        public:
+            void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+    
+        private:
+            void Notification(Publisher*, int = 0, void* = 0) override;
+    
+        private:
+            std::shared_ptr<Asgaard::MemoryPool>   m_memory;
+            std::shared_ptr<Asgaard::MemoryBuffer> m_buffers[static_cast<int>(IconState::COUNT)];
+    
+            int         m_originalWidth;
+            int         m_originalHeight;
+            std::string m_originalPath;
         };
-    public:
-        Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
-        ~Icon();
-        
-        bool LoadIcon(std::string& path);
-        void SetState(IconState state);
-
-    public:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
-
-    private:
-        void Notification(Publisher*, int = 0, void* = 0) override;
-
-    private:
-        std::shared_ptr<Asgaard::MemoryPool>   m_memory;
-        std::shared_ptr<Asgaard::MemoryBuffer> m_buffers[static_cast<int>(IconState::COUNT)];
-
-        int         m_originalWidth;
-        int         m_originalHeight;
-        std::string m_originalPath;
-    };
+    }
 }

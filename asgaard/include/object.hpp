@@ -44,14 +44,14 @@ namespace Asgaard {
         };
         
     public:
-        Object(uint32_t id) : m_Id(id) { }
+        Object(uint32_t id) : m_id(id) { }
         virtual ~Object() { }
 
     public:
-        uint32_t     Id() const { return m_Id; }
+        uint32_t     Id() const { return m_id; }
         virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
         
     private:
-        uint32_t m_Id;
+        uint32_t m_id;
     };
 }
