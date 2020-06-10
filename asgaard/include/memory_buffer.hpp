@@ -37,7 +37,8 @@ namespace Asgaard {
         };
         
     public:
-        MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format);
+        MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset,
+            int width, int height, enum PixelFormat format);
         ~MemoryBuffer();
         
         void* Buffer() const { return m_buffer; }
@@ -48,11 +49,11 @@ namespace Asgaard {
         int   Stride() const { return m_width * GetBytesPerPixel(m_format); }
         
     public:
-        static std::shared_ptr<MemoryBuffer> Create(Object* owner, std::shared_ptr<MemoryPool> memory,
+        static std::shared_ptr<MemoryBuffer> Create(Object* owner, const std::shared_ptr<MemoryPool>& memory,
             int memoryOffset, int width, int height, enum PixelFormat format)
         {
             auto buffer = OM.CreateClientObject<
-                MemoryBuffer, std::shared_ptr<MemoryPool>, int, int, int, enum PixelFormat>(
+                MemoryBuffer, const std::shared_ptr<MemoryPool>&, int, int, int, enum PixelFormat>(
                     memory, memoryOffset, width, height, format);
             buffer->Subscribe(owner);
             return buffer;

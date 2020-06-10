@@ -22,29 +22,36 @@
  */
 #pragma once
 
-#include "surface.hpp"
-#include <windows.h>
+#include <asgaard/surface.hpp>
+#include <memory>
+#include <string>
+#include "../terminal_interpreter.hpp"
+#include <thread>
+#include <vector>
 
-class CWin32Surface : public CSurface
-{
+class Terminal;
+
+class ResolverBase : public TerminalInterpreter {
 public:
-    CWin32Surface(CSurfaceRect& Dimensions);
-    ~CWin32Surface();
+    ResolverBase();
+    virtual ~ResolverBase() = default;
 
-    void        SetHwnd(HWND hWnd);
+    void SetTerminal(std::shared_ptr<Terminal>&);
 
-    void        Clear(uint32_t Color, const CSurfaceRect& Area, bool InvalidateScreen) override;
-    void        Resize(int Width, int Height) override;
-    void        Invalidate() override;
-    uint8_t*    GetDataPointer(int OffsetX = 0, int OffsetY = 0) override;
-    size_t      GetStride() override;
-    
-    // Color helpers
-    uint32_t GetBlendedColor(uint8_t RA, uint8_t GA, uint8_t BA, uint8_t AA,
-        uint8_t RB, uint8_t GB, uint8_t BB, uint8_t AB, uint8_t A) override;
-    uint32_t GetColor(uint8_t R, uint8_t G, uint8_t B, uint8_t A) override;
+public:
+    virtual bool HandleKeyCode(const Asgaard::KeyEvent&) = 0;
+    virtual void PrintCommandHeader() = 0;
 
-private:
-    HWND        m_hWnd;
-    uint32_t*   m_Bitmap;
+public:
+    bool Alive() const { return m_alive; }
+
+protected:
+    virtual bool ListDirectory(const std::vector<std::string>&) = 0;
+    virtual bool ChangeDirectory(const std::vector<std::string>&) = 0;
+    bool Help(const std::vector<std::string>&);
+    bool Exit(const std::vector<std::string>&);
+
+protected:
+    std::shared_ptr<Terminal> m_terminal;
+    bool                      m_alive;
 };

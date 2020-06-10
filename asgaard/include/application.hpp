@@ -42,18 +42,18 @@ namespace Asgaard {
             if (!std::is_base_of<WindowBase, WC>::value) {
                 return;
             }
-            m_Window = OM.CreateClientObject<WC, Params...>(parameters...);
+            m_window = OM.CreateClientObject<WC, Params...>(parameters...);
         }
         
-        gracht_client_t* GrachtClient() { return m_Client; }
+        gracht_client_t* GrachtClient() { return m_client; }
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        gracht_client_t*            m_Client;
-        std::shared_ptr<WindowBase> m_Window;
+        gracht_client_t*            m_client;
+        std::shared_ptr<WindowBase> m_window;
     };
     
     extern Application APP;

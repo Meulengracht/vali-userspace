@@ -24,265 +24,361 @@
 #include <cassert>
 #include <cctype>
 #include <cmath>
-#include "surfaces/surface.hpp"
+
+#include <os/keycodes.h>
+
+#include <asgaard/object_manager.hpp>
+#include <asgaard/key_event.hpp>
 #include "terminal.hpp"
-#include "terminal_font.hpp"
-#include "terminal_renderer.hpp"
+#include "terminal_interpreter.hpp"
+#include "targets/resolver_base.hpp"
 
 const int PRINTBUFFER_SIZE = 4096;
 
-CTerminal::CTerminalLine::CTerminalLine(std::shared_ptr<CTerminalRenderer> Renderer, std::shared_ptr<CTerminalFont> Font, int Row, int Capacity)
-    : m_Renderer(Renderer), m_Font(Font), m_Row(Row), m_Capacity(Capacity - 6)
+Terminal::TerminalLine::TerminalLine(const std::shared_ptr<Asgaard::Drawing::Font>& font, int row, int capacity)
+    : m_font(font)
+    , m_dimensions(0, (row * font->GetFontHeight()) + 2, capacity, font->GetFontHeight())
+    , m_row(row)
+    , m_capacity(capacity - 6)
 {
     Reset();
 }
 
-void CTerminal::CTerminalLine::Reset()
+void Terminal::TerminalLine::Reset()
 {
-    m_ShowCursor    = false;
-    m_TextLength    = 0;
-    m_InputOffset   = 0;
-    m_Cursor        = 0;
-    m_Dirty         = true;
-    m_Text.clear();
+    m_showCursor  = false;
+    m_textLength  = 0;
+    m_inputOffset = 0;
+    m_cursor      = 0;
+    m_dirty       = true;
+    m_text.clear();
 }
 
-bool CTerminal::CTerminalLine::AddCharacter(int Character)
+bool Terminal::TerminalLine::AddCharacter(int character)
 {
-    char Buf            = (char)Character & 0xFF;
-    int CharacterLength = m_Renderer->GetLengthOfCharacter(m_Font, Buf);
+    struct Asgaard::Drawing::Font::CharInfo bitmap = { 0 };
+    
+    char buf = (char)character & 0xFF;
+    
+    if (!m_font->GetCharacterBitmap(buf, bitmap)) {
+        // ignore character
+        return true;
+    }
+    
+    if (AddInput(character)) {
+        m_inputOffset++;
+        return true;
+    }
+    return false;
+}
+
+bool Terminal::TerminalLine::AddInput(int character)
+{
+    struct Asgaard::Drawing::Font::CharInfo bitmap = { 0 };
+    
+    char buf = (char)character & 0xFF;
+    
+    if (!m_font->GetCharacterBitmap(buf, bitmap)) {
+        // ignore character
+        return true;
+    }
 
     // Handle \r \t \n?
-    if ((m_TextLength + CharacterLength) < m_Capacity) {
-        if (m_Cursor == m_Text.length()) {
-            m_Text.push_back(Character);
+    if ((m_textLength + (bitmap.width + bitmap.indentX)) < m_capacity) {
+        if (m_cursor == m_text.length()) {
+            m_text.push_back(character);
         }
         else {
-            m_Text.insert(m_Cursor, &Buf, 1);
+            m_text.insert(m_cursor, &buf, 1);
         }
-        m_Dirty      = true;
-        m_TextLength += CharacterLength;
-        m_InputOffset++;
-        m_Cursor++;
+        m_dirty      = true;
+        m_textLength += bitmap.width + bitmap.indentX;
+        m_cursor++;
         return true;
     }
     return false;
 }
 
-bool CTerminal::CTerminalLine::AddInput(int Character)
+bool Terminal::TerminalLine::RemoveInput()
 {
-    char Buf            = (char)Character & 0xFF;
-    int CharacterLength = m_Renderer->GetLengthOfCharacter(m_Font, Buf);
-
-    // Handle \r \t \n?
-    if ((m_TextLength + CharacterLength) < m_Capacity) {
-        if (m_Cursor == m_Text.length()) {
-            m_Text.push_back(Character);
-        }
-        else {
-            m_Text.insert(m_Cursor, &Buf, 1);
-        }
-        m_Dirty      = true;
-        m_TextLength += CharacterLength;
-        m_Cursor++;
+    int modifiedCursor = m_cursor - m_inputOffset;
+    if (modifiedCursor != 0) {
+        m_text.erase(m_cursor - 1, 1);
+        m_dirty      = true;
+        m_textLength = m_font->GetTextMetrics(m_text).Width();
+        m_cursor--;
         return true;
     }
     return false;
 }
 
-bool CTerminal::CTerminalLine::RemoveInput()
+void Terminal::TerminalLine::Update(std::shared_ptr<Asgaard::MemoryBuffer>& buffer)
 {
-    int ModifiedCursor = m_Cursor - m_InputOffset;
-    if (ModifiedCursor != 0) {
-        m_Text.erase(m_Cursor - 1, 1);
-        m_Dirty      = true;
-        m_TextLength = m_Renderer->CalculateTextLength(m_Font, m_Text);
-        m_Cursor--;
-        return true;
-    }
-    return false;
-}
-
-void CTerminal::CTerminalLine::Update()
-{
-    if (m_Dirty) {
-        m_Renderer->RenderClear(0, (m_Row * m_Font->GetFontHeight()) + 2, -1, m_Font->GetFontHeight());
-        m_TextLength = m_Renderer->RenderText(3, (m_Row * m_Font->GetFontHeight()) + 2, m_Font, m_Text);
-        if (m_ShowCursor) {
-            uint32_t ExistingColor = m_Renderer->GetBackgroundColor();
-            m_Renderer->SetBackgroundColor(255, 255, 255, 255);
-            m_Renderer->RenderCharacter(m_TextLength, (m_Row * m_Font->GetFontHeight()) + 2, m_Font, '_');
-            m_Renderer->SetBackgroundColor(ExistingColor);
+    if (m_dirty) {
+        Asgaard::Drawing::Painter paint(buffer);
+        
+        paint.SetColor(0, 0, 0);
+        paint.RenderFill(m_dimensions);
+        
+        paint.SetFont(m_font);
+        paint.RenderText(m_dimensions.X(), m_dimensions.Y(), m_text);
+        if (m_showCursor) {
+            paint.SetColor(255, 255, 255);
+            paint.RenderCharacter(m_textLength, m_dimensions.Y(), '_');
         }
-        m_Dirty = false;
+        m_dirty = false;
     }
 }
 
-void CTerminal::CTerminalLine::SetText(const std::string& Text)
+void Terminal::TerminalLine::SetText(const std::string& text)
 {
     Reset();
-    m_Text   = Text;
-    m_Cursor = Text.length();
+    m_text   = text;
+    m_cursor = text.length();
 }
 
-std::string CTerminal::CTerminalLine::GetInput()
+std::string Terminal::TerminalLine::GetInput()
 {
-    if ((int)m_Text.length() > m_InputOffset) {
-        return m_Text.substr(m_InputOffset);
+    if ((int)m_text.length() > m_inputOffset) {
+        return m_text.substr(m_inputOffset);
     }
     return "";
 }
 
-void CTerminal::CTerminalLine::HideCursor()
+void Terminal::TerminalLine::HideCursor()
 {
-    m_ShowCursor = false;
-    m_Dirty      = true;
+    m_showCursor = false;
+    m_dirty      = true;
 }
 
-void CTerminal::CTerminalLine::ShowCursor()
+void Terminal::TerminalLine::ShowCursor()
 {
-    m_ShowCursor = true;
-    m_Dirty      = true;
+    m_showCursor = true;
+    m_dirty      = true;
 }
 
-CTerminal::CTerminal(CSurfaceRect& Area, std::shared_ptr<CTerminalRenderer> Renderer, std::shared_ptr<CTerminalFont> Font)
-    : m_Renderer(Renderer), m_Font(Font), m_Rows((Area.GetHeight() / Font->GetFontHeight()) - 1), 
-      m_HistoryIndex(0), m_LineIndex(0)
+Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std::shared_ptr<Asgaard::Drawing::Font>& font,
+    const std::shared_ptr<ResolverBase>& resolver)
+    : WindowBase(id, dimensions)
+    , m_font(font)
+    , m_resolver(resolver)
+    , m_rows((dimensions.Height() / font->GetFontHeight()) - 1)
+    , m_historyIndex(0)
+    , m_lineIndex(0)
 {
-    m_PrintBuffer = (char*)std::malloc(PRINTBUFFER_SIZE);
-    for (int i = 0; i < m_Rows; i++) {
-        m_Lines.push_back(std::make_unique<CTerminalLine>(Renderer, Font, i, Area.GetWidth()));
+    m_printBuffer = (char*)std::malloc(PRINTBUFFER_SIZE);
+    for (int i = 0; i < m_rows; i++) {
+        m_lines.push_back(std::make_unique<TerminalLine>(font, i, dimensions.Width()));
     }
 }
 
-CTerminal::~CTerminal() {
-    std::free(m_PrintBuffer);
-    m_History.clear();
-    m_Lines.clear();
+Terminal::~Terminal()
+{
+    std::free(m_printBuffer);
+    m_history.clear();
+    m_lines.clear();
 }
 
-void CTerminal::AddInput(int Character)
+void Terminal::AddInput(int character)
 {
-    if (!m_Lines[m_LineIndex]->AddInput(Character)) {
+    if (!m_lines[m_lineIndex]->AddInput(character)) {
         // uh todo, we should skip to next line
         return;
     }
-    m_Lines[m_LineIndex]->Update();
+    m_lines[m_lineIndex]->Update(m_buffer);
 }
 
-void CTerminal::RemoveInput()
+void Terminal::RemoveInput()
 {
-    if (!m_Lines[m_LineIndex]->RemoveInput()) {
+    if (!m_lines[m_lineIndex]->RemoveInput()) {
         // uh todo, we should skip to prev line
         return;
     }
-    m_Lines[m_LineIndex]->Update();
+    m_lines[m_lineIndex]->Update(m_buffer);
 }
 
-std::string CTerminal::ClearInput(bool Newline)
+std::string Terminal::ClearInput(bool newline)
 {
-    std::string Input = m_Lines[m_LineIndex]->GetInput();
-    if (Newline) {
+    std::string input = m_lines[m_lineIndex]->GetInput();
+    if (newline) {
         FinishCurrentLine();
     }
     else {
-        m_Lines[m_LineIndex]->Reset();
-        m_Lines[m_LineIndex]->Update();
+        m_lines[m_lineIndex]->Reset();
+        m_lines[m_lineIndex]->Update(m_buffer);
     }
-    return Input;
+    return input;
 }
 
-void CTerminal::FinishCurrentLine()
+void Terminal::FinishCurrentLine()
 {
     // Only add to history if not an empty line
-    if (m_Lines[m_LineIndex]->GetText().length() > 0) {
-        m_History.push_back(m_Lines[m_LineIndex]->GetText());
-        m_HistoryIndex = m_History.size();
+    if (m_lines[m_lineIndex]->GetText().length() > 0) {
+        m_history.push_back(m_lines[m_lineIndex]->GetText());
+        m_historyIndex = m_history.size();
     }
 
     // Are we at the end?
-    if (m_LineIndex == m_Rows - 1) {
+    if (m_lineIndex == m_rows - 1) {
         ScrollToLine(true);
     }
     else {
-        m_Lines[m_LineIndex]->HideCursor();
-        m_Lines[m_LineIndex]->Update();
-        m_LineIndex++;
-        m_Lines[m_LineIndex]->ShowCursor();
-        m_Lines[m_LineIndex]->Update();
+        m_lines[m_lineIndex]->HideCursor();
+        m_lines[m_lineIndex]->Update(m_buffer);
+        m_lineIndex++;
+        m_lines[m_lineIndex]->ShowCursor();
+        m_lines[m_lineIndex]->Update(m_buffer);
     }
 }
 
-void CTerminal::ScrollToLine(bool ClearInput)
+void Terminal::ScrollToLine(bool clearInput)
 {
-    int HistoryStart = m_HistoryIndex - m_LineIndex;
-    for (int i = 0; i < m_Rows; i++) {
-        if (i == m_LineIndex && !ClearInput) {
+    int historyStart = m_historyIndex - m_lineIndex;
+    for (int i = 0; i < m_rows; i++) {
+        if (i == m_lineIndex && !clearInput) {
             break;
         }
 
-        m_Lines[i]->Reset();
-        if (HistoryStart < m_HistoryIndex) {
-            m_Lines[i]->SetText(m_History[HistoryStart++]);
+        m_lines[i]->Reset();
+        if (historyStart < m_historyIndex) {
+            m_lines[i]->SetText(m_history[historyStart++]);
         }
-        m_Lines[i]->Update();
+        m_lines[i]->Update(m_buffer);
     }
 }
 
-void CTerminal::HistoryNext()
+void Terminal::HistoryNext()
 {
     // History must be longer than the number of rows - 1
-    if (m_History.size()        >= (size_t)m_Rows &&
-        (size_t)m_HistoryIndex  < m_History.size()) {
-        m_HistoryIndex++;
+    if (m_history.size()        >= (size_t)m_rows &&
+        (size_t)m_historyIndex  < m_history.size()) {
+        m_historyIndex++;
         ScrollToLine(false);
     }
 }
 
-void CTerminal::HistoryPrevious()
+void Terminal::HistoryPrevious()
 {
     // History must be longer than the number of rows - 1
-    if (m_History.size()    >= (size_t)m_Rows &&
-        m_HistoryIndex      >= m_Rows) {
-        m_HistoryIndex--;
+    if (m_history.size()    >= (size_t)m_rows &&
+        m_historyIndex      >= m_rows) {
+        m_historyIndex--;
         ScrollToLine(false);
     }
 }
 
-void CTerminal::Print(const char *Format, ...)
+void Terminal::MoveCursorLeft()
 {
-    std::unique_lock<std::mutex> LockedSection(m_PrintLock);
-    va_list Arguments;
 
-    va_start(Arguments, Format);
-    vsnprintf(m_PrintBuffer, PRINTBUFFER_SIZE, Format, Arguments);
-    va_end(Arguments);
+}
 
-    for (size_t i = 0; i < PRINTBUFFER_SIZE && m_PrintBuffer[i]; i++) {
-        if (m_PrintBuffer[i] == '\n') {
+void Terminal::MoveCursorRight()
+{
+
+}
+
+void Terminal::Print(const char* format, ...)
+{
+    std::unique_lock<std::mutex> lockedSection(m_printLock);
+    va_list arguments;
+
+    va_start(arguments, format);
+    vsnprintf(m_printBuffer, PRINTBUFFER_SIZE, format, arguments);
+    va_end(arguments);
+
+    for (size_t i = 0; i < PRINTBUFFER_SIZE && m_printBuffer[i]; i++) {
+        if (m_printBuffer[i] == '\n') {
             FinishCurrentLine();
         }
         else {
-            if (!m_Lines[m_LineIndex]->AddCharacter(m_PrintBuffer[i])) {
+            if (!m_lines[m_lineIndex]->AddCharacter(m_printBuffer[i])) {
                 FinishCurrentLine();
                 i--;
             }
         }
     }
-    m_Lines[m_LineIndex]->Update();
+    m_lines[m_lineIndex]->Update(m_buffer);
+    Invalidate();
 }
 
-void CTerminal::Invalidate()
+void Terminal::Invalidate()
 {
-    m_Renderer->Invalidate();
+    MarkDamaged(Dimensions());
+    ApplyChanges();
 }
 
-void CTerminal::MoveCursorLeft()
+void Terminal::OnCreated(Asgaard::Object* createdObject)
 {
-
+    if (createdObject->Id() == Id()) {
+        // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
+        auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
+        m_memory = Asgaard::MemoryPool::Create(this, screenSize);
+        
+        // we couldn't do this in constructor as the OM had not registered us
+        auto terminal = std::dynamic_pointer_cast<Terminal>(Asgaard::OM[Id()]);
+        m_resolver->SetTerminal(terminal);
+    }
+    else if (createdObject->Id() == m_memory->Id()) {
+        // Create initial buffer the size of this surface
+        m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
+            Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
+    }
+    else if (createdObject->Id() == m_buffer->Id()) {
+        // Now all resources are created
+        SetBuffer(m_buffer);
+        m_resolver->PrintCommandHeader();
+        Invalidate();
+    }
 }
 
-void CTerminal::MoveCursorRight()
+void Terminal::OnRefreshed(Asgaard::MemoryBuffer*)
 {
+    
+}
 
+void Terminal::Teardown()
+{
+    
+}
+
+void Terminal::OnKeyEvent(const Asgaard::KeyEvent& key)
+{
+    // Don't respond to released events
+    if (!key.Pressed()) {
+        return;
+    }
+
+    if (key.KeyCode() == VK_BACK) {
+        RemoveInput();
+        Invalidate();
+    }
+    else if (key.KeyCode() == VK_ENTER) {
+        std::string input = ClearInput(true);
+        if (!m_resolver->Interpret(input)) {
+            if (m_resolver->GetClosestMatch().length() != 0) {
+                Print("Command did not exist, did you mean %s?\n", m_resolver->GetClosestMatch().c_str());
+            }
+        }
+        m_resolver->PrintCommandHeader();
+    }
+    else if (key.KeyCode() == VK_UP) {
+        HistoryPrevious();
+        Invalidate();
+    }
+    else if (key.KeyCode() == VK_DOWN) {
+        HistoryNext();
+        Invalidate();
+    }
+    else if (key.KeyCode() == VK_LEFT) {
+        MoveCursorLeft();
+        Invalidate();
+    }
+    else if (key.KeyCode() == VK_RIGHT) {
+        MoveCursorRight();
+        Invalidate();
+    }
+    else if (key.KeyAscii() != 0) {
+        AddInput(key.KeyAscii());
+        Invalidate();
+    }
 }

@@ -37,37 +37,40 @@ static enum Asgaard::Surface::SurfaceEdges GetSurfaceEdges(enum wm_surface_edge 
 }
 
 namespace Asgaard {
-    Surface::Surface(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parent_id, const Rectangle& dimensions)
-        : Object(id), m_Parent(OM[parent_id]), m_Dimensions(dimensions)
+    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parent_id, const Rectangle& dimensions)
+        : Object(id)
+        , m_screen(nullptr)
+        , m_parent(OM[parent_id])
+        , m_dimensions(dimensions)
     {
         // Try to perform binding.
         BindToScreen(screen);
     }
     
-    Surface::Surface(uint32_t id, std::shared_ptr<Screen> screen, const Rectangle& dimensions)
+    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, const Rectangle& dimensions)
         : Surface(id, screen, 0, dimensions) { }
 
     Surface::Surface(uint32_t id, const Rectangle& dimensions)
-        : Surface(id, nullptr, 0, dimensions) { }
+        : Surface(id, std::shared_ptr<Screen>(nullptr), 0, dimensions) { }
 
     Surface::~Surface()
     {
         
     }
     
-    void Surface::BindToScreen(std::shared_ptr<Screen> screen)
+    void Surface::BindToScreen(const std::shared_ptr<Screen>& screen)
     {
         // If we previously were not attached to a screen and now are attaching
         // then we need to provide an underlying surface
-        if (m_Screen == nullptr && screen != nullptr) {
+        if (m_screen == nullptr && screen != nullptr) {
             wm_screen_create_surface(APP.GrachtClient(), nullptr, screen->Id(), Id(),    
-                m_Dimensions.Width(), m_Dimensions.Height());
-            if (m_Parent != nullptr) {
-                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, m_Parent->Id(),
-                    Id(), m_Dimensions.X(), m_Dimensions.Y());
+                m_dimensions.Width(), m_dimensions.Height());
+            if (m_parent != nullptr) {
+                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, m_parent->Id(),
+                    Id(), m_dimensions.X(), m_dimensions.Y());
             }
         }
-        m_Screen = screen;
+        m_screen = screen;
     }
     
     void Surface::ExternalEvent(enum ObjectEvent event, void* data)
@@ -82,8 +85,8 @@ namespace Asgaard {
                 // registered children
                 
                 OnResized(GetSurfaceEdges(event->edges), event->width, event->height);
-                m_Dimensions.SetWidth(event->width);
-                m_Dimensions.SetHeight(event->height);
+                m_dimensions.SetWidth(event->width);
+                m_dimensions.SetHeight(event->height);
             } break;
             
             case ObjectEvent::SURFACE_FRAME: {
@@ -95,7 +98,7 @@ namespace Asgaard {
         }
     }
     
-    void Surface::SetBuffer(std::shared_ptr<MemoryBuffer> buffer)
+    void Surface::SetBuffer(const std::shared_ptr<MemoryBuffer>& buffer)
     {
         wm_surface_set_buffer(APP.GrachtClient(), nullptr, Id(), buffer->Id());
     }
@@ -128,8 +131,7 @@ namespace Asgaard {
     void Surface::OnFocus(bool focus) { }
     void Surface::OnFrame() { }
     void Surface::OnMouseMove() { }
-    void Surface::OnMouseDown() { }
-    void Surface::OnMouseUp() { }
-    void Surface::OnKeyDown() { }
-    void Surface::OnKeyUp() { }
+    void Surface::OnMousePressed() { }
+    void Surface::OnMouseReleased() { }
+    void Surface::OnKeyEvent(const KeyEvent&) { }
 }

@@ -69,7 +69,7 @@ static std::string ExtendFilename(std::string& path, std::string& extension)
 
 namespace Asgaard {
     namespace Widgets {
-        Icon::Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
+        Icon::Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
             : Surface(id, screen, parentId, dimensions)
             , m_originalPath("")
             , m_originalWidth(0)
@@ -82,7 +82,7 @@ namespace Asgaard {
         {
         }
     
-        bool Icon::LoadIcon(std::string& path)
+        bool Icon::LoadIcon(const std::string& path)
         {
             int numComponents;
     
@@ -118,6 +118,7 @@ namespace Asgaard {
             switch (event)
             {
                 case ObjectEvent::CREATION: {
+                    SetValid(true);
                     Notify(static_cast<int>(IconEvent::CREATED));
                 } break;
                 
@@ -184,8 +185,13 @@ namespace Asgaard {
                                 Notify(static_cast<int>(IconEvent::ERROR) /*, error text*/);
                                 break;
                             }
+                            
                             memcpy(bufferObject->Buffer(), buffer, bufferSize);
                             stbi_image_free(buffer);
+                        
+                            if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
+                                SetState(IconState::NORMAL);
+                            }
                         }
                     } break;
                     

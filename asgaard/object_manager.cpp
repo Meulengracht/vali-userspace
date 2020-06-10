@@ -30,14 +30,14 @@ namespace Asgaard {
     ObjectManager OM;
     
     ObjectManager::ObjectManager() :
-        m_IdIndex(0x100) { }
+        m_idIndex(0x100) { }
 
     ObjectManager::~ObjectManager() { }
     
     std::shared_ptr<Object> ObjectManager::operator[](uint32_t index)
     {
-        std::map<uint32_t, std::shared_ptr<Object>>::iterator it = m_Objects.find(index);
-        if (it != m_Objects.end()) {
+        std::map<uint32_t, std::shared_ptr<Object>>::iterator it = m_objects.find(index);
+        if (it != m_objects.end()) {
             return it->second;
         }
         return nullptr;
@@ -45,6 +45,6 @@ namespace Asgaard {
     
     uint32_t ObjectManager::CreateObjectId()
     {
-        return m_IdIndex++;
+        return m_idIndex++;
     }
 }

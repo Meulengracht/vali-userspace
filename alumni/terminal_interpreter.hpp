@@ -30,12 +30,10 @@
 #include <memory>
 #include <list>
 
-class CTerminal;
-
-class CTerminalInterpreter {
-    class CTerminalCommand {
+class TerminalInterpreter {
+    class TerminalCommand {
     public:
-        CTerminalCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn)
+        TerminalCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn)
             : m_Command(Command), m_Description(Description), m_Function(Fn) { }
 
         int operator()(const std::string& Command, const std::vector<std::string>& Arguments) {
@@ -55,25 +53,27 @@ class CTerminalInterpreter {
     private:
         std::string m_Command;
         std::string m_Description;
+        
         std::function<bool(const std::vector<std::string>&)> m_Function;
     };
 
 public:
-    CTerminalInterpreter();
-    ~CTerminalInterpreter() = default;
+    TerminalInterpreter();
+    ~TerminalInterpreter() = default;
 
-    bool                Interpret(const std::string& String);
-    void                SetCommandResolver(std::function<bool(const std::string&, const std::vector<std::string>&)> Resolver);
-    void                RegisterCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn);
+    bool Interpret(const std::string& String);
+    void RegisterCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn);
     
     const std::string&  GetClosestMatch() const { return m_ClosestMatch; }
-    const std::list<std::unique_ptr<CTerminalCommand>>& GetCommands() const { return m_Commands; }
+    const std::list<std::unique_ptr<TerminalCommand>>& GetCommands() const { return m_Commands; }
+
+protected:
+    virtual bool CommandResolver(const std::string&, const std::vector<std::string>&) = 0;
 
 private:
-    std::vector<std::string>    SplitCommandString(const std::string& String);
+    std::vector<std::string> SplitCommandString(const std::string& String);
 
 private:
-    std::list<std::unique_ptr<CTerminalCommand>>    m_Commands;
-    std::string                                     m_ClosestMatch;
-    std::function<bool(const std::string&, const std::vector<std::string>&)> m_Resolver;
+    std::list<std::unique_ptr<TerminalCommand>> m_Commands;
+    std::string                                 m_ClosestMatch;
 };

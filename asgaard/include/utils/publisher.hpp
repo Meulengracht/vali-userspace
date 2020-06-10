@@ -29,27 +29,27 @@ namespace Asgaard {
     namespace Utils {
         class Publisher {
         public:
-            Publisher() : m_NotifyActive(true) { }
+            Publisher() : m_notifyActive(true) { }
             virtual ~Publisher() { }
             
             void Subscribe(Subscriber* subscriber) {
-                m_Subscribers.push_back(subscriber);
+                m_subscribers.push_back(subscriber);
             }
             void Unsubscribe(Subscriber* subscriber) {
-                m_Subscribers.remove(subscriber);
+                m_subscribers.remove(subscriber);
             }
             
             void Notify(int event = 0, void* data = 0) {
-                for (auto subscriber : m_Subscribers) {
+                for (auto subscriber : m_subscribers) {
                     subscriber->Notification(this, event, data);
                 }
             }
             
-            void SetNotifyState(bool enable) { m_NotifyActive = enable; }
+            void SetNotifyState(bool enable) { m_notifyActive = enable; }
             
         private:
-            std::list<Subscriber*> m_Subscribers;
-            bool                   m_NotifyActive;
+            std::list<Subscriber*> m_subscribers;
+            bool                   m_notifyActive;
         };
     }
 }

@@ -33,7 +33,7 @@ namespace Asgaard {
         
         class Painter {
             public:
-                Painter(std::shared_ptr<MemoryBuffer> canvas);
+                Painter(const std::shared_ptr<MemoryBuffer>& canvas);
                 ~Painter();
                 
                 void SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
@@ -42,7 +42,7 @@ namespace Asgaard {
                 void RenderFill(const Rectangle& dimensions);
                 void RenderFill();
                 
-                void SetFont(std::shared_ptr<Font>& font);
+                void SetFont(const std::shared_ptr<Font>& font);
                 
                 void RenderCharacter(int x, int y, char character);
                 void RenderText(const Rectangle& dimensions, const std::string& text);

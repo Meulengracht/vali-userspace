@@ -29,7 +29,8 @@
 
 namespace Asgaard {
     MemoryPool::MemoryPool(uint32_t id, int size)
-        : Object(id), m_Size(size)
+        : Object(id)
+        , m_size(size)
     {
         wm_memory_create_pool(APP.GrachtClient(), nullptr, 0 /* memory_system_id */, id, size);
     }
@@ -48,19 +49,19 @@ namespace Asgaard {
                     (struct wm_core_object_event*)data;
                 int status;
                 
-                status = dma_attach(event->system_handle, &m_Attachment);
+                status = dma_attach(event->system_handle, &m_attachment);
                 if (status) {
-                    Notification(this, static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
+                    Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
                     return;
                 }
                 
-                status = dma_attachment_map(&m_Attachment);
+                status = dma_attachment_map(&m_attachment);
                 if (status) {
-                    Notification(this, static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
+                    Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
                     return;
                 }
                 
-                Notification(this, static_cast<int>(MemoryEvent::CREATED));
+                Notify(static_cast<int>(MemoryEvent::CREATED));
             } break;
             
             default:
@@ -70,7 +71,7 @@ namespace Asgaard {
     
     void* MemoryPool::CreateBufferPointer(int memoryOffset)
     {
-        uint8_t* bufferPointer = static_cast<uint8_t*>(m_Attachment.buffer);
+        uint8_t* bufferPointer = static_cast<uint8_t*>(m_attachment.buffer);
         if (bufferPointer == nullptr) {
             return nullptr;
         }

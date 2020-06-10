@@ -28,56 +28,61 @@
 #include <string>
 #include <list>
 
-class CTerminalRenderer;
-class CTerminalFont;
-class CSurfaceRect;
+#include <asgaard/application.hpp>
+#include <asgaard/window_base.hpp>
+#include <asgaard/memory_pool.hpp>
+#include <asgaard/memory_buffer.hpp>
+#include <asgaard/drawing/font.hpp>
+#include <asgaard/drawing/painter.hpp>
 
-class CTerminal
-{    
+class ResolverBase;
+
+class Terminal : public Asgaard::WindowBase {
 private:
-    class CTerminalLine {
+    class TerminalLine {
     public:
-        CTerminalLine(std::shared_ptr<CTerminalRenderer> Renderer, std::shared_ptr<CTerminalFont> Font, int Row, int Capacity);
-        ~CTerminalLine() = default;
+        TerminalLine(const std::shared_ptr<Asgaard::Drawing::Font>&, int row, int capacity);
+        ~TerminalLine() = default;
 
         void Reset();
-        bool AddInput(int Character);
+        bool AddInput(int character);
         bool RemoveInput();
-        bool AddCharacter(int Character);
-        void Update();
+        bool AddCharacter(int character);
+        void Update(std::shared_ptr<Asgaard::MemoryBuffer>&);
 
-        void SetText(const std::string& Text);
+        void SetText(const std::string& text);
         void HideCursor();
         void ShowCursor();
 
-        std::string GetInput();
-        const std::string& GetText() const { return m_Text; }
+        std::string        GetInput();
+        const std::string& GetText() const { return m_text; }
 
     private:
-        std::shared_ptr<CTerminalRenderer>  m_Renderer;
-        std::shared_ptr<CTerminalFont>      m_Font;
+        std::shared_ptr<Asgaard::Drawing::Font> m_font;
         
-        std::string m_Text;
-        int         m_TextLength;
-        int         m_Row;
-        int         m_Capacity;
-        int         m_Cursor;
-        int         m_InputOffset;
-        bool        m_ShowCursor;
-        bool        m_Dirty;
+        Asgaard::Rectangle m_dimensions;
+        std::string        m_text;
+        int                m_textLength;
+        int                m_row;
+        int                m_capacity;
+        int                m_cursor;
+        int                m_inputOffset;
+        bool               m_showCursor;
+        bool               m_dirty;
     };
 
 public:
-    CTerminal(CSurfaceRect& Area, std::shared_ptr<CTerminalRenderer> Renderer, std::shared_ptr<CTerminalFont> Font);
-    ~CTerminal();
+    Terminal(uint32_t id, const Asgaard::Rectangle&, const std::shared_ptr<Asgaard::Drawing::Font>&,
+        const std::shared_ptr<ResolverBase>&);
+    ~Terminal();
 
-    void Print(const char *Format, ...);
+    void Print(const char* format, ...);
     void Invalidate();
 
     // Input manipulation
-    std::string ClearInput(bool Newline);
+    std::string ClearInput(bool newline);
     void RemoveInput();
-    void AddInput(int Character);
+    void AddInput(int character);
     
     // History manipulation
     void HistoryPrevious();
@@ -86,19 +91,28 @@ public:
     // Cursor manipulation
     void MoveCursorLeft();
     void MoveCursorRight();
-
+    
+protected:
+    void OnCreated(Asgaard::Object*) override;
+    void Teardown() override;
+    void OnRefreshed(Asgaard::MemoryBuffer*) override;
+    void OnKeyEvent(const Asgaard::KeyEvent&) override;
+    
 private:
     void FinishCurrentLine();
-    void ScrollToLine(bool ClearInput);
+    void ScrollToLine(bool clearInput);
 
 private:
-    std::shared_ptr<CTerminalRenderer>          m_Renderer;
-    std::shared_ptr<CTerminalFont>              m_Font;
-    int                                         m_Rows;
-    std::vector<std::string>                    m_History;
-    int                                         m_HistoryIndex;
-    std::vector<std::unique_ptr<CTerminalLine>> m_Lines;
-    int                                         m_LineIndex;
-    char*                                       m_PrintBuffer;
-    std::mutex                                  m_PrintLock;
+    std::shared_ptr<Asgaard::MemoryPool>    m_memory;
+    std::shared_ptr<Asgaard::MemoryBuffer>  m_buffer;
+    std::shared_ptr<Asgaard::Drawing::Font> m_font;
+    std::shared_ptr<ResolverBase>           m_resolver;
+    
+    int                                        m_rows;
+    std::vector<std::string>                   m_history;
+    int                                        m_historyIndex;
+    std::vector<std::unique_ptr<TerminalLine>> m_lines;
+    int                                        m_lineIndex;
+    char*                                      m_printBuffer;
+    std::mutex                                 m_printLock;
 };

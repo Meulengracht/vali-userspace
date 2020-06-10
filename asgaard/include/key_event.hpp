@@ -1,4 +1,4 @@
-/* MollenOS
+/* ValiOS
  *
  * Copyright 2018, Philip Meulengracht
  *
@@ -16,34 +16,28 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS Terminal Implementation (Alumnious)
- * - The terminal emulator implementation for Vali. Built on manual rendering and
- *   using freetype as the font renderer.
+ * ValiOS - Application Framework (Asgaard)
+ *  - Contains the implementation of the application framework used for building
+ *    graphical applications.
  */
 #pragma once
 
-#include <string>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-#include FT_STROKER_H
-#include FT_GLYPH_H
-#include FT_TRUETYPE_IDS_H
-#include <cassert>
+struct hid_events_key_event_args;
 
-class CTerminalFreeType {
-public:
-    CTerminalFreeType() {
-        bool Status = FT_Init_FreeType(&m_FreeType) == 0;
-        assert(Status);
-    }
-
-    ~CTerminalFreeType() {
-        FT_Done_FreeType(m_FreeType);
-    }
-
-    FT_Library GetLibrary() const { return m_FreeType; }
-
-private:
-    FT_Library m_FreeType;
-};
+namespace Asgaard {
+    class KeyEvent {
+    public:
+        KeyEvent(struct hid_events_key_event_args*);
+        
+        char          KeyAscii() const;
+        unsigned int  KeyUnicode() const;
+        unsigned char KeyCode() const;
+        bool          Pressed() const;
+        
+    private:
+        unsigned int  m_modifiers;
+        unsigned int  m_keyUnicode;
+        char          m_keyAscii;
+        unsigned char m_keyCode;
+    };
+}

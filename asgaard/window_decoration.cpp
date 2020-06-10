@@ -26,13 +26,20 @@
 #include "include/memory_buffer.hpp"
 #include "include/rectangle.hpp"
 #include "include/window_decoration.hpp"
+#include "include/drawing/painter.hpp"
 
 #include "include/widgets/icon.hpp"
 #include "include/widgets/label.hpp"
 
 namespace Asgaard {
-    WindowDecoration::WindowDecoration(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
+    WindowDecoration::WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
         : Surface(id, screen, parentId, dimensions)
+        , m_memory(nullptr)
+        , m_buffer(nullptr)
+        , m_appFont(nullptr)
+        , m_appTitle(nullptr)
+        , m_appIcon(nullptr)
+        , m_closeIcon(nullptr)
     {
         
     }
@@ -44,12 +51,38 @@ namespace Asgaard {
     
     void WindowDecoration::SetTitle(const std::string& title)
     {
+        if (m_appTitle == nullptr || !m_appTitle->Valid()) {
+            return;
+        }
         
+        m_appTitle->SetText(title);
     }
     
     void WindowDecoration::SetIcon(const std::string& iconPath)
     {
         
+    }
+    
+    void WindowDecoration::Redraw()
+    {
+        Drawing::Painter paint(m_buffer);
+        
+        paint.SetColor(64, 64, 64);
+        paint.RenderFill();
+        
+        MarkDamaged(Dimensions());
+        ApplyChanges();
+    }
+    
+    void WindowDecoration::CheckCreation()
+    {
+        if (m_closeIcon != nullptr && m_closeIcon->Valid() && 
+            m_appIcon   != nullptr && m_appIcon->Valid()   &&
+            m_appTitle  != nullptr && m_appTitle->Valid())
+        {
+            SetValid(true);
+            Notify(static_cast<int>(Event::CREATED));
+        }
     }
     
     void WindowDecoration::ExternalEvent(enum ObjectEvent event, void* data)
@@ -70,13 +103,13 @@ namespace Asgaard {
                 // create resources
                 m_memory = MemoryPool::Create(this, poolSize);
                 
-                m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_Screen, Id(), labelSize);
+                m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(), labelSize);
                 m_appTitle->Subscribe(this);
                 
-                m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_Screen, Id(), appIconSize);
+                m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(), appIconSize);
                 m_appIcon->Subscribe(this);
                 
-                m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_Screen, Id(), closeIconSize);
+                m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(), closeIconSize);
                 m_closeIcon->Subscribe(this);
             } break;
             
@@ -94,14 +127,15 @@ namespace Asgaard {
     
     void WindowDecoration::Notification(Publisher* source, int event, void* data)
     {
-        auto memoryObject = dynamic_cast<MemoryPool*>(source);
-        if (memoryObject != nullptr)
-        {
-            switch (static_cast<MemoryPool::MemoryEvent>(event))
-            {
+        auto object = dynamic_cast<Object*>(source);
+        if (object == nullptr) {
+            return;
+        }
+        
+        if (m_memory != nullptr && object->Id() == m_memory->Id()) {
+            switch (static_cast<MemoryPool::MemoryEvent>(event)) {
                 case MemoryPool::MemoryEvent::CREATED: {
-                    auto bufferSize = Dimensions().Width() * Dimensions().Height() * 4;
-                    m_buffer = MemoryBuffer::Create(this, m_memory, bufferSize,
+                    m_buffer = MemoryBuffer::Create(this, m_memory, 0,
                         Dimensions().Width(), Dimensions().Height(), PixelFormat::A8R8G8B8);
                 } break;
                 
@@ -109,6 +143,37 @@ namespace Asgaard {
                     Notify(static_cast<int>(Event::ERROR));
                 } break;
             }
+            
+            return;
+        }
+        
+        if (m_buffer != nullptr && object->Id() == m_buffer->Id()) {
+            switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
+                case MemoryBuffer::BufferEvent::CREATED: {
+                    SetBuffer(m_buffer);
+                    Redraw();
+                } break;
+                
+                default:
+                    break;
+            }
+            
+            return;
+        }
+        
+        if (m_appIcon != nullptr && object->Id() == m_appIcon->Id()) {
+            // load app icon from current package './appIcon.png'
+            
+            CheckCreation();
+            return;
+        }
+        
+        
+        if (m_closeIcon != nullptr && object->Id() == m_closeIcon->Id()) {
+            // load close icon
+            
+            CheckCreation();
+            return;
         }
     }
 }

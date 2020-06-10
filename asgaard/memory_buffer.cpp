@@ -43,7 +43,7 @@ static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
 }
 
 namespace Asgaard {
-    MemoryBuffer::MemoryBuffer(uint32_t id, std::shared_ptr<MemoryPool> memory, int memoryOffset, int width, int height, enum PixelFormat format)
+    MemoryBuffer::MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset, int width, int height, enum PixelFormat format)
         : Object(id)
         , m_memory(memory)
         , m_width(width)
@@ -76,11 +76,11 @@ namespace Asgaard {
         switch (event)
         {
             case ObjectEvent::CREATION: {
-                Notification(this, static_cast<int>(BufferEvent::CREATED));
+                Notify(static_cast<int>(BufferEvent::CREATED));
             } break;
             
             case ObjectEvent::BUFFER_RELEASE: {
-                Notification(this, static_cast<int>(BufferEvent::REFRESHED));
+                Notify(static_cast<int>(BufferEvent::REFRESHED));
             } break;
             
             default:

@@ -29,6 +29,7 @@
 namespace Asgaard {
     class Screen;
     class MemoryBuffer;
+    class KeyEvent;
     
     class Surface : public Object {
     public:
@@ -44,21 +45,21 @@ namespace Asgaard {
             CREATED
         };
     public:
-        Surface(uint32_t, std::shared_ptr<Screen>, uint32_t, const Rectangle&);
-        Surface(uint32_t, std::shared_ptr<Screen>, const Rectangle&);
+        Surface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
+        Surface(uint32_t, const std::shared_ptr<Screen>&, const Rectangle&);
         Surface(uint32_t, const Rectangle&);
         ~Surface();
         
-        void BindToScreen(std::shared_ptr<Screen>);
+        void BindToScreen(const std::shared_ptr<Screen>&);
         
-        void SetBuffer(std::shared_ptr<MemoryBuffer>);
+        void SetBuffer(const std::shared_ptr<MemoryBuffer>&);
         void MarkDamaged(const Rectangle&);
         void MarkInputRegion(const Rectangle&);
         void ApplyChanges();
         
         void RequestFrame();
         
-        const Rectangle& Dimensions() const { return m_Dimensions; }
+        const Rectangle& Dimensions() const { return m_dimensions; }
         
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
@@ -68,14 +69,13 @@ namespace Asgaard {
         virtual void OnFocus(bool);
         virtual void OnFrame();
         virtual void OnMouseMove();
-        virtual void OnMouseDown();
-        virtual void OnMouseUp();
-        virtual void OnKeyDown();
-        virtual void OnKeyUp();
+        virtual void OnMousePressed();
+        virtual void OnMouseReleased();
+        virtual void OnKeyEvent(const KeyEvent&);
         
     protected:
-        Rectangle               m_Dimensions;
-        std::shared_ptr<Object> m_Parent;
-        std::shared_ptr<Screen> m_Screen;
+        Rectangle               m_dimensions;
+        std::shared_ptr<Object> m_parent;
+        std::shared_ptr<Screen> m_screen;
     };
 }

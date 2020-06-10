@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include "../rectangle.hpp"
 
 namespace Asgaard {
     namespace Utils {
@@ -46,13 +47,16 @@ namespace Asgaard {
                 unsigned int index;
             };
         public:
-            Font(std::shared_ptr<Utils::FreeType> freetype, int pixelSize);
+            Font(const std::shared_ptr<Utils::FreeType>& freetype, int pixelSize);
             ~Font();
             
-            bool Initialize(std::string& path);
+            bool Initialize(const std::string& path);
             
-            bool SetPixelSize(int pixelSize);
-            bool GetCharacterBitmap(unsigned long character, struct CharInfo& bitmap);
+            bool      SetPixelSize(int pixelSize);
+            bool      GetCharacterBitmap(unsigned long character, struct CharInfo& bitmap);
+            
+            int       GetFontHeight() const { return m_height; }
+            Rectangle GetTextMetrics(const std::string& text);
             
         private:
             bool LoadGlyph(unsigned long character, struct Glyph* cached, int want);

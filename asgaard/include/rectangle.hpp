@@ -26,24 +26,23 @@ namespace Asgaard {
     class Rectangle {
     public:
         Rectangle(int x, int y, int width, int height)
-            : m_X(x), m_Y(y), m_Width(width), m_Height(height) { }
+            : m_x(x), m_y(y), m_width(width), m_height(height) { }
         Rectangle(const Rectangle& rectangle)
-            : Rectangle(rectangle.X(), rectangle.Y(), 
-                rectangle.Width(), rectangle.Height()) { }
+            : Rectangle(rectangle.X(), rectangle.Y(), rectangle.Width(), rectangle.Height()) { }
         virtual ~Rectangle() { }
         
-        void SetWidth(int width) { m_Width = width; }
-        void SetHeight(int height) { m_Height = height; }
+        void SetWidth(int width) { m_width = width; }
+        void SetHeight(int height) { m_height = height; }
         
-        int X() const { return m_X; }
-        int Y() const { return m_Y; }
-        int Width() const { return m_Width; };
-        int Height() const { return m_Height; };
+        int X() const { return m_x; }
+        int Y() const { return m_y; }
+        int Width() const { return m_width; };
+        int Height() const { return m_height; };
         
     private:
-        int m_X;
-        int m_Y;
-        int m_Width;
-        int m_Height;
+        int m_x;
+        int m_y;
+        int m_width;
+        int m_height;
     };
 }

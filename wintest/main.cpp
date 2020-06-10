@@ -26,7 +26,8 @@
 int main(int argc, char **argv)
 {
     Asgaard::Rectangle initialSize(0, 0, 640, 320);
-    Asgaard::APP.CreateWindow<TestWindow>(initialSize);
     Asgaard::APP.Initialize();
+    
+    Asgaard::APP.CreateWindow<TestWindow>(initialSize);
     return Asgaard::APP.Execute();
 }

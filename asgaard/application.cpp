@@ -54,7 +54,10 @@ namespace Asgaard {
     Application APP;
     
     Application::Application() 
-        : Object(0), m_Client(nullptr), m_Window(nullptr) { }
+        : Object(0)
+        , m_client(nullptr)
+        , m_window(nullptr) { }
+    
     Application::~Application() { }
 
     int Application::Initialize()
@@ -67,19 +70,19 @@ namespace Asgaard {
         gracht_os_get_server_client_address(&linkConfiguration.address, &linkConfiguration.address_length);
         
         gracht_link_socket_client_create(&clientConfiguration.link, &linkConfiguration);
-        status = gracht_client_create(&clientConfiguration, &m_Client);
+        status = gracht_client_create(&clientConfiguration, &m_client);
         if (status) {
             // log
             return -1;
         }
         
-        gracht_client_register_protocol(m_Client, &wm_core_protocol);
-        gracht_client_register_protocol(m_Client, &wm_screen_protocol);
-        gracht_client_register_protocol(m_Client, &wm_surface_protocol);
-        gracht_client_register_protocol(m_Client, &wm_buffer_protocol);
+        gracht_client_register_protocol(m_client, &wm_core_protocol);
+        gracht_client_register_protocol(m_client, &wm_screen_protocol);
+        gracht_client_register_protocol(m_client, &wm_surface_protocol);
+        gracht_client_register_protocol(m_client, &wm_buffer_protocol);
         
         // kick off a chain reaction by asking for all objects
-        return wm_core_get_objects(m_Client, nullptr);
+        return wm_core_get_objects(m_client, nullptr);
     }
     
     int Application::Execute()
@@ -87,7 +90,7 @@ namespace Asgaard {
         char* messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
         while (true) {
-            if (gracht_client_wait_message(m_Client, messageBuffer)) {
+            if (gracht_client_wait_message(m_client, messageBuffer)) {
                 // todo log it
             }
         }
@@ -98,8 +101,8 @@ namespace Asgaard {
 
     int Application::Shutdown()
     {
-        if (m_Client != nullptr) {
-            gracht_client_shutdown(m_Client);
+        if (m_client != nullptr) {
+            gracht_client_shutdown(m_client);
         }
         return 0;
     }
@@ -138,9 +141,9 @@ namespace Asgaard {
         if (screenObject) {
             switch (static_cast<Screen::ScreenEvent>(event)) {
                 case Screen::ScreenEvent::CREATED: {
-                    if (m_Window != nullptr) {
+                    if (m_window != nullptr) {
                         auto screenPtr = std::static_pointer_cast<Screen>(OM[screenObject->Id()]);
-                        m_Window->BindToScreen(screenPtr);
+                        m_window->BindToScreen(screenPtr);
                     }
                 } break;
                 

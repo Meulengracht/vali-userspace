@@ -23,10 +23,9 @@
 
 #include <sstream>
 #include <numeric>
-#include "terminal.hpp"
 #include "terminal_interpreter.hpp"
 
-int CTerminalInterpreter::CTerminalCommand::GetCommandDistance(const std::string& Command)
+int TerminalInterpreter::TerminalCommand::GetCommandDistance(const std::string& Command)
 {
 	int s1len = m_Command.size();
 	int s2len = Command.size();
@@ -54,17 +53,17 @@ int CTerminalInterpreter::CTerminalCommand::GetCommandDistance(const std::string
 	return result;
 }
 
-CTerminalInterpreter::CTerminalInterpreter()
+TerminalInterpreter::TerminalInterpreter()
     : m_ClosestMatch("")
 {
 }
 
-void CTerminalInterpreter::RegisterCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn)
+void TerminalInterpreter::RegisterCommand(const std::string& Command, const std::string& Description, std::function<bool(const std::vector<std::string>&)> Fn)
 {
-    m_Commands.push_back(std::make_unique<CTerminalCommand>(Command, Description, Fn));
+    m_Commands.push_back(std::make_unique<TerminalCommand>(Command, Description, Fn));
 }
 
-std::vector<std::string> CTerminalInterpreter::SplitCommandString(const std::string& String)
+std::vector<std::string> TerminalInterpreter::SplitCommandString(const std::string& String)
 {
     std::vector<std::string>    Tokens;
     std::string                 Token = "";
@@ -84,7 +83,7 @@ std::vector<std::string> CTerminalInterpreter::SplitCommandString(const std::str
     return Tokens;
 }
 
-bool CTerminalInterpreter::Interpret(const std::string& String)
+bool TerminalInterpreter::Interpret(const std::string& String)
 {
     int ShortestDistance = String.size();
     m_ClosestMatch = "";
@@ -107,10 +106,5 @@ bool CTerminalInterpreter::Interpret(const std::string& String)
             m_ClosestMatch      = Command->GetCommandText();
         }
     }
-    return m_Resolver(CommandString, Tokens);
-}
-
-void CTerminalInterpreter::SetCommandResolver(std::function<bool(const std::string&, const std::vector<std::string>&)> Resolver)
-{
-    m_Resolver = Resolver;
+    return CommandResolver(CommandString, Tokens);
 }

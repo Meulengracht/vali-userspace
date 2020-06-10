@@ -43,7 +43,7 @@ namespace Asgaard {
             }
             
             std::shared_ptr<T> object = std::shared_ptr<T>(new T(CreateObjectId()));
-            m_Objects[object->Id()] = object;
+            m_objects[object->Id()] = object;
             return object;
         }
         
@@ -56,7 +56,7 @@ namespace Asgaard {
             
             std::shared_ptr<T> object = std::shared_ptr<T>(
                 new T(CreateObjectId(), std::forward<Params>(parameters)...));
-            m_Objects[object->Id()] = object;
+            m_objects[object->Id()] = object;
             return object;
         }
         
@@ -68,7 +68,7 @@ namespace Asgaard {
             }
             
             std::shared_ptr<T> object = std::shared_ptr<T>(new T(id));
-            m_Objects[object->Id()] = object;
+            m_objects[object->Id()] = object;
             return object;
         }
         
@@ -81,7 +81,7 @@ namespace Asgaard {
             
             std::shared_ptr<T> object = std::shared_ptr<T>(
                 new T(id, std::forward<Params>(parameters)...));
-            m_Objects[object->Id()] = object;
+            m_objects[object->Id()] = object;
             return object;
         }
         
@@ -97,8 +97,8 @@ namespace Asgaard {
         uint32_t CreateObjectId();
 
     private:
-        std::map<uint32_t, std::shared_ptr<Object>> m_Objects;
-        uint32_t m_IdIndex;
+        std::map<uint32_t, std::shared_ptr<Object>> m_objects;
+        uint32_t m_idIndex;
     };
     
     extern ObjectManager OM;

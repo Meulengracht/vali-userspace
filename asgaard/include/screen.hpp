@@ -53,19 +53,19 @@ namespace Asgaard {
             
         public:
             ScreenMode(enum ModeFlags flags, int resolutionX, int resolutionY, int refreshRate)
-                : m_Flags(flags), m_ResolutionX(resolutionX), m_ResolutionY(resolutionY), m_RefreshRate(refreshRate)
+                : m_flags(flags), m_resolutionX(resolutionX), m_resolutionY(resolutionY), m_refreshRate(refreshRate)
                 { }
                 
-            bool IsCurrent() const { return ((unsigned int)m_Flags & (unsigned int)Asgaard::Screen::ScreenMode::ModeFlags::MODE_CURRENT) != 0; }
-            int  ResolutionX() const { return m_ResolutionX; }
-            int  ResolutionY() const { return m_ResolutionY; }
-            int  RefreshRate() const { return m_RefreshRate; }
+            bool IsCurrent()   const { return ((unsigned int)m_flags & (unsigned int)Asgaard::Screen::ScreenMode::ModeFlags::MODE_CURRENT) != 0; }
+            int  ResolutionX() const { return m_resolutionX; }
+            int  ResolutionY() const { return m_resolutionY; }
+            int  RefreshRate() const { return m_refreshRate; }
             
         private:
-            ModeFlags m_Flags;
-            int       m_ResolutionX;
-            int       m_ResolutionY;
-            int       m_RefreshRate;
+            ModeFlags m_flags;
+            int       m_resolutionX;
+            int       m_resolutionY;
+            int       m_refreshRate;
         };
         
     public:
@@ -80,10 +80,11 @@ namespace Asgaard {
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         
     private:
-        std::list<std::unique_ptr<ScreenMode>> m_Modes;
-        int             m_PositionX;
-        int             m_PositionY;
-        int             m_Scale;
-        ScreenTransform m_Transform;
+        std::list<std::unique_ptr<ScreenMode>> m_modes;
+        
+        int             m_positionX;
+        int             m_positionY;
+        int             m_scale;
+        ScreenTransform m_transform;
     };
 }

@@ -23,16 +23,16 @@
 #pragma once
 
 #include <os/osdefs.h>
+#include "resolver_base.hpp"
 #include <thread>
-#include "alumni.hpp"
 
-class CValiAlumni : public CAlumni {
+class ResolverVali : public ResolverBase {
 public:
-    CValiAlumni(std::unique_ptr<CTerminal> Terminal, std::unique_ptr<CTerminalInterpreter> Interpreter);
-    ~CValiAlumni();
+    ResolverVali();
+    ~ResolverVali();
 
 public:
-    bool HandleKeyCode(unsigned int KeyCode, unsigned int Flags) override;
+    bool HandleKeyCode(const Asgaard::KeyEvent&) override;
     void PrintCommandHeader() override;
 
 protected:
@@ -51,13 +51,13 @@ private:
     void StderrListener();
 
 private:
-    std::string m_Profile;
-    std::string m_CurrentDirectory;
+    std::string m_profile;
+    std::string m_currentDirectory;
 
-    int     m_Stdout;
-    int     m_Stderr;
-    UUId_t  m_Application;
+    int     m_stdout;
+    int     m_stderr;
+    UUId_t  m_application;
 
-    std::thread     m_StdoutThread;
-    std::thread     m_StderrThread;
+    std::thread m_stdoutThread;
+    std::thread m_stderrThread;
 };

@@ -96,7 +96,7 @@ namespace Asgaard {
             unsigned long cached;
         };
 
-        Font::Font(std::shared_ptr<Utils::FreeType> freetype, int pixelSize)
+        Font::Font(const std::shared_ptr<Utils::FreeType>& freetype, int pixelSize)
             : m_freetype(freetype)
             , m_face(nullptr)
             , m_valid(false)
@@ -136,7 +136,7 @@ namespace Asgaard {
             }
         }
         
-        bool Font::Initialize(std::string& path)
+        bool Font::Initialize(const std::string& path)
         {
             char*      fileBase;
             size_t     fileSize;
@@ -310,6 +310,24 @@ namespace Asgaard {
                 bitmap.advance += m_glyphOverhang;
             }
             return true;
+        }
+        
+        Rectangle Font::GetTextMetrics(const std::string& text)
+        {
+            struct CharInfo bitmapInfo = { 0 };
+            int             width      = 0;
+            int             height     = 0;
+            for (size_t i = 0; i < text.length(); i++) {
+                char character = text[i];
+                
+                if (GetCharacterBitmap(character, bitmapInfo)) {
+                    width += bitmapInfo.indentX + bitmapInfo.advance;
+                    if ((bitmapInfo.height + bitmapInfo.indentY) > height) {
+                        height = bitmapInfo.height + bitmapInfo.indentY;
+                    }
+                }
+            }
+            return Rectangle(0, 0, width, height);
         }
         
         bool Font::LoadGlyph(unsigned long character, struct Glyph* cached, int want)

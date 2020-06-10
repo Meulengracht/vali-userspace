@@ -55,7 +55,6 @@ namespace Asgaard {
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        std::vector<enum PixelFormat> m_SupportedFormats;
-        bool                          m_Invalidated;
+        std::vector<enum PixelFormat> m_supportedFormats;
     };
 }

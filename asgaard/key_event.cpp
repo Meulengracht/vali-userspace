@@ -20,38 +20,36 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
-#pragma once
-
-#include "object_manager.hpp"
-#include "object.hpp"
-#include <os/dmabuf.h>
+ 
+#include "include/key_event.hpp"
 
 namespace Asgaard {
-    class MemoryPool : public Object {
-    public:
-        enum class MemoryEvent : int {
-            CREATED,
-            ERROR
-        };
-    public:
-        MemoryPool(uint32_t id, int size);
-        ~MemoryPool();
-        
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
-
-    static std::shared_ptr<MemoryPool> Create(Object* owner, std::size_t size)
+    KeyEvent::KeyEvent(struct hid_events_key_event_args*)
+        : m_modifiers(0)
+        , m_keyUnicode(0)
+        , m_keyAscii(0)
+        , m_keyCode(0)
     {
-        // Create the memory pool we're going to use
-        auto memory = OM.CreateClientObject<MemoryPool, std::size_t>(size);
-        memory->Subscribe(owner);
-        return memory;
+        
     }
-        
-    public:
-        void* CreateBufferPointer(int memoryOffset);
-        
-    private:
-        int                   m_size;
-        struct dma_attachment m_attachment;
-    };
+    
+    char KeyEvent::KeyAscii() const
+    {
+        return 0;
+    }
+    
+    unsigned int KeyEvent::KeyUnicode() const
+    {
+        return 0;
+    }
+    
+    unsigned char KeyEvent::KeyCode() const
+    {
+        return 0;
+    }
+    
+    bool KeyEvent::Pressed() const
+    {
+        return false;
+    }
 }

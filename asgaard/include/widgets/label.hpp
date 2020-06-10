@@ -43,10 +43,10 @@ namespace Asgaard {
                 ERROR
             };
         public:
-            Label(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+            Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
             ~Label();
             
-            void SetFont(std::shared_ptr<Drawing::Font>& font);
+            void SetFont(const std::shared_ptr<Drawing::Font>& font);
             void SetText(const std::string& text);
             
         public:

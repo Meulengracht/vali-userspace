@@ -54,7 +54,12 @@ static Asgaard::Screen::ScreenMode::ModeFlags ConvertProtocolMode(enum wm_screen
 }
 
 namespace Asgaard {
-    Screen::Screen(uint32_t id) : Object(id)
+    Screen::Screen(uint32_t id)
+        : Object(id)
+        , m_positionX(0)
+        , m_positionY(0)
+        , m_scale(0)
+        , m_transform(ScreenTransform::NONE)
     {
         // Get properties of the screen
         wm_screen_get_properties(APP.GrachtClient(), nullptr, id);
@@ -67,9 +72,9 @@ namespace Asgaard {
     
     int Screen::GetCurrentWidth() const
     {
-        auto it = std::find_if(m_Modes.begin(), m_Modes.end(), 
+        auto it = std::find_if(m_modes.begin(), m_modes.end(), 
             [](const std::unique_ptr<ScreenMode>& mode) { return mode->IsCurrent(); });
-        if (it != m_Modes.end()) {
+        if (it != m_modes.end()) {
             return (*it)->ResolutionX();
         }
         return -1;
@@ -77,9 +82,9 @@ namespace Asgaard {
     
     int Screen::GetCurrentHeight() const
     {
-        auto it = std::find_if(m_Modes.begin(), m_Modes.end(), 
+        auto it = std::find_if(m_modes.begin(), m_modes.end(), 
             [](const std::unique_ptr<ScreenMode>& mode) { return mode->IsCurrent(); });
-        if (it != m_Modes.end()) {
+        if (it != m_modes.end()) {
             return (*it)->ResolutionY();
         }
         return -1;
@@ -87,9 +92,9 @@ namespace Asgaard {
     
     int Screen::GetCurrentRefreshRate() const
     {
-        auto it = std::find_if(m_Modes.begin(), m_Modes.end(), 
+        auto it = std::find_if(m_modes.begin(), m_modes.end(), 
             [](const std::unique_ptr<ScreenMode>& mode) { return mode->IsCurrent(); });
-        if (it != m_Modes.end()) {
+        if (it != m_modes.end()) {
             return (*it)->RefreshRate();
         }
         return -1;
@@ -115,10 +120,10 @@ namespace Asgaard {
                     (struct wm_screen_screen_properties_event*)data;
                 
                 // update stored information
-                m_PositionX   = properties->x;
-                m_PositionY   = properties->y;
-                m_Scale       = properties->scale;
-                m_Transform   = ConvertProtocolTransform(properties->transform);
+                m_positionX   = properties->x;
+                m_positionY   = properties->y;
+                m_scale       = properties->scale;
+                m_transform   = ConvertProtocolTransform(properties->transform);
                 
                 // continue this charade and ask for modes, end with a sync
                 wm_screen_get_modes(APP.GrachtClient(), nullptr, Id());
@@ -133,7 +138,7 @@ namespace Asgaard {
                     new ScreenMode(ConvertProtocolMode(mode->flags), mode->resolution_x, 
                         mode->resolution_y, mode->refresh_rate));
                 
-                m_Modes.push_back(std::move(screenMode));
+                m_modes.push_back(std::move(screenMode));
             } break;
             
             default:

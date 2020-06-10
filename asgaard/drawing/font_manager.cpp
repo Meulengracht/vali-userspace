@@ -39,7 +39,7 @@ namespace Asgaard {
             
         }
         
-        std::shared_ptr<Font> FontManager::CreateFont(std::string& path, int pixelSize)
+        std::shared_ptr<Font> FontManager::CreateFont(const std::string& path, int pixelSize)
         {
             auto font = std::shared_ptr<Font>(new Font(m_freetype, pixelSize));
             if (!font->Initialize(path)) {

@@ -23,6 +23,7 @@
 
 #include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
+#include <asgaard/window_decoration.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
 #include <asgaard/drawing/painter.hpp>
@@ -47,30 +48,30 @@ protected:
     {
         if (createdObject->Id() == Id()) {
             // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-            auto screenSize = m_Screen->GetCurrentWidth() * m_Screen->GetCurrentHeight() * 4;
-            m_Memory = Asgaard::MemoryPool::Create(this, screenSize);
+            auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
+            m_memory = Asgaard::MemoryPool::Create(this, screenSize);
         }
-        else if (createdObject->Id() == m_Memory->Id()) {
+        else if (createdObject->Id() == m_memory->Id()) {
             // Create initial buffer the size of this surface
-            m_Buffer = Asgaard::MemoryBuffer::Create(this, m_Memory, 0, Dimensions().Width(),
+            m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
                 Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
-        else if (createdObject->Id() == m_Buffer->Id()) {
+        else if (createdObject->Id() == m_buffer->Id()) {
             // Now all resources are created
-            SetBuffer(m_Buffer);
+            SetBuffer(m_buffer);
             Redraw();
-            MarkDamaged(Dimensions());
-            ApplyChanges();
+            
+            // Create the window decoration
+            Asgaard::Rectangle decorationDimensions(0, 0, Dimensions().Width(), 64);
+            m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions);
         }
     }
     
     void OnRefreshed(Asgaard::MemoryBuffer* buffer) override
     {
-        if (buffer->Id() == m_Buffer->Id()) {
-            Redraw();
-            MarkDamaged(Dimensions());
-            ApplyChanges();
-        }
+        //if (buffer->Id() == m_buffer->Id()) {
+        //    Redraw();
+        //}
     }
     
     void OnFrame() override
@@ -89,27 +90,22 @@ protected:
     }
 
 private:
-    void PixelFill(unsigned int color) {
-        std::size_t size = Dimensions().Width() * Dimensions().Height();
-        uint32_t*   pointer = static_cast<uint32_t*>(m_Buffer->Buffer());
-        for (std::size_t i = 0; i < size; i++) {
-            pointer[i] = color;
-        }
-    }
-
     void Redraw()
     {
-        Drawing::Painter paint(m_Buffer);
+        Asgaard::Drawing::Painter paint(m_buffer);
         
         paint.SetColor(r, g, b);
         paint.RenderFill();
         
         r++; g++; b++;
+        MarkDamaged(Dimensions());
+        ApplyChanges();
     }
     
 private:
-    std::shared_ptr<Asgaard::MemoryPool> m_Memory;
-    std::shared_ptr<Asgaard::MemoryBuffer> m_Buffer;
+    std::shared_ptr<Asgaard::MemoryPool>      m_memory;
+    std::shared_ptr<Asgaard::MemoryBuffer>    m_buffer;
+    std::shared_ptr<Asgaard::WindowDecoration> m_decoration;
 
     uint8_t r,g,b;
 };

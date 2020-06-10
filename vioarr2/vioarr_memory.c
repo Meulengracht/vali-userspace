@@ -29,10 +29,12 @@
 #include "engine/vioarr_memory.h"
 #include "engine/vioarr_buffer.h"
 #include "engine/vioarr_objects.h"
+#include "engine/vioarr_utils.h"
 #include <errno.h>
 
 void wm_memory_create_pool_callback(struct gracht_recv_message* message, struct wm_memory_create_pool_args* input)
 {
+    vioarr_utils_trace("[wm_memory_create_pool_callback] client %i", message->client);
     vioarr_memory_pool_t* pool;
     int                   status;
     
@@ -50,6 +52,7 @@ void wm_memory_create_pool_callback(struct gracht_recv_message* message, struct 
 
 void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, struct wm_memory_pool_create_buffer_args* input)
 {
+    vioarr_utils_trace("[wm_memory_pool_create_buffer_callback] client %i", message->client);
     vioarr_memory_pool_t* pool = vioarr_objects_get_object(input->pool_id);
     vioarr_buffer_t*      buffer;
     int                   status;
@@ -69,6 +72,7 @@ void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, 
 
 void wm_buffer_destroy_callback(struct gracht_recv_message* message, struct wm_buffer_destroy_args* input)
 {
+    vioarr_utils_trace("[wm_buffer_destroy_callback] client %i", message->client);
     vioarr_buffer_t* buffer = vioarr_objects_get_object(input->buffer_id);
     int              status;
     if (!buffer) {

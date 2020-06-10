@@ -29,7 +29,7 @@
 
 namespace Asgaard {
     namespace Widgets {
-        Label::Label(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle& dimensions)
+        Label::Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
             : Surface(id, screen, parentId, dimensions)
             , m_memory(nullptr)
             , m_buffer(nullptr)
@@ -44,7 +44,7 @@ namespace Asgaard {
             
         }
         
-        void Label::SetFont(std::shared_ptr<Drawing::Font>& font)
+        void Label::SetFont(const std::shared_ptr<Drawing::Font>& font)
         {
             m_font = font;
             
@@ -105,8 +105,7 @@ namespace Asgaard {
                 switch (static_cast<MemoryPool::MemoryEvent>(event))
                 {
                     case MemoryPool::MemoryEvent::CREATED: {
-                        auto bufferSize = Dimensions().Width() * Dimensions().Height() * 4;
-                        m_buffer = MemoryBuffer::Create(this, m_memory, bufferSize,
+                        m_buffer = MemoryBuffer::Create(this, m_memory, 0,
                             Dimensions().Width(), Dimensions().Height(), PixelFormat::A8R8G8B8);
                     } break;
                     
@@ -123,6 +122,7 @@ namespace Asgaard {
                 {
                     case MemoryBuffer::BufferEvent::CREATED: {
                         SetBuffer(m_buffer);
+                        SetValid(true);
                         Notify(static_cast<int>(LabelEvent::CREATED));
                     } break;
                     

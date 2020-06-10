@@ -29,6 +29,10 @@ namespace Asgaard {
     class MemoryPool;
     class MemoryBuffer;
     
+    namespace Drawing {
+        class Font;
+    }
+    
     namespace Widgets {
         class Icon;
         class Label;
@@ -41,7 +45,7 @@ namespace Asgaard {
             ERROR
         };
     public:
-        WindowDecoration(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+        WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
         ~WindowDecoration();
         
         void SetTitle(const std::string& title);
@@ -51,7 +55,9 @@ namespace Asgaard {
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
     
     private:
+        void Redraw();
         void Notification(Publisher*, int = 0, void* = 0) override;
+        void CheckCreation();
 
     private:
         // consists of multiple resources;
@@ -61,6 +67,7 @@ namespace Asgaard {
         // a buffer with the close icon
         std::shared_ptr<Asgaard::MemoryPool>     m_memory;
         std::shared_ptr<Asgaard::MemoryBuffer>   m_buffer;
+        std::shared_ptr<Asgaard::Drawing::Font>  m_appFont;
         std::shared_ptr<Asgaard::Widgets::Label> m_appTitle;
         std::shared_ptr<Asgaard::Widgets::Icon>  m_appIcon;
         std::shared_ptr<Asgaard::Widgets::Icon>  m_closeIcon;

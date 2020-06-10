@@ -45,7 +45,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_asgaard build_macia build_llvm build_mesa build_glm build_vioarr build_wintest
+build: $(VALI_APPLICATION_PATH) build_apps build_wm
 	
 .PHONY: package
 package: build
@@ -57,6 +57,12 @@ $(VALI_APPLICATION_PATH):
 	@mkdir -p $(VALI_APPLICATION_PATH)/bin
 	@mkdir -p $(VALI_APPLICATION_PATH)/include
 	@mkdir -p $(VALI_APPLICATION_PATH)/lib
+
+.PHONY: build_apps
+build_apps: build_zlib build_libpng build_libfreetype build_asgaard build_macia build_wintest build_alumni
+
+.PHONY: build_wm
+build_wm: build_llvm build_mesa build_glm build_vioarr
 
 .PHONY: build_zlib
 build_zlib:
@@ -123,6 +129,16 @@ build_vioarr:
 clean_vioarr:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
 	@$(MAKE) -s -C vioarr2 -f makefile clean
+
+.PHONY: clean_apps
+clean_apps:
+	@$(MAKE) -s -C zlib -f makefile clean
+	@$(MAKE) -s -C libpng -f makefile clean
+	@$(MAKE) -s -C freetype -f makefile clean
+	@$(MAKE) -s -C asgaard -f makefile clean
+	@$(MAKE) -s -C macia -f makefile clean
+	@$(MAKE) -s -C alumni -f makefile clean
+	@$(MAKE) -s -C wintest -f makefile clean
 
 .PHONY: clean
 clean:

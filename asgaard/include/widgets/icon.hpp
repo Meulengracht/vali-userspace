@@ -47,10 +47,10 @@ namespace Asgaard {
                 ERROR
             };
         public:
-            Icon(uint32_t id, std::shared_ptr<Screen> screen, uint32_t parentId, const Rectangle&);
+            Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
             ~Icon();
             
-            bool LoadIcon(std::string& path);
+            bool LoadIcon(const std::string& path);
             void SetState(IconState state);
     
         public:

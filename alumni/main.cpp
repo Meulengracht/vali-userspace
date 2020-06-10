@@ -21,30 +21,18 @@
  *   using freetype as the font renderer.
  */
 
-#include "targets/alumni_vali.hpp"
-#include "surfaces/surface_vali.hpp"
-#include "terminal_interpreter.hpp"
-#include "terminal_renderer.hpp"
-#include "terminal_font.hpp"
+#include "targets/resolver_vali.hpp"
 #include "terminal.hpp"
-#include <os/input.h>
+#include <asgaard/drawing/font_manager.hpp>
 
-int main(int argc, char **argv) {
-    std::unique_ptr<CTerminalFreeType>    FreeType(new CTerminalFreeType());
-    CSurfaceRect                          TerminalArea(450, 300);
-    std::unique_ptr<CSurface>             Surface(new CValiSurface(TerminalArea));
-    std::shared_ptr<CTerminalRenderer>    Renderer(new CTerminalRenderer(std::move(Surface)));
-    std::shared_ptr<CTerminalFont>        Font(new CTerminalFont(std::move(FreeType), "$sys/fonts/DejaVuSansMono.ttf", 12));
-    std::unique_ptr<CTerminal>            Terminal(new CTerminal(TerminalArea, Renderer, Font));
-    std::unique_ptr<CTerminalInterpreter> Interpreter(new CTerminalInterpreter());
-    std::unique_ptr<CValiAlumni>          Alumni(new CValiAlumni(std::move(Terminal), std::move(Interpreter)));
-    SystemKey_t                           Key;
-
-    Alumni->PrintCommandHeader();
-	while (Alumni->IsAlive()) {
-        if (ReadSystemKey(&Key) == OsSuccess) {
-            Alumni->HandleKeyCode(Key.KeyCode, Key.Flags);
-        }
-    }
-    return 0;
+int main(int argc, char **argv)
+{
+    std::string                             fontPath = "$sys/fonts/DejaVuSansMono.ttf";
+    std::shared_ptr<Asgaard::Drawing::Font> font     = Asgaard::Drawing::FM.CreateFont(fontPath, 12);
+    std::shared_ptr<ResolverVali>           resolver = std::shared_ptr<ResolverVali>(new ResolverVali());
+    Asgaard::Rectangle                      initialSize(0, 0, 450, 300);
+    
+    Asgaard::APP.CreateWindow<Terminal>(initialSize, font, resolver);
+    Asgaard::APP.Initialize();
+    return Asgaard::APP.Execute();
 }

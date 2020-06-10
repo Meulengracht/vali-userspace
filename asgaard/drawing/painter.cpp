@@ -40,7 +40,7 @@ namespace {
 
 namespace Asgaard {
     namespace Drawing {
-        Painter::Painter(std::shared_ptr<MemoryBuffer> canvas)
+        Painter::Painter(const std::shared_ptr<MemoryBuffer>& canvas)
             : m_canvas(canvas)
             , m_font(nullptr)
             , m_color(0xFF000000)
@@ -63,7 +63,7 @@ namespace Asgaard {
             m_color = 0xFF000000 | (r << 16) | (g << 8) | b;
         }
         
-        void Painter::SetFont(std::shared_ptr<Font>& font)
+        void Painter::SetFont(const std::shared_ptr<Font>& font)
         {
             m_font = font;
         }

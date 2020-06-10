@@ -36,7 +36,7 @@ namespace Asgaard {
             FontManager();
             ~FontManager();
             
-            std::shared_ptr<Font> CreateFont(std::string& path, int pixelSize);
+            std::shared_ptr<Font> CreateFont(const std::string& path, int pixelSize);
             
         private:
             std::shared_ptr<Utils::FreeType> m_freetype;

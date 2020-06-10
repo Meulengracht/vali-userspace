@@ -44,7 +44,7 @@ static enum wm_surface_edge ToWindowEdges(enum Asgaard::Surface::SurfaceEdges ed
 
 namespace Asgaard {
     WindowBase::WindowBase(uint32_t id, const Rectangle& dimensions)
-        : Surface(id, dimensions), m_Invalidated(false)
+        : Surface(id, dimensions)
     {
         
     }
@@ -67,7 +67,7 @@ namespace Asgaard {
             case ObjectEvent::SURFACE_FORMAT: {
                 struct wm_surface_format_event* event = 
                     (struct wm_surface_format_event*)data;
-                m_SupportedFormats.push_back((enum PixelFormat)event->format);
+                m_supportedFormats.push_back((enum PixelFormat)event->format);
             } break;
             
             case ObjectEvent::SYNC: {
@@ -85,10 +85,8 @@ namespace Asgaard {
     void WindowBase::Notification(Publisher* source, int event, void* data)
     {
         auto memoryObject = dynamic_cast<MemoryPool*>(source);
-        if (memoryObject != nullptr)
-        {
-            switch (static_cast<MemoryPool::MemoryEvent>(event))
-            {
+        if (memoryObject != nullptr) {
+            switch (static_cast<MemoryPool::MemoryEvent>(event)) {
                 case MemoryPool::MemoryEvent::CREATED: {
                     OnCreated(memoryObject);
                 } break;
@@ -97,13 +95,12 @@ namespace Asgaard {
                     
                 } break;
             }
+            return;
         }
         
         auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
-        if (bufferObject != nullptr)
-        {
-            switch (static_cast<MemoryBuffer::BufferEvent>(event))
-            {
+        if (bufferObject != nullptr) {
+            switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
                 case MemoryBuffer::BufferEvent::CREATED: {
                     OnCreated(bufferObject);
                 } break;
@@ -111,6 +108,7 @@ namespace Asgaard {
                     OnRefreshed(bufferObject);
                 } break;
             }
+            return;
         }
     }
     
