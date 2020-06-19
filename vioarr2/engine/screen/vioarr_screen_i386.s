@@ -25,8 +25,8 @@ global _present_basic
 global _present_sse
 global _present_sse2
 
-; present_basic(void *Framebuffer, void *Backbuffer, uint32_t Rows, uint32_t RowLoops,
-;   uint32_t RowRemaining, uint32_t LeftoverBytes)
+; present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops,
+;   int RowRemaining, int LeftoverBytes)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 _present_basic:
 	; Stack Frame
@@ -72,8 +72,8 @@ _present_basic:
 	ret
 
 
-; present_sse(void *Framebuffer, void *Backbuffer, uint32_t Rows, uint32_t RowLoops,
-;   uint32_t RowRemaining, uint32_t LeftoverBytes)
+; present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops,
+;   int RowRemaining, int LeftoverBytes)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 _present_sse:
 	; Stack Frame
@@ -150,12 +150,12 @@ _present_sse:
     movdqu  xmm6, [esp]
     movdqu  xmm7, [esp + 16]
 	add     esp, 32
-    
+    uint64_t
 	pop     ebp
 	ret
 
-; present_sse2(void *Framebuffer, void *Backbuffer, uint32_t Rows, uint32_t RowLoops,
-;   uint32_t RowRemaining, uint32_t LeftoverBytes)
+; present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops,
+;   int RowRemaining, int LeftoverBytes)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 _present_sse2:
 	; Stack Frame

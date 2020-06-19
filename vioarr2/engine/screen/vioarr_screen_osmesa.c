@@ -46,9 +46,9 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-void present_basic(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
-void present_sse(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
-void present_sse2(void *Framebuffer, void *Backbuffer, int Rows, int RowLoops, int RowRemaining, int BytesPerScanline);
+void present_basic(void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
+void present_sse(  void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
+void present_sse2( void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
 
 typedef struct vioarr_screen {
     uint32_t           id;

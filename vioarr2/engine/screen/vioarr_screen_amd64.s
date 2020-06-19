@@ -31,8 +31,8 @@ present_basic:
 present_sse:
     ret
 
-; present_sse2(void *Framebuffer, void *Backbuffer, uint64_t Rows, 
-;   uint64_t RowLoops, uint64_t RowRemaining, uint64_t BytesPerScanline)
+; present_sse2(void *Framebuffer, void *Backbuffer, int Rows, 
+;   int RowLoops, int RowRemaining, int BytesPerScanline)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 ; @abi set to ms
 ; rcx => Framebuffer
@@ -43,8 +43,8 @@ present_sse:
 ; r11 => BytesPerScanline  ; stack in ms
 present_sse2:
     ; Save the two stacked arguments to volatile registers
-    mov r10, qword [rsp + 40] ; arg0 is 32 + 8 (reserved + return address)
-    mov r11, qword [rsp + 48] ; arg1 is 32 + 8 + 8 (reserved + return address + arg0)
+    movsx r10, dword [rsp + 40] ; arg0 is 32 + 8 (reserved + return address)
+    movsx r11, dword [rsp + 48] ; arg1 is 32 + 8 + 8 (reserved + return address + arg0)
     
     ; Save XMM non-volatile registers, maybe consider using xmm8-15 aswell
     sub rsp, 32
