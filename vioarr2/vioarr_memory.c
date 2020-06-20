@@ -41,19 +41,20 @@ void wm_memory_create_pool_callback(struct gracht_recv_message* message, struct 
     // get memory subsystem
     // TODO
     
-    status = vioarr_memory_create_pool(input->pool_id, input->size, &pool);
+    status = vioarr_memory_create_pool(message->client, input->pool_id, input->size, &pool);
     if (status) {
         wm_core_event_error_single(message->client, 0 /* input->object_id */, status, "wm_memory: failed to create memory pool");
         return;
     }
     
+    vioarr_objects_create_client_object(message->client, input->pool_id, pool, object_type_memory_pool);
     wm_core_event_object_single(message->client, input->pool_id, vioarr_memory_pool_handle(pool), object_type_memory_pool);
 }
 
 void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, struct wm_memory_pool_create_buffer_args* input)
 {
     vioarr_utils_trace("[wm_memory_pool_create_buffer_callback] client %i", message->client);
-    vioarr_memory_pool_t* pool = vioarr_objects_get_object(input->pool_id);
+    vioarr_memory_pool_t* pool = vioarr_objects_get_object(message->client, input->pool_id);
     vioarr_buffer_t*      buffer;
     int                   status;
     if (!pool) {
@@ -67,13 +68,14 @@ void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, 
         return;
     }
     
+    vioarr_objects_create_client_object(message->client, input->buffer_id, buffer, object_type_buffer);
     wm_core_event_object_single(message->client, input->buffer_id, UUID_INVALID, object_type_buffer);
 }
 
 void wm_buffer_destroy_callback(struct gracht_recv_message* message, struct wm_buffer_destroy_args* input)
 {
     vioarr_utils_trace("[wm_buffer_destroy_callback] client %i", message->client);
-    vioarr_buffer_t* buffer = vioarr_objects_get_object(input->buffer_id);
+    vioarr_buffer_t* buffer = vioarr_objects_get_object(message->client, input->buffer_id);
     int              status;
     if (!buffer) {
         wm_core_event_error_single(message->client, input->buffer_id, ENOENT, "wm_memory: object does not exist");

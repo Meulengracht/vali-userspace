@@ -28,10 +28,10 @@
 #include <stdint.h>
 #include "../protocols/wm_core_protocol.h"
 
-void     vioarr_objects_create_client_object(uint32_t, void*, enum wm_core_object_type);
+void     vioarr_objects_create_client_object(int, uint32_t, void*, enum wm_core_object_type);
 uint32_t vioarr_objects_create_server_object(void*, enum wm_core_object_type);
-int      vioarr_objects_remove_object(uint32_t);
-void*    vioarr_objects_get_object(uint32_t);
+int      vioarr_objects_remove_object(int, uint32_t);
+void*    vioarr_objects_get_object(int, uint32_t);
 void     vioarr_objects_publish(int);
 
 #endif //!__VIOARR_OBJECTS_H__

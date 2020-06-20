@@ -23,21 +23,24 @@
  */
 
 #include "vioarr_objects.h"
+#include "vioarr_utils.h"
 #include "../protocols/wm_core_protocol_server.h"
 #include <ds/list.h>
 #include <stdatomic.h>
 #include <stdlib.h>
  
+#define SERVER_ID_START 0x80000000
+
 typedef struct vioarr_object {
+    int                      client;
     uint32_t                 id;
     enum wm_core_object_type type;
     void*                    object;
     UUId_t                   handle;
-    
-    element_t link;
+    element_t                link;
 } vioarr_object_t;
  
-static _Atomic(uint32_t) object_id = ATOMIC_VAR_INIT(0x80000000);
+static _Atomic(uint32_t) object_id = ATOMIC_VAR_INIT(SERVER_ID_START);
 static list_t            objects   = LIST_INIT;
  
 static uint32_t vioarr_utils_get_object_id(void)
@@ -45,7 +48,7 @@ static uint32_t vioarr_utils_get_object_id(void)
     return atomic_fetch_add(&object_id, 1);
 }
 
-void vioarr_objects_create_client_object(uint32_t id, void* object, enum wm_core_object_type type)
+void vioarr_objects_create_client_object(int client, uint32_t id, void* object, enum wm_core_object_type type)
 {
     vioarr_object_t* resource;
     
@@ -54,6 +57,7 @@ void vioarr_objects_create_client_object(uint32_t id, void* object, enum wm_core
         return;
     }
     
+    resource->client = client;
     resource->id     = id;
     resource->object = object;
     resource->type   = type;
@@ -71,6 +75,7 @@ uint32_t vioarr_objects_create_server_object(void* object, enum wm_core_object_t
         return 0;
     }
     
+    resource->client = -1;
     resource->id     = vioarr_utils_get_object_id();
     resource->object = object;
     resource->type   = type;
@@ -80,19 +85,35 @@ uint32_t vioarr_objects_create_server_object(void* object, enum wm_core_object_t
     return resource->id;
 }
 
-void* vioarr_objects_get_object(uint32_t id)
+// Returns the object that matches the id - either if the id is a global id
+// and matches or if the client and id matches
+static vioarr_object_t* get_object(int client, uint32_t id)
 {
-    vioarr_object_t* object = list_find_value(&objects, (void*)(uintptr_t)id);
+    foreach(i, &objects) {
+        vioarr_object_t* object = i->value;
+        if ((id >= SERVER_ID_START && object->id == id) ||
+            (object->client == client && object->id == id)) {
+            return object;
+        }
+    }
+    ERROR("[vioarr_objects_get_object] %i => %u object not found", client, id);
+    return NULL;
+}
+
+// Returns the object that matches the id - either if the id is a global id
+// and matches or if the client and id matches
+void* vioarr_objects_get_object(int client, uint32_t id)
+{
+    vioarr_object_t* object = get_object(client, id);
     if (!object){
         return NULL;
     }
-    
     return object->object;
 }
 
-int vioarr_objects_remove_object(uint32_t id)
+int vioarr_objects_remove_object(int client, uint32_t id)
 {
-    vioarr_object_t* object = list_find_value(&objects, (void*)(uintptr_t)id);
+    vioarr_object_t* object = get_object(client, id);
     if (!object){
         return -1;
     }
@@ -103,10 +124,13 @@ int vioarr_objects_remove_object(uint32_t id)
     return 0;
 }
 
+// publishes all server objects
 void vioarr_objects_publish(int client)
 {
     foreach(i, &objects) {
         vioarr_object_t* object = i->value;
-        wm_core_event_object_single(client, object->id, object->handle, object->type);
+        if (object->client == -1) {
+            wm_core_event_object_single(client, object->id, object->handle, object->type);
+        }
     }
 }

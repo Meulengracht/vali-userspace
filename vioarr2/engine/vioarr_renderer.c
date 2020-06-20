@@ -25,25 +25,23 @@
 #include <glad/glad.h>
 #include "backend/nanovg.h"
 #include "backend/nanovg_gl.h"
+#include <ds/list.h>
 #include "vioarr_renderer.h"
 #include "vioarr_screen.h"
 #include "vioarr_surface.h"
 #include "vioarr_utils.h"
 #include <stdlib.h>
-
-typedef struct vioarr_renderer_entity {
-    vioarr_surface_t*              surface;
-    struct vioarr_renderer_entity* link;
-} vioarr_renderer_entity_t;
+#include <threads.h>
 
 typedef struct vioarr_renderer {
     NVGcontext* context;
     int         width;
     int         height;
     float       pixel_ratio;
-    
-    vioarr_renderer_entity_t* entities;
-    vioarr_renderer_entity_t* front_entities;
+    mtx_t       sync_object;
+
+    list_t entities;
+    list_t front_entities;
 } vioarr_renderer_t;
 
 vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
@@ -69,71 +67,97 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         return NULL;
     }
     
+    mtx_init(&renderer->sync_object, mtx_plain);
+    list_construct(&renderer->entities);
+    list_construct(&renderer->front_entities);
+
     renderer->width       = width;
     renderer->height      = height;
     renderer->pixel_ratio = (float)width / (float)height;
     
-    renderer->entities       = NULL;
-    renderer->front_entities = NULL;
     return renderer;
 }
 
 void vioarr_renderer_set_scale(vioarr_renderer_t* renderer, int scale)
 {
-    
+    TRACE("[vioarr_renderer_set_scale] FIXME: STUB FUNCTION");
 }
 
 void vioarr_renderer_set_rotation(vioarr_renderer_t* renderer, int rotation)
 {
-    
+    TRACE("[vioarr_renderer_set_rotation] FIXME: STUB FUNCTION");
 }
 
 int vioarr_renderer_scale(vioarr_renderer_t* renderer)
 {
+    TRACE("[vioarr_renderer_scale] FIXME: STUB FUNCTION");
     return 1;
 }
 
 int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
 {
+    TRACE("[vioarr_renderer_rotation] FIXME: STUB FUNCTION");
     return 0;
 }
 
 void vioarr_renderer_register_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
 {
     if (!renderer || !surface) {
+        ERROR("[vioarr_renderer_register_surface] null parameters");
         return;
     }
+
+    element_t* element = malloc(sizeof(element_t));
+    if (!element) {
+        ERROR("[vioarr_renderer_register_surface] out of memory");
+        return;
+    }
+
+    ELEMENT_INIT(element, (uintptr_t)vioarr_surface_id(surface), surface);
     
+    mtx_lock(&renderer->sync_object);
+    list_append(&renderer->entities, element);
+    mtx_unlock(&renderer->sync_object);
 }
 
 void vioarr_renderer_unregister_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
 {
     if (!renderer || !surface) {
+        ERROR("[vioarr_renderer_register_surface] null parameters");
         return;
     }
-    
+
+    mtx_lock(&renderer->sync_object);
+    element_t* element = list_find(&renderer->entities, (void*)(uintptr_t)vioarr_surface_id(surface));
+    if (!element) {
+        mtx_unlock(&renderer->sync_object); 
+        return;
+    }
+
+    list_remove(&renderer->entities, element);
+    mtx_unlock(&renderer->sync_object);
 }
 
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
-    vioarr_renderer_entity_t* entity;
+    element_t* i;
     
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
     
-    entity = renderer->entities;
-    while (entity) {
-        vioarr_surface_render(renderer->context, entity->surface);
-        entity = entity->link;
+    mtx_lock(&renderer->sync_object);
+    _foreach(i, &renderer->entities) {
+        vioarr_surface_t* surface = i->value;
+        vioarr_surface_render(renderer->context, surface);
     }
     
-    entity = renderer->front_entities;
-    while (entity) {
-        vioarr_surface_render(renderer->context, entity->surface);
-        entity = entity->link;
+    _foreach(i, &renderer->front_entities) {
+        vioarr_surface_t* surface = i->value;
+        vioarr_surface_render(renderer->context, surface);
     }
+    mtx_unlock(&renderer->sync_object);
     
     nvgEndFrame(renderer->context);
     glFinish();

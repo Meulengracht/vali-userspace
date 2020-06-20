@@ -138,12 +138,12 @@ int vioarr_region_height(vioarr_region_t* region)
 int vioarr_region_is_zero(vioarr_region_t* region)
 {
     if (!region) {
-        return -1;
+        return 0;
     }
     
     if (region->x == 0 && region->y == 0 &&
             region->width == 0 && region->height == 0) {
-        return 0;            
+        return 1;            
     }
-    return -1;
+    return 0;
 }

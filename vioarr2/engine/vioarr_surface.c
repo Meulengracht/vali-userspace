@@ -26,8 +26,9 @@
 #include "vioarr_region.h"
 #include "vioarr_buffer.h"
 #include "vioarr_objects.h"
-#include "vioarr_screen.h"
+#include "vioarr_utils.h"
 #include <stdlib.h>
+#include <stdatomic.h>
 #include <string.h>
 
 #include "../protocols/wm_buffer_protocol_server.h"
@@ -46,7 +47,7 @@ typedef struct vioarr_surface {
     uint32_t         id;
     vioarr_screen_t* screen;
     int              visible;
-    int              swap_properties;
+    atomic_int       swap_properties;
 
     // non-versioned data
     vioarr_region_t*       dimensions;
@@ -63,7 +64,7 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
 int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int x, int y,
-    int width, int height, vioarr_surface_t** surface_out)
+    int width, int height, vioarr_surface_t** surfaceOut)
 {
     vioarr_surface_t* surface;
     
@@ -100,12 +101,12 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
         return -1;
     }
     
-    surface->client = client;
-    surface->id     = id;
-    surface->screen = screen;
+    surface->client          = client;
+    surface->id              = id;
+    surface->screen          = screen;
+    surface->swap_properties = ATOMIC_VAR_INIT(0);
 
-    vioarr_screen_register_surface(screen, surface);
-    *surface_out = surface;
+    *surfaceOut = surface;
     return 0;
 }
 
@@ -148,7 +149,6 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         vioarr_buffer_destroy(surface->properties.content);
     }
 
-    vioarr_screen_unregister_surface(surface->screen, surface);
     free(surface->pending_properties.dirt);
     free(surface->properties.dirt);
     free(surface->dimensions);
@@ -216,7 +216,7 @@ void vioarr_surface_commit(vioarr_surface_t* surface)
         return;
     }
     
-    surface->swap_properties = 1;
+    atomic_store(&surface->swap_properties, 1);
 }
 
 void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
@@ -238,6 +238,14 @@ uint32_t vioarr_surface_id(vioarr_surface_t* surface)
     return surface->id;
 }
 
+vioarr_screen_t* vioarr_surface_screen(vioarr_surface_t* surface)
+{
+    if (!surface) {
+        return NULL;
+    }
+    return surface->screen;
+}
+
 void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
 {
     NVGpaint stream_paint;
@@ -245,6 +253,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     float y = (float)vioarr_region_y(surface->dimensions);
     float width = (float)vioarr_region_width(surface->dimensions);
     float height = (float)vioarr_region_height(surface->dimensions);
+    TRACE("[vioarr_surface_render]");
     
     if (!surface) {
         return;
@@ -259,6 +268,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     nvgTranslate(context, x, y);
     
     if (surface->properties.content) {
+        TRACE("[vioarr_surface_render] rendering content");
         if (surface->properties.drop_shadow) {
             render_drop_shadow(context, surface);
         }
@@ -271,6 +281,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     }
 
     if (surface->properties.children) {
+        TRACE("[vioarr_surface_render] rendering children");
         vioarr_surface_t* child = surface->properties.children;
         while (child) {
             vioarr_surface_render(context, child);
@@ -283,6 +294,8 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
 
 static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t* surface)
 {
+    TRACE("[vioarr_surface_swap_properties]");
+
     // handle basic properties
     surface->properties.corner_radius = surface->pending_properties.corner_radius;
     surface->properties.drop_shadow   = surface->pending_properties.drop_shadow;
@@ -304,7 +317,9 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
 
     // Handle any cleanup if the content is changing
     if (surface->pending_properties.content) {
+        TRACE("[vioarr_surface_swap_properties] initializing new content");
         if (surface->resource_id) {
+            TRACE("[vioarr_surface_swap_properties] cleaning up previous");
             nvgDeleteImage(context, surface->resource_id);
             vioarr_buffer_destroy(surface->properties.content);
         }
@@ -323,17 +338,19 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
     vioarr_region_copy(surface->properties.dirt, surface->pending_properties.dirt);
     vioarr_region_zero(surface->pending_properties.dirt);
 
-    surface->swap_properties = 0;
+    atomic_store(&surface->swap_properties, 0);
 }
 
 static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface)
 {
-    if (surface->swap_properties) {
+    TRACE("[vioarr_surface_update]");
+    if (atomic_load(&surface->swap_properties)) {
         vioarr_surface_swap_properties(context, surface);
     }
     
     // Only update the image data if the region is not empty
-    if (vioarr_region_is_zero(surface->properties.dirt)) {
+    if (!vioarr_region_is_zero(surface->properties.dirt)) {
+        TRACE("[vioarr_surface_update] refreshing conent");
         nvgUpdateImage(context, surface->resource_id,
             (const uint8_t*)vioarr_buffer_data(surface->properties.content));
         
@@ -343,6 +360,7 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
     
     // Determine other attributes about this surface. Is it visible?
     surface->visible = surface->properties.content != NULL;
+    TRACE("[vioarr_surface_update] is visible: %i", surface->visible);
 }
 
 static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)

@@ -29,16 +29,17 @@
 #include <stdlib.h>
 
 typedef struct vioarr_memory_pool {
+    int                   client;
     uint32_t              id;
     _Atomic(int)          references;
     struct dma_attachment attachment;
 } vioarr_memory_pool_t;
 
-int vioarr_memory_create_pool(uint32_t id, size_t size, vioarr_memory_pool_t** pool_out)
+int vioarr_memory_create_pool(int client, uint32_t id, size_t size, vioarr_memory_pool_t** poolOut)
 {
     vioarr_memory_pool_t*  pool;
-    struct dma_buffer_info dma_info;
-    OsStatus_t             os_status;
+    struct dma_buffer_info dmaInfo;
+    OsStatus_t             osStatus;
     
     if (!size) {
         return -1;
@@ -49,23 +50,23 @@ int vioarr_memory_create_pool(uint32_t id, size_t size, vioarr_memory_pool_t** p
         return -1;
     }
     
-    dma_info.name     = "wm_buffer";
-    dma_info.length   = size;
-    dma_info.capacity = size;
-    dma_info.flags    = DMA_CLEAN;
+    dmaInfo.name     = "wm_buffer";
+    dmaInfo.length   = size;
+    dmaInfo.capacity = size;
+    dmaInfo.flags    = DMA_CLEAN;
     
-    os_status = dma_create(&dma_info, &pool->attachment);
-    if (os_status != OsSuccess) {
-        OsStatusToErrno(os_status);
+    osStatus = dma_create(&dmaInfo, &pool->attachment);
+    if (osStatus != OsSuccess) {
+        OsStatusToErrno(osStatus);
         free(pool);
         return -1;
     }
     
+    pool->client     = client;
     pool->id         = id;
     pool->references = ATOMIC_VAR_INIT(1);
     
-    vioarr_objects_create_client_object(id, pool, object_type_memory_pool);
-    *pool_out = pool;
+    *poolOut = pool;
     return 0;
 }
 
@@ -94,7 +95,7 @@ int vioarr_memory_destroy_pool(vioarr_memory_pool_t* pool)
     
     references = atomic_fetch_sub(&pool->references, 1);
     if (references == 1) {
-        vioarr_objects_remove_object(pool->id);
+        vioarr_objects_remove_object(pool->client, pool->id);
         dma_attachment_unmap(&pool->attachment);
         dma_detach(&pool->attachment);
         free(pool);

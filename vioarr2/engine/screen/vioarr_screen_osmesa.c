@@ -46,6 +46,8 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
+//#define VIOARR_TRACEMODE
+
 void present_basic(void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
 void present_sse(  void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
 void present_sse2( void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
@@ -201,7 +203,7 @@ void vioarr_screen_set_transform(vioarr_screen_t* screen, enum wm_screen_transfo
     if (!screen) {
         return;
     }
-    // TODO
+    TRACE("[vioarr_screen_set_transform] FIXME: STUB FUNCTION");
 }
 
 vioarr_region_t* vioarr_screen_region(vioarr_screen_t* screen)
@@ -264,6 +266,8 @@ void vioarr_screen_unregister_surface(vioarr_screen_t* screen, vioarr_surface_t*
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
     vioarr_renderer_render(screen->renderer);
+#ifndef VIOARR_TRACEMODE
     screen->present(screen->framebuffer, screen->backbuffer, vioarr_region_height(screen->dimensions), 
         screen->row_loops, screen->bytes_remaining, screen->stride);
+#endif
 }
