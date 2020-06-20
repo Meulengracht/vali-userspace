@@ -63,7 +63,7 @@
                 "${workspaceFolder}/glm/**",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",
-                "${workspaceFolder}/vioarr/**",
+                "${workspaceFolder}/vioarr2/loader/include",
                 "${workspaceFolder}/wintest/**",
                 "${env:VALI_SDK_PATH}/include/",
                 "${env:VALI_DDK_PATH}/include/"

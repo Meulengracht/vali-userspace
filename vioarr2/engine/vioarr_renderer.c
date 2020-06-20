@@ -37,12 +37,19 @@ typedef struct vioarr_renderer {
     NVGcontext* context;
     int         width;
     int         height;
+    int         scale;
+    int         rotation;
     float       pixel_ratio;
     mtx_t       sync_object;
 
     list_t entities;
     list_t front_entities;
 } vioarr_renderer_t;
+
+static void opengl_initialize(int width, int height)
+{
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+}
 
 vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
 {
@@ -54,15 +61,18 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
     if (!renderer) {
         return NULL;
     }
-    
-    vioarr_utils_trace("[vioarr] [renderer] creating nvg context");
+
+    TRACE("[vioarr_renderer_create] initializing openGL");
+    opengl_initialize(width, height);
+
+    TRACE("[vioarr_renderer_create] creating nvg context");
 #ifdef __VIOARR_CONFIG_RENDERER_MSAA
 	renderer->context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
 	renderer->context = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
 #endif
     if (!renderer->context) {
-        vioarr_utils_error("[vioarr] [renderer] failed to create the nvg context");
+        ERROR("[vioarr_renderer_create] failed to create the nvg context");
         free(renderer);
         return NULL;
     }
@@ -74,30 +84,44 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
     renderer->width       = width;
     renderer->height      = height;
     renderer->pixel_ratio = (float)width / (float)height;
+    renderer->scale       = 1;
+    renderer->rotation    = 0;
     
     return renderer;
 }
 
 void vioarr_renderer_set_scale(vioarr_renderer_t* renderer, int scale)
 {
-    TRACE("[vioarr_renderer_set_scale] FIXME: STUB FUNCTION");
+    if (!renderer) {
+        return;
+    }
+    
+    renderer->scale = scale;
 }
 
 void vioarr_renderer_set_rotation(vioarr_renderer_t* renderer, int rotation)
 {
-    TRACE("[vioarr_renderer_set_rotation] FIXME: STUB FUNCTION");
+    if (!renderer) {
+        return;
+    }
+    
+    renderer->rotation = rotation;
 }
 
 int vioarr_renderer_scale(vioarr_renderer_t* renderer)
 {
-    TRACE("[vioarr_renderer_scale] FIXME: STUB FUNCTION");
-    return 1;
+    if (!renderer) {
+        return 1;
+    }
+    return renderer->scale;
 }
 
 int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
 {
-    TRACE("[vioarr_renderer_rotation] FIXME: STUB FUNCTION");
-    return 0;
+    if (!renderer) {
+        return 0;
+    }
+    return renderer->rotation;
 }
 
 void vioarr_renderer_register_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
@@ -142,9 +166,7 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
     element_t* i;
     
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
     
     mtx_lock(&renderer->sync_object);

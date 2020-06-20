@@ -84,7 +84,8 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
         free(surface);
         return -1;
     }
-    vioarr_region_add(surface->dimensions, x, y, width, height);
+    vioarr_region_add(surface->dimensions, 0, 0, width, height);
+    vioarr_region_set_position(surface->dimensions, x, y);
     
     surface->properties.dirt = vioarr_region_create();
     if (!surface->properties.dirt) {
@@ -178,7 +179,11 @@ int vioarr_surface_add_child(vioarr_surface_t* parent, vioarr_surface_t* child, 
         itr->link = child;
     }
     
-    vioarr_surface_set_position(child, x, y);
+    vioarr_surface_set_position(child,
+        vioarr_region_x(parent->dimensions) + x,
+        vioarr_region_y(parent->dimensions) + y
+    );
+
     child->parent = parent;
     return 0;
 }
@@ -194,11 +199,22 @@ void vioarr_surface_set_buffer(vioarr_surface_t* surface, vioarr_buffer_t* conte
 
 void vioarr_surface_set_position(vioarr_surface_t* surface, int x, int y)
 {
+    vioarr_surface_t* child;
+
     if (!surface) {
         return;
     }
 
     vioarr_region_set_position(surface->dimensions, x, y);
+    
+    child = surface->properties.children;
+    while (child) {
+        vioarr_surface_set_position(child,
+            x + vioarr_region_x(vioarr_dimensions(child)),
+            y + vioarr_region_y(vioarr_dimensions(child))
+        );
+        child = child->link;
+    }
 }
 
 void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int width, int height)
@@ -221,6 +237,8 @@ void vioarr_surface_commit(vioarr_surface_t* surface)
 
 void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
 {
+    vioarr_surface_t* child;
+
     if (!surface) {
         return;
     }
@@ -228,6 +246,12 @@ void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
     vioarr_region_set_position(surface->dimensions,
         vioarr_region_x(surface->dimensions) + x,
         vioarr_region_y(surface->dimensions) + y);
+    
+    child = surface->properties.children;
+    while (child) {
+        vioarr_surface_move(child, x, y);
+        child = child->link;
+    }
 }
 
 uint32_t vioarr_surface_id(vioarr_surface_t* surface)
@@ -246,11 +270,17 @@ vioarr_screen_t* vioarr_surface_screen(vioarr_surface_t* surface)
     return surface->screen;
 }
 
+vioarr_region_t* vioarr_dimensions(vioarr_surface_t* surface)
+{
+    if (!surface) {
+        return NULL;
+    }
+    return surface->dimensions;
+}
+
 void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
 {
     NVGpaint stream_paint;
-    float x = (float)vioarr_region_x(surface->dimensions);
-    float y = (float)vioarr_region_y(surface->dimensions);
     float width = (float)vioarr_region_width(surface->dimensions);
     float height = (float)vioarr_region_height(surface->dimensions);
     TRACE("[vioarr_surface_render]");
@@ -265,7 +295,10 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     }
     
     nvgSave(context);
-    nvgTranslate(context, x, y);
+    nvgTranslate(context, 
+        (float)vioarr_region_x(surface->dimensions),
+        (float)vioarr_region_y(surface->dimensions)
+    );
     
     if (surface->properties.content) {
         TRACE("[vioarr_surface_render] rendering content");
@@ -273,9 +306,9 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
             render_drop_shadow(context, surface);
         }
         
-        stream_paint = nvgImagePattern(context, x, y, width, height, 0.0f, surface->resource_id, 1.0f);
+        stream_paint = nvgImagePattern(context, 0.0f, 0.0f, width, height, 0.0f, surface->resource_id, 1.0f);
         nvgBeginPath(context);
-        nvgRect(context, x, y, width, height);
+        nvgRect(context, 0.0f, 0.0f, width, height);
         nvgFillPaint(context, stream_paint);
         nvgFill(context);
     }
