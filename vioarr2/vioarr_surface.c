@@ -111,6 +111,9 @@ void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, str
         wm_core_event_error_single(message->client, input->child_id, ENOENT, "wm_surface: child object does not exist");
         return;
     }
+
+    // unregister the surface
+    vioarr_screen_unregister_surface(vioarr_surface_screen(child_surface), child_surface);
     
     status = vioarr_surface_add_child(parent_surface, child_surface, input->x, input->y);
     if (status) {

@@ -34,11 +34,19 @@ namespace Asgaard {
         class Painter {
             public:
                 Painter(const std::shared_ptr<MemoryBuffer>& canvas);
-                ~Painter();
                 
                 void SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
                 void SetColor(unsigned char r, unsigned char g, unsigned char b);
+
+                void RenderLine(int x1, int y1, int x2, int y2);
                 
+                void RenderFillGradientV(const Rectangle& dimensions,
+                    unsigned char r1, unsigned char g1, unsigned char b1,
+                    unsigned char r2, unsigned char g2, unsigned char b2);
+                void RenderFillGradientV(
+                    unsigned char r1, unsigned char g1, unsigned char b1,
+                    unsigned char r2, unsigned char g2, unsigned char b2);
+
                 void RenderFill(const Rectangle& dimensions);
                 void RenderFill();
                 

@@ -25,8 +25,8 @@
 #ifndef __VIOARR_UTILS_H__
 #define __VIOARR_UTILS_H__
 
-#define __TRACE
-#define VIOARR_TRACEMODE
+//#define __TRACE
+//#define VIOARR_TRACEMODE
 //#define VIOARR_REVERSE_FB_BLIT // must be given to asm aswell
 
 #include <stdint.h>

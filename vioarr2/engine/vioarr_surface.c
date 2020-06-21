@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdatomic.h>
 #include <string.h>
+#include <threads.h>
 
 #include "../protocols/wm_buffer_protocol_server.h"
 
@@ -48,6 +49,7 @@ typedef struct vioarr_surface {
     vioarr_screen_t* screen;
     int              visible;
     atomic_int       swap_properties;
+    mtx_t            sync_object;
 
     // non-versioned data
     vioarr_region_t*       dimensions;
@@ -102,6 +104,7 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
         return -1;
     }
     
+    mtx_init(&surface->sync_object, mtx_plain);
     surface->client          = client;
     surface->id              = id;
     surface->screen          = screen;
@@ -165,7 +168,10 @@ int vioarr_surface_add_child(vioarr_surface_t* parent, vioarr_surface_t* child, 
     if (child->parent) {
         return -1;
     }
+    child->parent = parent;
 
+    TRACE("[vioarr_surface_add_child]");
+    mtx_lock(&parent->sync_object);
     // the list that we keep updated is actually the one in pending properties
     // which means all list changes are performed there
     if (parent->pending_properties.children == NULL) {
@@ -178,13 +184,10 @@ int vioarr_surface_add_child(vioarr_surface_t* parent, vioarr_surface_t* child, 
         }
         itr->link = child;
     }
-    
-    vioarr_surface_set_position(child,
-        vioarr_region_x(parent->dimensions) + x,
-        vioarr_region_y(parent->dimensions) + y
-    );
+    mtx_unlock(&parent->sync_object);
 
-    child->parent = parent;
+    // update child position
+    vioarr_surface_set_position(child, x, y);
     return 0;
 }
 
@@ -194,27 +197,20 @@ void vioarr_surface_set_buffer(vioarr_surface_t* surface, vioarr_buffer_t* conte
         return;
     }
 
+    mtx_lock(&surface->sync_object);
     surface->pending_properties.content = content;
+    mtx_unlock(&surface->sync_object);
 }
 
 void vioarr_surface_set_position(vioarr_surface_t* surface, int x, int y)
 {
-    vioarr_surface_t* child;
-
     if (!surface) {
         return;
     }
 
+    mtx_lock(&surface->sync_object);
     vioarr_region_set_position(surface->dimensions, x, y);
-    
-    child = surface->properties.children;
-    while (child) {
-        vioarr_surface_set_position(child,
-            x + vioarr_region_x(vioarr_dimensions(child)),
-            y + vioarr_region_y(vioarr_dimensions(child))
-        );
-        child = child->link;
-    }
+    mtx_unlock(&surface->sync_object);
 }
 
 void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int width, int height)
@@ -223,7 +219,9 @@ void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int widt
         return;
     }
     
+    mtx_lock(&surface->sync_object);
     vioarr_region_add(surface->pending_properties.dirt, x, y, width, height);
+    mtx_unlock(&surface->sync_object);
 }
 
 void vioarr_surface_commit(vioarr_surface_t* surface)
@@ -237,21 +235,15 @@ void vioarr_surface_commit(vioarr_surface_t* surface)
 
 void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
 {
-    vioarr_surface_t* child;
-
     if (!surface) {
         return;
     }
 
+    mtx_lock(&surface->sync_object);
     vioarr_region_set_position(surface->dimensions,
         vioarr_region_x(surface->dimensions) + x,
         vioarr_region_y(surface->dimensions) + y);
-    
-    child = surface->properties.children;
-    while (child) {
-        vioarr_surface_move(child, x, y);
-        child = child->link;
-    }
+    mtx_unlock(&surface->sync_object);
 }
 
 uint32_t vioarr_surface_id(vioarr_surface_t* surface)
@@ -301,7 +293,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
         (float)vioarr_region_x(surface->dimensions),
         (float)vioarr_region_y(surface->dimensions)
     );
-    
+
     if (surface->properties.content) {
         TRACE("[vioarr_surface_render] rendering content");
         if (surface->properties.drop_shadow) {
@@ -330,6 +322,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
 static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t* surface)
 {
     TRACE("[vioarr_surface_swap_properties]");
+    mtx_lock(&surface->sync_object);
 
     // handle basic properties
     surface->properties.corner_radius = surface->pending_properties.corner_radius;
@@ -372,6 +365,7 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
     
     vioarr_region_copy(surface->properties.dirt, surface->pending_properties.dirt);
     vioarr_region_zero(surface->pending_properties.dirt);
+    mtx_unlock(&surface->sync_object);
 
     atomic_store(&surface->swap_properties, 0);
 }
@@ -391,6 +385,9 @@ static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface
         
         // Now we are done with the user-buffer, send the release event
         wm_buffer_event_release_single(surface->client, vioarr_buffer_id(surface->properties.content));
+
+        // clear dirt
+        vioarr_region_zero(surface->properties.dirt);
     }
     
     // Determine other attributes about this surface. Is it visible?

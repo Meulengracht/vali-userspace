@@ -48,11 +48,6 @@ namespace Asgaard {
             
         }
         
-        Painter::~Painter()
-        {
-            
-        }
-        
         void Painter::SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
         {
             m_color = (a << 24) | (r << 16) | (g << 8) | b;
@@ -67,23 +62,65 @@ namespace Asgaard {
         {
             m_font = font;
         }
+
+        void Painter::RenderLine(int x1, int y1, int x2, int y2)
+        {
+            uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer());
+            int       dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+            int       dy = abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+            int       err = (dx > dy ? dx : -dy) / 2, e2;
+
+            // Draw the line by brute force
+            while (x1 < m_canvas->Width() && y1 < m_canvas->Height()) {
+                pointer[(y1 * m_canvas->Width()) + x1] = m_color;
+
+                if (x1 == x2 && y1 == y2) {
+                    break;
+                }
+                
+                e2 = err;
+                if (e2 > -dx) { err -= dy; x1 += sx; }
+                if (e2 <  dy) { err += dx; y1 += sy; }
+            }
+        }
+
+        void Painter::RenderFillGradientV(const Rectangle& dimensions,
+                    unsigned char r1, unsigned char g1, unsigned char b1,
+                    unsigned char r2, unsigned char g2, unsigned char b2)
+        {
+            for (int y = 0; y < dimensions.Height(); y++) {
+                float p = y / (float)(dimensions.Height() - 1);
+                unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
+                unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
+                unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
+                RenderLine(dimensions.X(), y, dimensions.Width(), y);
+            }
+        }
         
+        void Painter::RenderFillGradientV(
+                    unsigned char r1, unsigned char g1, unsigned char b1,
+                    unsigned char r2, unsigned char g2, unsigned char b2)
+        {
+            for (int y = 0; y < m_canvas->Height(); y++) {
+                float p = y / (float)(m_canvas->Height() - 1);
+                unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
+                unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
+                unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
+                RenderLine(0, y, m_canvas->Width(), y);
+            }
+        }
+
         void Painter::RenderFill(const Rectangle& dimensions)
         {
-            // @todo
-            std::size_t size = m_canvas->Width() * m_canvas->Height();
-            uint32_t*   pointer = static_cast<uint32_t*>(m_canvas->Buffer());
-            for (std::size_t i = 0; i < size; i++) {
-                pointer[i] = m_color;
+            for (int y = dimensions.Y(); y < dimensions.Height(); y++) {
+                RenderLine(dimensions.X(), y, dimensions.Width(), y);
             }
         }
         
         void Painter::RenderFill()
         {
-            std::size_t size = m_canvas->Width() * m_canvas->Height();
-            uint32_t*   pointer = static_cast<uint32_t*>(m_canvas->Buffer());
-            for (std::size_t i = 0; i < size; i++) {
-                pointer[i] = m_color;
+            for (int y = 0; y < m_canvas->Height(); y++) {
+                RenderLine(0, y, m_canvas->Width(), y);
             }
         }
         

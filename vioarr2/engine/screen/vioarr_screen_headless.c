@@ -59,7 +59,7 @@ vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
     }
 
     attributes[n++] = OSMESA_FORMAT;
-    attributes[n++] = OSMESA_BGRA;
+    attributes[n++] = OSMESA_ARGB;
     attributes[n++] = OSMESA_DEPTH_BITS;
     attributes[n++] = 24;
     attributes[n++] = OSMESA_STENCIL_BITS;

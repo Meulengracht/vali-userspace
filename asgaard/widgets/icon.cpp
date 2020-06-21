@@ -105,7 +105,7 @@ namespace Asgaard {
     
         void Icon::SetState(IconState state)
         {
-            if (m_buffers[static_cast<int>(state)] == nullptr) {
+            if (!m_buffers[static_cast<int>(state)]) {
                 return;
             }
     
@@ -178,7 +178,7 @@ namespace Asgaard {
                         else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
                             extension = iconStateExtensions[static_cast<int>(IconState::DISABLED)];
                         }
-    
+
                         auto path   = ExtendFilename(m_originalPath, extension);
                         auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
                         if (buffer != nullptr) {

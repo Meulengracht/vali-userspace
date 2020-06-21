@@ -33,9 +33,9 @@ public:
     TestWindow(uint32_t id, const Asgaard::Rectangle& dimensions)
         : WindowBase(id, dimensions)
     {
-        r = 32;
-        g = 32;
-        b = 32;
+        r = 0xDC;
+        g = 0xD4;
+        b = 0xC5;
     }
     
     ~TestWindow()
@@ -57,13 +57,13 @@ protected:
                 Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
         }
         else if (createdObject->Id() == m_buffer->Id()) {
-            // Now all resources are created
-            SetBuffer(m_buffer);
-            Redraw();
-            
             // Create the window decoration
             Asgaard::Rectangle decorationDimensions(0, 0, Dimensions().Width(), 64);
             m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions);
+
+            // Now all resources are created
+            SetBuffer(m_buffer);
+            Redraw();         
         }
     }
     

@@ -67,7 +67,7 @@ namespace Asgaard {
     {
         Drawing::Painter paint(m_buffer);
         
-        paint.SetColor(64, 64, 64);
+        paint.SetColor(0xCF, 0xC9, 0xCB);
         paint.RenderFill();
         
         MarkDamaged(Dimensions());
@@ -170,7 +170,7 @@ namespace Asgaard {
         
         
         if (m_closeIcon != nullptr && object->Id() == m_closeIcon->Id()) {
-            m_closeIcon->LoadIcon("$sys/themes/default/close_inactive.png");
+            m_closeIcon->LoadIcon("$sys/themes/default/close.png");
             CheckCreation();
             return;
         }
