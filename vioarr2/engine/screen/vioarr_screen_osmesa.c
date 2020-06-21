@@ -46,8 +46,6 @@
 #define CPUID_FEAT_EDX_SSE		1 << 25
 #define CPUID_FEAT_EDX_SSE2     1 << 26
 
-//#define VIOARR_TRACEMODE
-
 void present_basic(void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
 void present_sse(  void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
 void present_sse2( void* framebuffer, void* backbuffer, int rows, int rowLoops, int rowRemaining, int bytesPerScanline);
@@ -266,8 +264,14 @@ void vioarr_screen_unregister_surface(vioarr_screen_t* screen, vioarr_surface_t*
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
     vioarr_renderer_render(screen->renderer);
+
 #ifndef VIOARR_TRACEMODE
+#ifdef  VIOARR_REVERSE_FB_BLIT
+    screen->present(screen->framebuffer_end, screen->backbuffer, vioarr_region_height(screen->dimensions), 
+        screen->row_loops, screen->bytes_remaining, screen->stride);
+#else
     screen->present(screen->framebuffer, screen->backbuffer, vioarr_region_height(screen->dimensions), 
         screen->row_loops, screen->bytes_remaining, screen->stride);
-#endif
+#endif // VIOARR_REVERSE_FB_BLIT
+#endif //!VIOARR_TRACEMODE
 }

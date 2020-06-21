@@ -283,12 +283,14 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     NVGpaint stream_paint;
     float width = (float)vioarr_region_width(surface->dimensions);
     float height = (float)vioarr_region_height(surface->dimensions);
-    TRACE("[vioarr_surface_render]");
     
     if (!surface) {
         return;
     }
-    
+
+    TRACE("[vioarr_surface_render] %u [%i, %i]", 
+        surface->id, vioarr_region_x(surface->dimensions),
+        vioarr_region_y(surface->dimensions));
     vioarr_surface_update(context, surface);
     if (!surface->visible) {
         return;

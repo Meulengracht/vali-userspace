@@ -35,7 +35,7 @@ present_sse:
 ;   int RowLoops, int RowRemaining, int BytesPerScanline)
 ; Copies data <Rows> times from _Backbuffer to Framebuffer
 ; @abi set to ms
-; rcx => Framebuffer
+; rcx => start of framebuffer/end of framebuffer
 ; rdx => Backbuffer
 ; r8  => Rows
 ; r9  => RowLoops
@@ -92,7 +92,11 @@ present_sse2:
         mov rcx, r10
         rep movsb
         mov rdi, rax
+%ifdef VIOARR_REVERSE_FB_BLIT
+        sub rdi, r11
+%else
         add rdi, r11
+%endif
 
         ; Loop Epilogue
         dec r8

@@ -32,7 +32,7 @@
 
 void wm_surface_get_formats_callback(struct gracht_recv_message* message, struct wm_surface_get_formats_args* input)
 {
-    TRACE("[wm_surface_get_formats_callback] client %i", message->client);
+    TRACE("[wm_surface_get_formats_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -44,7 +44,7 @@ void wm_surface_get_formats_callback(struct gracht_recv_message* message, struct
 
 void wm_surface_set_buffer_callback(struct gracht_recv_message* message, struct wm_surface_set_buffer_args* input)
 {
-    TRACE("[wm_surface_set_buffer_callback] client %i", message->client);
+    TRACE("[wm_surface_set_buffer_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     vioarr_buffer_t*  buffer  = vioarr_objects_get_object(message->client, input->buffer_id);
     if (!surface) {
@@ -62,7 +62,7 @@ void wm_surface_set_buffer_callback(struct gracht_recv_message* message, struct 
 
 void wm_surface_set_input_region_callback(struct gracht_recv_message* message, struct wm_surface_set_input_region_args* input)
 {
-    TRACE("[wm_surface_set_input_region_callback] client %i", message->client);
+    TRACE("[wm_surface_set_input_region_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -74,7 +74,7 @@ void wm_surface_set_input_region_callback(struct gracht_recv_message* message, s
 
 void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args* input)
 {
-    TRACE("[wm_surface_request_frame_callback] client %i", message->client);
+    TRACE("[wm_surface_request_frame_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -86,7 +86,7 @@ void wm_surface_request_frame_callback(struct gracht_recv_message* message, stru
 
 void wm_surface_invalidate_callback(struct gracht_recv_message* message, struct wm_surface_invalidate_args* input)
 {
-    TRACE("[wm_surface_invalidate_callback] client %i", message->client);
+    TRACE("[wm_surface_invalidate_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -98,7 +98,7 @@ void wm_surface_invalidate_callback(struct gracht_recv_message* message, struct 
 
 void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_add_subsurface_args* input)
 {
-    TRACE("[wm_surface_add_subsurface_callback] client %i", message->client);
+    TRACE("[wm_surface_add_subsurface_callback] client %i, surface %u", message->client, input->parent_id);
     vioarr_surface_t* parent_surface = vioarr_objects_get_object(message->client, input->parent_id);
     vioarr_surface_t* child_surface  = vioarr_objects_get_object(message->client, input->child_id);
     int               status;
@@ -121,7 +121,7 @@ void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, str
 
 void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_surface_commit_args* input)
 {
-    TRACE("[wm_surface_commit_callback] client %i", message->client);
+    TRACE("[wm_surface_commit_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -133,7 +133,7 @@ void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_s
 
 void wm_surface_resize_callback(struct gracht_recv_message* message, struct wm_surface_resize_args* input)
 {
-    TRACE("[wm_surface_resize_callback] client %i", message->client);
+    TRACE("[wm_surface_resize_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -145,7 +145,7 @@ void wm_surface_resize_callback(struct gracht_recv_message* message, struct wm_s
 
 void wm_surface_move_callback(struct gracht_recv_message* message, struct wm_surface_move_args* input)
 {
-    TRACE("[wm_surface_move_callback] client %i", message->client);
+    TRACE("[wm_surface_move_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
@@ -157,7 +157,7 @@ void wm_surface_move_callback(struct gracht_recv_message* message, struct wm_sur
 
 void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_surface_destroy_args* input)
 {
-    TRACE("[wm_surface_destroy_callback] client %i", message->client);
+    TRACE("[wm_surface_destroy_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");

@@ -170,8 +170,7 @@ namespace Asgaard {
         
         
         if (m_closeIcon != nullptr && object->Id() == m_closeIcon->Id()) {
-            // load close icon
-            
+            m_closeIcon->LoadIcon("$sys/themes/default/close_inactive.png");
             CheckCreation();
             return;
         }

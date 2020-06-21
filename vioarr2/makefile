@@ -7,7 +7,7 @@ LFLAGS := libds.lib ddk.lib libgracht.lib libfreetype.lib gallium-osmesa.lib
 ifeq ($(VALI_ARCH),i386)
 	ASFLAGS = -f win32 -Xvc
 else
-	ASFLAGS = -f win64 -Xvc
+	ASFLAGS = -f win64 -Xvc -DVIOARR_REVERSE_FB_BLIT
 endif
 
 APP_SOURCES_ASM := 
@@ -32,7 +32,7 @@ APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_HEADLESS
 else
 APP_SOURCES_C += engine/screen/vioarr_screen_osmesa.c
 APP_SOURCES_ASM += engine/screen/vioarr_screen_$(VALI_ARCH).s
-APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_OSMESA
+APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_OSMESA -DVIOARR_REVERSE_FB_BLIT
 endif
 
 APP_CFLAGS = $(VALI_CFLAGS) $(CFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)

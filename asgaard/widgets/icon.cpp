@@ -71,6 +71,7 @@ namespace Asgaard {
     namespace Widgets {
         Icon::Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
             : Surface(id, screen, parentId, dimensions)
+            , m_memory(nullptr)
             , m_originalPath("")
             , m_originalWidth(0)
             , m_originalHeight(0)
