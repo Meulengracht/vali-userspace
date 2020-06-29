@@ -55,6 +55,7 @@ namespace Asgaard {
         void SetBuffer(const std::shared_ptr<MemoryBuffer>&);
         void MarkDamaged(const Rectangle&);
         void MarkInputRegion(const Rectangle&);
+        void SetDropShadow(const Rectangle&);
         void ApplyChanges();
         
         void RequestFrame();

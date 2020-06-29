@@ -7,7 +7,10 @@
     <enums>
         <enum name="pixel_format">
             <value name="format_a8r8g8b8" />
+            <value name="format_a8b8g8r8" />
             <value name="format_x8r8g8b8" />
+            <value name="format_r8g8b8a8" />
+            <value name="format_b8g8r8a8" />
         </enum>
     </enums>
     <protocols namespace="wm">
@@ -25,7 +28,7 @@
             <functions>
                 <function name="sync">
                     <request>
-                        <param name="serial" type="uint32_t" count="1" />
+                        <param name="serial" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="get_objects" />
@@ -33,17 +36,17 @@
             
             <events>
                 <event name="error">
-                    <param name="object_id" type="uint32_t" count="1" />
-                    <param name="error_id" type="int" count="1" />
+                    <param name="object_id" type="uint32_t"/>
+                    <param name="error_id" type="int"/>
                     <param name="error_description" type="string" />
                 </event>
                 <event name="sync">
-                    <param name="serial" type="uint32_t" count="1" />
+                    <param name="serial" type="uint32_t"/>
                 </event>
                 <event name="object">
-                    <param name="object_id" type="uint32_t" count="1" />
-                    <param name="system_handle" type="UUId_t" count="1" />
-                    <param name="type" type="object_type" count="1" />
+                    <param name="object_id" type="uint32_t"/>
+                    <param name="system_handle" type="UUId_t"/>
+                    <param name="type" type="object_type"/>
                 </event>
             </events>
         </protocol>
@@ -65,50 +68,50 @@
             <functions>
                 <function name="get_properties">
                     <request>
-                        <param name="screen_id" type="uint32_t" count="1" />
+                        <param name="screen_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="get_modes">
                     <request>
-                        <param name="screen_id" type="uint32_t" count="1" />
+                        <param name="screen_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="set_scale">
                     <request>
-                        <param name="screen_id" type="uint32_t" count="1" />
-                        <param name="scale" type="int" count="1" />
+                        <param name="screen_id" type="uint32_t"/>
+                        <param name="scale" type="int"/>
                     </request>
                 </function>
                 <function name="set_transform">
                     <request>
-                        <param name="screen_id" type="uint32_t" count="1" />
-                        <param name="transform" type="transform" count="1" />
+                        <param name="screen_id" type="uint32_t"/>
+                        <param name="transform" type="transform"/>
                     </request>
                 </function>
                 <function name="create_surface">
                     <request>
-                        <param name="screen_id" type="uint32_t" count="1" />
-                        <param name="surface_id" type="uint32_t" count="1" />
-                        <param name="width" type="int" count="1" />
-                        <param name="height" type="int" count="1" />
+                        <param name="screen_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t"/>
+                        <param name="width" type="int"/>
+                        <param name="height" type="int"/>
                     </request>
                 </function>
             </functions>
             
             <events>
                 <event name="screen_properties">
-                    <param name="screen_id" type="uint32_t" count="1" />
-                    <param name="x" type="int" count="1" />
-                    <param name="y" type="int" count="1" />
-                    <param name="transform" type="transform" count="1" />
-                    <param name="scale" type="int" count="1" />
+                    <param name="screen_id" type="uint32_t"/>
+                    <param name="x" type="int"/>
+                    <param name="y" type="int"/>
+                    <param name="transform" type="transform"/>
+                    <param name="scale" type="int"/>
                 </event>
                 <event name="mode">
-                    <param name="screen_id" type="uint32_t" count="1" />
-                    <param name="flags" type="mode_attributes" count="1" />
-                    <param name="resolution_x" type="int" count="1" />
-                    <param name="resolution_y" type="int" count="1" />
-                    <param name="refresh_rate" type="int" count="1" />
+                    <param name="screen_id" type="uint32_t"/>
+                    <param name="flags" type="mode_attributes"/>
+                    <param name="resolution_x" type="int"/>
+                    <param name="resolution_y" type="int"/>
+                    <param name="refresh_rate" type="int"/>
                 </event>
             </events>
         </protocol>
@@ -117,9 +120,9 @@
             <functions>
                 <function name="create_pool">
                     <request>
-                        <param name="memory_id" type="uint32_t" count="1" />
-                        <param name="pool_id" type="uint32_t" count="1" />
-                        <param name="size" type="int" count="1" />
+                        <param name="memory_id" type="uint32_t"/>
+                        <param name="pool_id" type="uint32_t"/>
+                        <param name="size" type="int"/>
                     </request>
                 </function>
             </functions>
@@ -129,13 +132,13 @@
             <functions>
                 <function name="create_buffer">
                     <request>
-                        <param name="pool_id" type="uint32_t" count="1" />
-                        <param name="buffer_id" type="uint32_t" count="1" />
-                        <param name="offset" type="int" count="1" />
-                        <param name="width" type="int" count="1" />
-                        <param name="height" type="int" count="1" />
-                        <param name="stride" type="int" count="1" />
-                        <param name="format" type="pixel_format" count="1" />
+                        <param name="pool_id" type="uint32_t"/>
+                        <param name="buffer_id" type="uint32_t"/>
+                        <param name="offset" type="int"/>
+                        <param name="width" type="int"/>
+                        <param name="height" type="int"/>
+                        <param name="stride" type="int"/>
+                        <param name="format" type="pixel_format"/>
                     </request>
                 </function>
             </functions>
@@ -155,18 +158,27 @@
             <functions>
                 <function name="get_formats">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="set_buffer">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
-                        <param name="buffer_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
+                        <param name="buffer_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="invalidate">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
+                        <param name="x" type="int"/>
+                        <param name="y" type="int"/>
+                        <param name="width" type="int"/>
+                        <param name="height" type="int"/>
+                    </request>
+                </function>
+                <function name="set_drop_shadow">
+                    <request>
+                        <param name="surface_id" type="uint32_t"/>
                         <param name="x" type="int"/>
                         <param name="y" type="int"/>
                         <param name="width" type="int"/>
@@ -175,7 +187,7 @@
                 </function>
                 <function name="set_input_region">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                         <param name="x" type="int"/>
                         <param name="y" type="int"/>
                         <param name="width" type="int"/>
@@ -184,52 +196,52 @@
                 </function>
                 <function name="add_subsurface">
                     <request>
-                        <param name="parent_id" type="uint32_t" count="1" />
-                        <param name="child_id" type="uint32_t" count="1" />
+                        <param name="parent_id" type="uint32_t"/>
+                        <param name="child_id" type="uint32_t"/>
                         <param name="x" type="int"/>
                         <param name="y" type="int"/>
                     </request>
                 </function>
                 <function name="request_frame">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="commit">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="resize">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                         <param name="edges" type="edge"/>
                     </request>
                 </function>
                 <function name="move">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
                 <function name="destroy">
                     <request>
-                        <param name="surface_id" type="uint32_t" count="1" />
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
             </functions>
             
             <events>
                 <event name="format">
-                    <param name="surface_id" type="uint32_t" count="1" />
-                    <param name="format" type="pixel_format" count="1" />
+                    <param name="surface_id" type="uint32_t"/>
+                    <param name="format" type="pixel_format"/>
                 </event>
                 <event name="frame">
-                    <param name="surface_id" type="uint32_t" count="1" />
+                    <param name="surface_id" type="uint32_t"/>
                 </event>
                 <event name="resize">
-                    <param name="surface_id" type="uint32_t" count="1" />
-                    <param name="width" type="int" count="1" />
-                    <param name="height" type="int" count="1" />
+                    <param name="surface_id" type="uint32_t"/>
+                    <param name="width" type="int"/>
+                    <param name="height" type="int"/>
                     <param name="edges" type="edge"/>
                 </event>
             </events>
@@ -239,14 +251,14 @@
             <functions>
                 <function name="destroy">
                     <request>
-                        <param name="buffer_id" type="uint32_t" count="1" />
+                        <param name="buffer_id" type="uint32_t"/>
                     </request>
                 </function>
             </functions>
             
             <events>
                 <event name="release">
-                    <param name="buffer_id" type="uint32_t" count="1" />
+                    <param name="buffer_id" type="uint32_t"/>
                 </event>
             </events>
         </protocol>

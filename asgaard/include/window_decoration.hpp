@@ -70,6 +70,8 @@ namespace Asgaard {
         std::shared_ptr<Asgaard::Drawing::Font>  m_appFont;
         std::shared_ptr<Asgaard::Widgets::Label> m_appTitle;
         std::shared_ptr<Asgaard::Widgets::Icon>  m_appIcon;
+        std::shared_ptr<Asgaard::Widgets::Icon>  m_minIcon;
+        std::shared_ptr<Asgaard::Widgets::Icon>  m_maxIcon;
         std::shared_ptr<Asgaard::Widgets::Icon>  m_closeIcon;
     };
 }

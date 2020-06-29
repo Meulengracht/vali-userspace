@@ -30,7 +30,7 @@
 
 static std::string iconStateExtensions[static_cast<int>(
     Asgaard::Widgets::Icon::IconState::COUNT)] = {
-    ""
+    "",
     "_hover",
     "_active",
     "_disabled"
@@ -88,6 +88,7 @@ namespace Asgaard {
             int numComponents;
     
             if (m_memory) {
+                // todo support for replacing icon
                 return false;
             }
     
@@ -146,7 +147,7 @@ namespace Asgaard {
                         auto bufferSize = m_originalWidth * m_originalHeight * 4;
                         for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
                             m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
-                                m_originalWidth, m_originalHeight, PixelFormat::A8R8G8B8);
+                                m_originalWidth, m_originalHeight, PixelFormat::A8B8G8R8);
                         }
                     } break;
                     
@@ -154,6 +155,7 @@ namespace Asgaard {
                         Notify(static_cast<int>(IconEvent::ERROR));
                     } break;
                 }
+                return;
             }
             
             auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
@@ -165,7 +167,7 @@ namespace Asgaard {
                         auto bufferSize = m_originalWidth * m_originalHeight * 4;
                         int loadedWidth, loadedHeight, loadedComponents;
                         std::string extension = "";
-    
+
                         if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
                             extension = iconStateExtensions[static_cast<int>(IconState::NORMAL)];
                         }
@@ -189,7 +191,7 @@ namespace Asgaard {
                             
                             memcpy(bufferObject->Buffer(), buffer, bufferSize);
                             stbi_image_free(buffer);
-                        
+
                             if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
                                 SetState(IconState::NORMAL);
                             }

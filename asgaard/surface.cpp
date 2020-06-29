@@ -116,6 +116,12 @@ namespace Asgaard {
             dimensions.X(), dimensions.Y(),
             dimensions.Width(), dimensions.Height());
     }
+
+    void Surface::SetDropShadow(const Rectangle& dimensions)
+    {
+        wm_surface_set_drop_shadow(APP.GrachtClient(), nullptr, Id(),
+            dimensions.X(), dimensions.Y(), dimensions.Width(), dimensions.Height());
+    }
     
     void Surface::ApplyChanges()
     {

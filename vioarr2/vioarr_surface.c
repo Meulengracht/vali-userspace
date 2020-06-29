@@ -96,6 +96,18 @@ void wm_surface_invalidate_callback(struct gracht_recv_message* message, struct 
     vioarr_surface_invalidate(surface, input->x, input->y, input->width, input->height);
 }
 
+void wm_surface_set_drop_shadow_callback(struct gracht_recv_message* message, struct wm_surface_set_drop_shadow_args* input)
+{
+    TRACE("[wm_surface_set_drop_shadow_callback] client %i, surface %u", message->client, input->surface_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    vioarr_surface_set_drop_shadow(surface, input->x, input->y, input->width, input->height);
+}
+
 void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_add_subsurface_args* input)
 {
     TRACE("[wm_surface_add_subsurface_callback] client %i, surface %u", message->client, input->parent_id);

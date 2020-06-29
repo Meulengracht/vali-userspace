@@ -35,9 +35,11 @@
 #include "../protocols/wm_buffer_protocol_server.h"
 
 typedef struct vioarr_surface_properties {
-    int drop_shadow;
     int corner_radius;
+    int border_width;
+    int border_color;
     
+    vioarr_region_t*       drop_shadow;
     vioarr_region_t*       dirt;
     vioarr_buffer_t*       content;
     struct vioarr_surface* children;
@@ -89,18 +91,13 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
     vioarr_region_add(surface->dimensions, 0, 0, width, height);
     vioarr_region_set_position(surface->dimensions, x, y);
     
-    surface->properties.dirt = vioarr_region_create();
-    if (!surface->properties.dirt) {
-        free(surface->dimensions);
-        free(surface);
-        return -1;
-    }
-    
-    surface->pending_properties.dirt = vioarr_region_create();
-    if (!surface->pending_properties.dirt) {
-        free(surface->properties.dirt);
-        free(surface->dimensions);
-        free(surface);
+    surface->properties.dirt                = vioarr_region_create();
+    surface->properties.drop_shadow         = vioarr_region_create();
+    surface->pending_properties.dirt        = vioarr_region_create();
+    surface->pending_properties.drop_shadow = vioarr_region_create();
+    if (!surface->properties.dirt || !surface->properties.drop_shadow ||
+        !surface->pending_properties.dirt || !surface->pending_properties.drop_shadow) {
+        vioarr_surface_destroy(surface);
         return -1;
     }
     
@@ -149,12 +146,26 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         itr = next;
     }
 
+    if (surface->pending_properties.drop_shadow) {
+        free(surface->pending_properties.drop_shadow);
+    }
+    
+    if (surface->pending_properties.dirt) {
+        free(surface->pending_properties.dirt);
+    }
+    
     if (surface->properties.content) {
         vioarr_buffer_destroy(surface->properties.content);
     }
 
-    free(surface->pending_properties.dirt);
-    free(surface->properties.dirt);
+    if (surface->properties.drop_shadow) {
+        free(surface->properties.drop_shadow);
+    }
+    
+    if (surface->properties.dirt) {
+        free(surface->properties.dirt);
+    }
+
     free(surface->dimensions);
     free(surface);
 }
@@ -210,6 +221,17 @@ void vioarr_surface_set_position(vioarr_surface_t* surface, int x, int y)
 
     mtx_lock(&surface->sync_object);
     vioarr_region_set_position(surface->dimensions, x, y);
+    mtx_unlock(&surface->sync_object);
+}
+
+void vioarr_surface_set_drop_shadow(vioarr_surface_t* surface, int x, int y, int width, int height)
+{
+    if (!surface) {
+        return;
+    }
+    
+    mtx_lock(&surface->sync_object);
+    vioarr_region_add(surface->pending_properties.drop_shadow, x, y, width, height);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -296,7 +318,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
 
     if (surface->properties.content) {
         TRACE("[vioarr_surface_render] rendering content");
-        if (surface->properties.drop_shadow) {
+        if (!vioarr_region_is_zero(surface->properties.drop_shadow)) {
             render_drop_shadow(context, surface);
         }
         
@@ -325,9 +347,11 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
     mtx_lock(&surface->sync_object);
 
     // handle basic properties
+    surface->properties.border_width  = surface->pending_properties.border_width;
+    surface->properties.border_color  = surface->pending_properties.border_color;
     surface->properties.corner_radius = surface->pending_properties.corner_radius;
-    surface->properties.drop_shadow   = surface->pending_properties.drop_shadow;
-
+    vioarr_region_copy(surface->properties.drop_shadow, surface->pending_properties.drop_shadow);
+    
     if (surface->pending_properties.children) {
         // append the new children
         if (surface->properties.children) {
@@ -356,7 +380,7 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
         surface->resource_id = nvgCreateImageRGBA(context, 
             vioarr_buffer_width(surface->pending_properties.content),
             vioarr_buffer_height(surface->pending_properties.content),
-            NVG_IMAGE_FLIPY, 
+            /* NVG_IMAGE_FLIPY */ 0, 
             (const uint8_t*)vioarr_buffer_data(surface->pending_properties.content));
 
         surface->properties.content         = surface->pending_properties.content;
@@ -402,8 +426,13 @@ static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
 	NVGpaint shadow_paint = nvgBoxGradient(context, 0, 0 + 2.0f, width, height, 
 	    surface->properties.corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
 	nvgBeginPath(context);
-	nvgRect(context, -10, -10, width + 20, height + 30);
+	//nvgRect(context, -10, -10, width + 20, height + 30);
 	//nvgRoundedRect(context, 0, 0, surface->width, surface->height, surface->properties.corner_radius);
+	nvgRect(context, 
+        (float)vioarr_region_x(surface->properties.drop_shadow),
+        (float)vioarr_region_y(surface->properties.drop_shadow),
+        width + (float)vioarr_region_width(surface->properties.drop_shadow),
+        height + (float)vioarr_region_height(surface->properties.drop_shadow));
 	nvgPathWinding(context, NVG_HOLE);
 	nvgFillPaint(context, shadow_paint);
 	nvgFill(context);

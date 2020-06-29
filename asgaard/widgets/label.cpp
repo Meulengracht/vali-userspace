@@ -106,7 +106,7 @@ namespace Asgaard {
                 {
                     case MemoryPool::MemoryEvent::CREATED: {
                         m_buffer = MemoryBuffer::Create(this, m_memory, 0,
-                            Dimensions().Width(), Dimensions().Height(), PixelFormat::A8R8G8B8);
+                            Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
                     } break;
                     
                     case MemoryPool::MemoryEvent::ERROR: {

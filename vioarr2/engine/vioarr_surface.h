@@ -36,6 +36,7 @@ typedef struct vioarr_region  vioarr_region_t;
 int              vioarr_surface_create(int, uint32_t, vioarr_screen_t*, int, int, int, int, vioarr_surface_t**);
 void             vioarr_surface_destroy(vioarr_surface_t*);
 void             vioarr_surface_set_buffer(vioarr_surface_t*, vioarr_buffer_t*);
+void             vioarr_surface_set_drop_shadow(vioarr_surface_t*, int, int, int, int);
 void             vioarr_surface_invalidate(vioarr_surface_t*, int, int, int, int);
 void             vioarr_surface_move(vioarr_surface_t*, int, int);
 void             vioarr_surface_commit(vioarr_surface_t*);

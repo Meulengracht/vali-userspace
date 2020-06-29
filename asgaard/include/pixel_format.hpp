@@ -25,14 +25,20 @@
 namespace Asgaard {
     enum class PixelFormat {
         A8R8G8B8,
-        X8R8G8B8
+        A8B8G8R8,
+        X8R8G8B8,
+        R8G8B8A8,
+        B8G8R8A8
     };
     
     static int GetBytesPerPixel(enum PixelFormat format) {
         int byteCount = 0;
         switch (format) {
             case Asgaard::PixelFormat::A8R8G8B8:
+            case Asgaard::PixelFormat::A8B8G8R8:
             case Asgaard::PixelFormat::X8R8G8B8:
+            case Asgaard::PixelFormat::R8G8B8A8:
+            case Asgaard::PixelFormat::B8G8R8A8:
                 byteCount = 4;
                 break;
         }

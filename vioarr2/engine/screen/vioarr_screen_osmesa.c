@@ -67,6 +67,47 @@ typedef struct vioarr_screen {
     void              (*present)(void*, void*, int, int, int, int);
 } vioarr_screen_t;
 
+static struct vioarr_screen_format {
+    int   color_positions[4];
+    int   color_bits[4];
+    int   osmesa_format;
+    char* text;
+} supportedFormats[] = {
+     // R,  G,  B,  A     //R, G, B, A    // FORMAT [Reversed]
+    { {  0,  8, 16, 24 }, { 8, 8, 8, 8 }, OSMESA_RGBA, "ABGR" },
+    { {  8, 16, 24,  0 }, { 8, 8, 8, 8 }, OSMESA_ARGB, "BGRA" },
+    { { 16,  8,  0, 24 }, { 8, 8, 8, 8 }, OSMESA_BGRA, "ARGB" },
+    { { 16,  8,  0,  0 }, { 8, 8, 8, 8 }, OSMESA_BGR, "RGB" },
+    { {  0,  8, 16,  0 }, { 5, 6, 5, 0 }, OSMESA_RGB, "BGR" },
+    { {  0,  5, 11,  0 }, { 5, 6, 5, 0 }, OSMESA_RGB_565, "BGR_565" },
+    { { 0 }, { 0 }, 0, NULL }
+};
+
+static int get_screen_format(VideoDescriptor_t* video)
+{
+    int i = 0;
+
+    while (supportedFormats[i].text) {
+        int depth = supportedFormats[i].color_bits[0] + supportedFormats[i].color_bits[1] +
+            supportedFormats[i].color_bits[2] + supportedFormats[i].color_bits[3];
+
+        if (video->Depth == depth) {
+            if (video->RedPosition      == supportedFormats[i].color_positions[0] &&
+                video->GreenPosition    == supportedFormats[i].color_positions[1] &&
+                video->BluePosition     == supportedFormats[i].color_positions[2] &&
+                video->ReservedPosition == supportedFormats[i].color_positions[3]) {
+                TRACE("[get_screen_format] found supported format %s", supportedFormats[i].text);
+                return supportedFormats[i].osmesa_format;
+            }
+        }
+
+        i++;
+    }
+
+    ERROR("[get_screen_format] %i [%i,%i,%i,%i] [0x%x,0x%x,0x%x,0x%x] UNSUPPORTED FORMAT");
+    return -1;
+}
+
 vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
 {
     vioarr_screen_t* screen;
@@ -76,6 +117,10 @@ vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
     int status;
     int bytes_to_copy;
     int bytes_step;
+    int format = get_screen_format(video);
+    if (format < 0) {
+        return NULL;
+    }
 
     screen = malloc(sizeof(vioarr_screen_t));
     if (!screen) {
@@ -83,7 +128,7 @@ vioarr_screen_t* vioarr_screen_create(VideoDescriptor_t* video)
     }
 
     attributes[n++] = OSMESA_FORMAT;
-    attributes[n++] = OSMESA_ARGB;
+    attributes[n++] = format;
     attributes[n++] = OSMESA_DEPTH_BITS;
     attributes[n++] = 24;
     attributes[n++] = OSMESA_STENCIL_BITS;

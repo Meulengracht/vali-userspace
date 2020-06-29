@@ -31,17 +31,9 @@
 class TestWindow : public Asgaard::WindowBase {
 public:
     TestWindow(uint32_t id, const Asgaard::Rectangle& dimensions)
-        : WindowBase(id, dimensions)
-    {
-        r = 0xDC;
-        g = 0xD4;
-        b = 0xC5;
-    }
+        : WindowBase(id, dimensions) { }
     
-    ~TestWindow()
-    {
-        
-    }
+    ~TestWindow() { }
     
 protected:
     void OnCreated(Asgaard::Object* createdObject) override
@@ -54,7 +46,7 @@ protected:
         else if (createdObject->Id() == m_memory->Id()) {
             // Create initial buffer the size of this surface
             m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-                Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
+                Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
         }
         else if (createdObject->Id() == m_buffer->Id()) {
             // Create the window decoration
@@ -62,6 +54,7 @@ protected:
             m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions);
 
             // Now all resources are created
+            SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
             SetBuffer(m_buffer);
             Redraw();         
         }
@@ -94,10 +87,10 @@ private:
     {
         Asgaard::Drawing::Painter paint(m_buffer);
         
-        paint.SetColor(r, g, b);
+        //paint.SetColor(0xFA, 0xEF, 0xDD);
+        paint.SetColor(0xF0, 0xF0, 0xF0);
         paint.RenderFill();
         
-        r++; g++; b++;
         MarkDamaged(Dimensions());
         ApplyChanges();
     }
@@ -106,6 +99,4 @@ private:
     std::shared_ptr<Asgaard::MemoryPool>      m_memory;
     std::shared_ptr<Asgaard::MemoryBuffer>    m_buffer;
     std::shared_ptr<Asgaard::WindowDecoration> m_decoration;
-
-    uint8_t r,g,b;
 };

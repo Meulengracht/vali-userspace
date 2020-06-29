@@ -44,9 +44,10 @@ namespace Asgaard {
         void* Buffer() const { return m_buffer; }
         void* Buffer(int x, int y);
         
-        int   Width()  const { return m_width; }
-        int   Height() const { return m_height; }
-        int   Stride() const { return m_width * GetBytesPerPixel(m_format); }
+        int         Width()  const { return m_width; }
+        int         Height() const { return m_height; }
+        int         Stride() const { return m_width * GetBytesPerPixel(m_format); }
+        PixelFormat Format() const { return m_format; }
         
     public:
         static std::shared_ptr<MemoryBuffer> Create(Object* owner, const std::shared_ptr<MemoryPool>& memory,

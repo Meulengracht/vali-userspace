@@ -38,7 +38,10 @@ static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
 {
     switch (format) {
         case Asgaard::PixelFormat::A8R8G8B8: return format_a8r8g8b8;
+        case Asgaard::PixelFormat::A8B8G8R8: return format_a8b8g8r8;
         case Asgaard::PixelFormat::X8R8G8B8: return format_x8r8g8b8;
+        case Asgaard::PixelFormat::R8G8B8A8: return format_r8g8b8a8;
+        case Asgaard::PixelFormat::B8G8R8A8: return format_b8g8r8a8;
     }
 }
 

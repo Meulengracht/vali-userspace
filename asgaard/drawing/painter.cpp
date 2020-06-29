@@ -43,19 +43,34 @@ namespace Asgaard {
         Painter::Painter(const std::shared_ptr<MemoryBuffer>& canvas)
             : m_canvas(canvas)
             , m_font(nullptr)
-            , m_color(0xFF000000)
         {
-            
+            SetColor(0, 0, 0);
         }
         
         void Painter::SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
         {
-            m_color = (a << 24) | (r << 16) | (g << 8) | b;
+            switch (m_canvas->Format()) {
+                case PixelFormat::A8R8G8B8:
+                    m_color = ((unsigned int)a << 24) | ((unsigned int)r << 16) | ((unsigned int)g << 8) | b;
+                    break;
+                case PixelFormat::A8B8G8R8:
+                    m_color = ((unsigned int)a << 24) | ((unsigned int)b << 16) | ((unsigned int)g << 8) | r;
+                    break;
+                case PixelFormat::X8R8G8B8:
+                    m_color = 0xFF000000 | ((unsigned int)r << 16) | ((unsigned int)g << 8) | b;
+                    break;
+                case PixelFormat::R8G8B8A8:
+                    m_color = ((unsigned int)r << 24) | ((unsigned int)g << 16) | ((unsigned int)b << 8) | a;
+                    break;
+                case PixelFormat::B8G8R8A8:
+                    m_color = ((unsigned int)b << 24) | ((unsigned int)g << 16) | ((unsigned int)r << 8) | a;
+                    break;
+            }
         }
         
         void Painter::SetColor(unsigned char r, unsigned char g, unsigned char b)
         {
-            m_color = 0xFF000000 | (r << 16) | (g << 8) | b;
+            SetColor(0xFF, r, g, b);
         }
         
         void Painter::SetFont(const std::shared_ptr<Font>& font)
@@ -88,26 +103,32 @@ namespace Asgaard {
                     unsigned char r1, unsigned char g1, unsigned char b1,
                     unsigned char r2, unsigned char g2, unsigned char b2)
         {
+            unsigned int originalColor = m_color;
             for (int y = 0; y < dimensions.Height(); y++) {
                 float p = y / (float)(dimensions.Height() - 1);
                 unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
                 unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
                 unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
+                SetColor(r, g, b);
                 RenderLine(dimensions.X(), y, dimensions.Width(), y);
             }
+            m_color = originalColor;
         }
         
         void Painter::RenderFillGradientV(
                     unsigned char r1, unsigned char g1, unsigned char b1,
                     unsigned char r2, unsigned char g2, unsigned char b2)
         {
+            unsigned int originalColor = m_color;
             for (int y = 0; y < m_canvas->Height(); y++) {
                 float p = y / (float)(m_canvas->Height() - 1);
                 unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
                 unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
                 unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
+                SetColor(r, g, b);
                 RenderLine(0, y, m_canvas->Width(), y);
             }
+            m_color = originalColor;
         }
 
         void Painter::RenderFill(const Rectangle& dimensions)
