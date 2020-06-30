@@ -117,9 +117,9 @@ namespace Asgaard {
             , m_underlineOffset(0)
             , m_underlineHeight(0)
         {
-            m_cache = static_cast<struct Glyph*>(std::malloc(sizeof(m_cache) * CACHE_SIZE));
+            m_cache = static_cast<struct Glyph*>(std::malloc(sizeof(struct Glyph) * CACHE_SIZE));
             if (m_cache != nullptr) {
-                memset(m_cache, 0, sizeof(m_cache) * CACHE_SIZE);
+                memset(m_cache, 0, sizeof(struct Glyph) * CACHE_SIZE);
             }
         }
         
@@ -265,6 +265,10 @@ namespace Asgaard {
                 return false;
             }
             
+            if (!m_current) {
+                return false;
+            }
+
             glyph   = m_current;
             current = &glyph->pixmap; // Use Bitmap if CACHED_BITMAP is set
         

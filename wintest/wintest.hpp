@@ -88,7 +88,7 @@ private:
         Asgaard::Drawing::Painter paint(m_buffer);
         
         //paint.SetColor(0xFA, 0xEF, 0xDD);
-        paint.SetColor(0xF0, 0xF0, 0xF0);
+        paint.SetFillColor(0xF0, 0xF0, 0xF0);
         paint.RenderFill();
         
         MarkDamaged(Dimensions());

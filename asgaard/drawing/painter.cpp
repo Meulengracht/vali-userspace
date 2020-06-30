@@ -28,7 +28,7 @@
 #include <string> 
 
 namespace {
-    unsigned int AlphaBlend(unsigned int colorA, unsigned int colorB, unsigned int alpha)
+    unsigned int AlphaBlendAXGX(unsigned int colorA, unsigned int colorB, unsigned int alpha)
     {
         unsigned int rb1 = ((0x100 - alpha) * (colorA & 0xFF00FF)) >> 8;
         unsigned int rb2 = (alpha * (colorB & 0xFF00FF)) >> 8;
@@ -43,34 +43,29 @@ namespace Asgaard {
         Painter::Painter(const std::shared_ptr<MemoryBuffer>& canvas)
             : m_canvas(canvas)
             , m_font(nullptr)
+            , m_fillColor(0, 0, 0)
+            , m_outlineColor(0, 0, 0)
         {
-            SetColor(0, 0, 0);
         }
         
-        void Painter::SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
+        void Painter::SetFillColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
         {
-            switch (m_canvas->Format()) {
-                case PixelFormat::A8R8G8B8:
-                    m_color = ((unsigned int)a << 24) | ((unsigned int)r << 16) | ((unsigned int)g << 8) | b;
-                    break;
-                case PixelFormat::A8B8G8R8:
-                    m_color = ((unsigned int)a << 24) | ((unsigned int)b << 16) | ((unsigned int)g << 8) | r;
-                    break;
-                case PixelFormat::X8R8G8B8:
-                    m_color = 0xFF000000 | ((unsigned int)r << 16) | ((unsigned int)g << 8) | b;
-                    break;
-                case PixelFormat::R8G8B8A8:
-                    m_color = ((unsigned int)r << 24) | ((unsigned int)g << 16) | ((unsigned int)b << 8) | a;
-                    break;
-                case PixelFormat::B8G8R8A8:
-                    m_color = ((unsigned int)b << 24) | ((unsigned int)g << 16) | ((unsigned int)r << 8) | a;
-                    break;
-            }
+            m_fillColor = Color(a, r, g, b);
         }
         
-        void Painter::SetColor(unsigned char r, unsigned char g, unsigned char b)
+        void Painter::SetFillColor(unsigned char r, unsigned char g, unsigned char b)
         {
-            SetColor(0xFF, r, g, b);
+            SetFillColor(0xFF, r, g, b);
+        }
+        
+        void Painter::SetOutlineColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
+        {
+            m_outlineColor = Color(a, r, g, b);
+        }
+        
+        void Painter::SetOutlineColor(unsigned char r, unsigned char g, unsigned char b)
+        {
+            SetOutlineColor(0xFF, r, g, b);
         }
         
         void Painter::SetFont(const std::shared_ptr<Font>& font)
@@ -86,8 +81,9 @@ namespace Asgaard {
             int       err = (dx > dy ? dx : -dy) / 2, e2;
 
             // Draw the line by brute force
+            unsigned int color = m_fillColor.GetFormatted(m_canvas->Format());
             while (x1 < m_canvas->Width() && y1 < m_canvas->Height()) {
-                pointer[(y1 * m_canvas->Width()) + x1] = m_color;
+                pointer[(y1 * m_canvas->Width()) + x1] = color;
 
                 if (x1 == x2 && y1 == y2) {
                     break;
@@ -103,32 +99,32 @@ namespace Asgaard {
                     unsigned char r1, unsigned char g1, unsigned char b1,
                     unsigned char r2, unsigned char g2, unsigned char b2)
         {
-            unsigned int originalColor = m_color;
+            Color originalColor = m_fillColor;
             for (int y = 0; y < dimensions.Height(); y++) {
                 float p = y / (float)(dimensions.Height() - 1);
                 unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
                 unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
                 unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
-                SetColor(r, g, b);
+                SetFillColor(r, g, b);
                 RenderLine(dimensions.X(), y, dimensions.Width(), y);
             }
-            m_color = originalColor;
+            m_fillColor = originalColor;
         }
         
         void Painter::RenderFillGradientV(
                     unsigned char r1, unsigned char g1, unsigned char b1,
                     unsigned char r2, unsigned char g2, unsigned char b2)
         {
-            unsigned int originalColor = m_color;
+            Color originalColor = m_fillColor;
             for (int y = 0; y < m_canvas->Height(); y++) {
                 float p = y / (float)(m_canvas->Height() - 1);
                 unsigned char r = (unsigned char)((1.0f - p) * r1 + p * r2 + 0.5);
                 unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
                 unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
-                SetColor(r, g, b);
+                SetFillColor(r, g, b);
                 RenderLine(0, y, m_canvas->Width(), y);
             }
-            m_color = originalColor;
+            m_fillColor = originalColor;
         }
 
         void Painter::RenderFill(const Rectangle& dimensions)
@@ -149,10 +145,11 @@ namespace Asgaard {
         {
             struct Font::CharInfo bitmap = { 0 };
             
-            if (m_font == nullptr) {
+            if (!m_font) {
                 return;
             }
-        
+
+            unsigned int color = m_fillColor.GetFormatted(m_canvas->Format());
             if (m_font->GetCharacterBitmap(character, bitmap)) {
                 uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer(
                     x + bitmap.indentX, y + bitmap.indentY));
@@ -161,11 +158,11 @@ namespace Asgaard {
                     for (int column = 0; column < bitmap.width; column++) { // @todo might need to be reverse
                         uint8_t alpha = source[column];
                         if (alpha == 255) {
-                            pointer[column] = m_color;
+                            pointer[column] = color;
                         }
-                        else {
+                        else if (alpha > 0) {
                             // pointer[Column] = m_FgColor; if CACHED_BITMAP
-                            pointer[column] = AlphaBlend(pointer[column], m_color, alpha);
+                            pointer[column] = AlphaBlendAXGX(pointer[column], color, alpha);
                         }
                     }
                     
@@ -181,17 +178,23 @@ namespace Asgaard {
             int                   currentX = dims.X();
             int                   currentY = dims.Y();
             
-            if (m_font == nullptr) {
+            if (!m_font) {
                 return;
             }
             
+            unsigned int bgColor = m_fillColor.GetFormatted(m_canvas->Format());
+            unsigned int fgColor = m_outlineColor.GetFormatted(m_canvas->Format());
             for (int i = 0; i < text.length(); i++) {
                 unsigned int character = text[i];
                 
                 if (m_font->GetCharacterBitmap(character, bitmap)) {
                     if ((currentX + bitmap.indentX + bitmap.advance) >= dims.Width()) {
-                        currentY += 0;
-                        currentX = dims.X();
+                        currentY += m_font->GetFontHeight();
+                        currentX  = dims.X();
+                    }
+
+                    if ((currentY + m_font->GetFontHeight()) > dims.Height()) {
+                        break;
                     }
                     
                     uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer(
@@ -202,11 +205,11 @@ namespace Asgaard {
                         for (int column = 0; column < bitmap.width; column++) { // @todo might need to be reverse
                             uint8_t alpha = source[column];
                             if (alpha == 255) {
-                                pointer[column] = m_color;
+                                pointer[column] = fgColor;
                             }
                             else {
                                 // pointer[Column] = m_FgColor; if CACHED_BITMAP
-                                pointer[column] = AlphaBlend(pointer[column], m_color, alpha);
+                                pointer[column] = AlphaBlendAXGX(bgColor, fgColor, alpha);
                             }
                         }
                         

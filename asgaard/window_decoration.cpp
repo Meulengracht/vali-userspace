@@ -27,21 +27,26 @@
 #include "include/rectangle.hpp"
 #include "include/window_decoration.hpp"
 #include "include/drawing/painter.hpp"
+#include "include/drawing/font_manager.hpp"
+#include "include/drawing/font.hpp"
 
 #include "include/widgets/icon.hpp"
 #include "include/widgets/label.hpp"
+
+#define ICON_SIZE 16
 
 namespace Asgaard {
     WindowDecoration::WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
         : Surface(id, screen, parentId, dimensions)
         , m_memory(nullptr)
         , m_buffer(nullptr)
-        , m_appFont(nullptr)
+        , m_appFont(Drawing::FM.CreateFont("$sys/fonts/DejaVuSansMono.ttf", 12))
         , m_appTitle(nullptr)
         , m_appIcon(nullptr)
         , m_minIcon(nullptr)
         , m_maxIcon(nullptr)
         , m_closeIcon(nullptr)
+        , m_titleText("Untitled Application")
     {
         
     }
@@ -53,11 +58,11 @@ namespace Asgaard {
     
     void WindowDecoration::SetTitle(const std::string& title)
     {
-        if (m_appTitle == nullptr || !m_appTitle->Valid()) {
-            return;
+        m_titleText = title;
+
+        if (m_appTitle) {
+            m_appTitle->SetText(title);
         }
-        
-        m_appTitle->SetText(title);
     }
     
     void WindowDecoration::SetIcon(const std::string& iconPath)
@@ -70,7 +75,7 @@ namespace Asgaard {
         Drawing::Painter paint(m_buffer);
         
         //paint.SetColor(0xCF, 0xC9, 0xCB);
-        paint.SetColor(0xF0, 0xF0, 0xF0);
+        paint.SetFillColor(0xF0, 0xF0, 0xF0);
         paint.RenderFill();
         
         MarkDamaged(Dimensions());
@@ -79,11 +84,11 @@ namespace Asgaard {
     
     void WindowDecoration::CheckCreation()
     {
-        if (m_closeIcon != nullptr && m_closeIcon->Valid() && 
-            m_minIcon   != nullptr && m_minIcon->Valid()   && 
-            m_maxIcon   != nullptr && m_maxIcon->Valid()   && 
-            m_appIcon   != nullptr && m_appIcon->Valid()   &&
-            m_appTitle  != nullptr && m_appTitle->Valid())
+        if (m_closeIcon && m_closeIcon->Valid() && 
+            m_minIcon   && m_minIcon->Valid()   && 
+            m_maxIcon   && m_maxIcon->Valid()   && 
+            m_appIcon   && m_appIcon->Valid()   &&
+            m_appTitle  && m_appTitle->Valid())
         {
             SetValid(true);
             Notify(static_cast<int>(Event::CREATED));
@@ -96,7 +101,7 @@ namespace Asgaard {
         {
             case ObjectEvent::CREATION: {
                 float halfHeight = (float)Dimensions().Height() / 2.0f;
-                int   iconY      = (int)(halfHeight - (16.0f));
+                int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
 
                 // create resources
                 auto poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
@@ -104,27 +109,31 @@ namespace Asgaard {
                 
                 // middle
                 m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
-                    Rectangle(8 + 8 + 32, iconY, 128, 32));
+                    Rectangle(
+                        8 + 8 + ICON_SIZE, // start text next to app icon
+                        (int)(halfHeight - (m_appFont->GetFontHeight() / 2.0f)), 
+                        Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8), // let text be as wide as till the 3 buttons
+                        m_appFont->GetFontHeight())); // allow text up to 18
                 m_appTitle->Subscribe(this);
                 
                 // left corner
                 m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(8, iconY, 32, 32));
+                    Rectangle(8, iconY, 24, 24));
                 m_appIcon->Subscribe(this);
                 
                 // right corner
                 m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (3 * (8 + 32)), iconY, 32, 32));
+                    Rectangle(Dimensions().Width() - (3 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
                 m_minIcon->Subscribe(this);
 
                 // right corner
                 m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (2 * (8 + 32)), iconY, 32, 32));
+                    Rectangle(Dimensions().Width() - (2 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
                 m_maxIcon->Subscribe(this);
 
                 // right corner
                 m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (8 + 32), iconY, 32, 32));
+                    Rectangle(Dimensions().Width() - (8 + ICON_SIZE), 8.0f, ICON_SIZE, ICON_SIZE));
                 m_closeIcon->Subscribe(this);
             } break;
             
@@ -177,26 +186,33 @@ namespace Asgaard {
             return;
         }
         
-        if (m_appIcon != nullptr && object->Id() == m_appIcon->Id()) {
+        if (m_appTitle && object->Id() == m_appTitle->Id()) {
+            m_appTitle->SetFont(m_appFont);
+            m_appTitle->SetText(m_titleText);
+            CheckCreation();
+            return;
+        }
+        
+        if (m_appIcon && object->Id() == m_appIcon->Id()) {
             // load app icon from current package './appIcon.png'
             m_appIcon->LoadIcon("$sys/themes/default/app.png");
             CheckCreation();
             return;
         }
         
-        if (m_minIcon != nullptr && object->Id() == m_minIcon->Id()) {
+        if (m_minIcon && object->Id() == m_minIcon->Id()) {
             m_minIcon->LoadIcon("$sys/themes/default/minimize.png");
             CheckCreation();
             return;
         }
         
-        if (m_maxIcon != nullptr && object->Id() == m_maxIcon->Id()) {
+        if (m_maxIcon && object->Id() == m_maxIcon->Id()) {
             m_maxIcon->LoadIcon("$sys/themes/default/maximize.png");
             CheckCreation();
             return;
         }
         
-        if (m_closeIcon != nullptr && object->Id() == m_closeIcon->Id()) {
+        if (m_closeIcon && object->Id() == m_closeIcon->Id()) {
             m_closeIcon->LoadIcon("$sys/themes/default/close.png");
             CheckCreation();
             return;

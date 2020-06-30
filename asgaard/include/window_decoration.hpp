@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include "surface.hpp"
 
 namespace Asgaard {
@@ -65,6 +66,7 @@ namespace Asgaard {
         // a buffer with the application title
         // a buffer with the application icon
         // a buffer with the close icon
+        std::string                              m_titleText;
         std::shared_ptr<Asgaard::MemoryPool>     m_memory;
         std::shared_ptr<Asgaard::MemoryBuffer>   m_buffer;
         std::shared_ptr<Asgaard::Drawing::Font>  m_appFont;

@@ -117,13 +117,14 @@ void Terminal::TerminalLine::Update(std::shared_ptr<Asgaard::MemoryBuffer>& buff
     if (m_dirty) {
         Asgaard::Drawing::Painter paint(buffer);
         
-        paint.SetColor(0, 0, 0);
+        paint.SetFillColor(0, 0, 0);
         paint.RenderFill(m_dimensions);
         
+        paint.SetOutlineColor(0xFF, 0xFF, 0xFF);
         paint.SetFont(m_font);
         paint.RenderText(m_dimensions.X(), m_dimensions.Y(), m_text);
         if (m_showCursor) {
-            paint.SetColor(255, 255, 255);
+            //paint.SetOutlineColor(255, 255, 255);
             paint.RenderCharacter(m_textLength, m_dimensions.Y(), '_');
         }
         m_dirty = false;

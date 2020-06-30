@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include "color.hpp"
 
 namespace Asgaard {
     class MemoryBuffer;
@@ -35,8 +36,11 @@ namespace Asgaard {
             public:
                 Painter(const std::shared_ptr<MemoryBuffer>& canvas);
                 
-                void SetColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
-                void SetColor(unsigned char r, unsigned char g, unsigned char b);
+                void SetFillColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
+                void SetFillColor(unsigned char r, unsigned char g, unsigned char b);
+
+                void SetOutlineColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
+                void SetOutlineColor(unsigned char r, unsigned char g, unsigned char b);
 
                 void RenderLine(int x1, int y1, int x2, int y2);
                 
@@ -59,7 +63,8 @@ namespace Asgaard {
             private:
                 std::shared_ptr<MemoryBuffer> m_canvas;
                 std::shared_ptr<Font>         m_font;
-                unsigned int                  m_color;
+                Color                         m_fillColor;
+                Color                         m_outlineColor;
         };
     }
 }

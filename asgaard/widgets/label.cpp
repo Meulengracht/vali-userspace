@@ -48,7 +48,7 @@ namespace Asgaard {
         {
             m_font = font;
             
-            if (m_text != "") {
+            if (Valid() && m_text != "") {
                 Redraw();
             }
         }
@@ -57,7 +57,7 @@ namespace Asgaard {
         {
             m_text = text;
             
-            if (m_font != nullptr) {
+            if (Valid() && m_font) {
                 Redraw();
             }
         }
@@ -66,11 +66,16 @@ namespace Asgaard {
         {
             Drawing::Painter paint(m_buffer);
             
-            paint.SetColor(0, 0, 0);
+            // Set background [white] transparent
+            paint.SetFillColor(0, 0xF0, 0xF0, 0xF0);
             paint.RenderFill();
             
+            // Set font
             paint.SetFont(m_font);
-            paint.RenderText(Dimensions(), m_text);
+
+            // Render text
+            paint.SetOutlineColor(0, 0, 0);
+            paint.RenderText(0, 0, m_text);
             
             MarkDamaged(Dimensions());
             ApplyChanges();
