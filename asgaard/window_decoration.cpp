@@ -107,19 +107,19 @@ namespace Asgaard {
                 auto poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
                 m_memory = MemoryPool::Create(this, poolSize);
                 
+                // left corner
+                m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+                    Rectangle(8, (int)(halfHeight - (12.0f)), 24, 24));
+                m_appIcon->Subscribe(this);
+
                 // middle
                 m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
                     Rectangle(
-                        8 + 8 + ICON_SIZE, // start text next to app icon
+                        8 + 8 + 24, // start text next to app icon
                         (int)(halfHeight - (m_appFont->GetFontHeight() / 2.0f)), 
                         Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8), // let text be as wide as till the 3 buttons
                         m_appFont->GetFontHeight())); // allow text up to 18
                 m_appTitle->Subscribe(this);
-                
-                // left corner
-                m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(8, iconY, 24, 24));
-                m_appIcon->Subscribe(this);
                 
                 // right corner
                 m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),

@@ -2,7 +2,7 @@
 # Include all the definitions for os
 
 INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
-LFLAGS := libds.lib ddk.lib libgracht.lib libfreetype.lib gallium-osmesa.lib
+LFLAGS := -LIBPATH:$(VALI_DDK_PATH)/lib static_libds.lib static_libddk.lib static_libgracht.lib libfreetype.lib gallium-osmesa.lib
 
 ifeq ($(VALI_ARCH),i386)
 	ASFLAGS = -f win32 -Xvc
@@ -23,7 +23,7 @@ APP_PROTOCOLS_C := protocols/wm_core_protocol_server.c \
 				   protocols/wm_memory_pool_protocol_server.c \
 				   protocols/wm_buffer_protocol_server.c \
 				   protocols/wm_surface_protocol_server.c \
-				   protocols/hid_events_protocol_server.c
+				   protocols/hid_events_protocol_client.c
 
 APP_DEFINES := -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
 ifdef VALI_HEADLESS
@@ -53,31 +53,31 @@ protocols:
 
 protocols/wm_core_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
 protocols/wm_screen_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
 protocols/wm_memory_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
 protocols/wm_memory_pool_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
 protocols/wm_buffer_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
 protocols/wm_surface_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
-protocols/hid_events_protocol_server.c: $(VALI_DDK_PATH)/protocols/hid_protocol.xml
+protocols/hid_events_protocol_client.c: $(VALI_DDK_PATH)/share/vali/protocols/hid_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
-	python $(VALI_DDK_PATH)/protocols/parser.py --protocol $< --lang-c --server --out ./protocols/
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --client --out ./protocols/
 
 loader:
 	@mkdir -p $@

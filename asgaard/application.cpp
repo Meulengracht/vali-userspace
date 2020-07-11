@@ -37,6 +37,46 @@
 #include "protocols/wm_surface_protocol_client.h"
 #include "protocols/wm_buffer_protocol_client.h"
 
+extern "C" {
+    static void wm_core_event_error_callback(struct wm_core_error_event*);
+    static void wm_core_event_sync_callback(struct wm_core_sync_event*);
+    static void wm_core_event_object_callback(struct wm_core_object_event*);
+ 
+    static gracht_protocol_function_t wm_core_callbacks[3] = {
+        { PROTOCOL_WM_CORE_EVENT_ERROR_ID ,  (void*)wm_core_event_error_callback },
+        { PROTOCOL_WM_CORE_EVENT_SYNC_ID ,   (void*)wm_core_event_sync_callback },
+        { PROTOCOL_WM_CORE_EVENT_OBJECT_ID , (void*)wm_core_event_object_callback },
+    };
+    DEFINE_WM_CORE_CLIENT_PROTOCOL(wm_core_callbacks, 3);
+
+    static void wm_screen_event_screen_properties_callback(struct wm_screen_screen_properties_event*);
+    static void wm_screen_event_mode_callback(struct wm_screen_mode_event*);
+ 
+    static gracht_protocol_function_t wm_screen_callbacks[2] = {
+        { PROTOCOL_WM_SCREEN_EVENT_SCREEN_PROPERTIES_ID , (void*)wm_screen_event_screen_properties_callback },
+        { PROTOCOL_WM_SCREEN_EVENT_MODE_ID , (void*)wm_screen_event_mode_callback },
+    };
+    DEFINE_WM_SCREEN_CLIENT_PROTOCOL(wm_screen_callbacks, 2);
+
+    static void wm_surface_event_format_callback(struct wm_surface_format_event*);
+    static void wm_surface_event_frame_callback(struct wm_surface_frame_event*);
+    static void wm_surface_event_resize_callback(struct wm_surface_resize_event*);
+
+    static gracht_protocol_function_t wm_surface_callbacks[3] = {
+        { PROTOCOL_WM_SURFACE_EVENT_FORMAT_ID , (void*)wm_surface_event_format_callback },
+        { PROTOCOL_WM_SURFACE_EVENT_FRAME_ID ,  (void*)wm_surface_event_frame_callback },
+        { PROTOCOL_WM_SURFACE_EVENT_RESIZE_ID , (void*)wm_surface_event_resize_callback },
+    };
+    DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 3);
+
+    static void wm_buffer_event_release_callback(struct wm_buffer_release_event*);
+
+    static gracht_protocol_function_t wm_buffer_callbacks[1] = {
+        { PROTOCOL_WM_BUFFER_EVENT_RELEASE_ID , (void*)wm_buffer_event_release_callback },
+    };
+    DEFINE_WM_BUFFER_CLIENT_PROTOCOL(wm_buffer_callbacks, 1);
+}
+
 int gracht_os_get_server_client_address(struct sockaddr_storage* address, int* address_length_out)
 {
     struct sockaddr_lc* local_address = sstolc(address);
@@ -76,10 +116,10 @@ namespace Asgaard {
             return -1;
         }
         
-        gracht_client_register_protocol(m_client, &wm_core_protocol);
-        gracht_client_register_protocol(m_client, &wm_screen_protocol);
-        gracht_client_register_protocol(m_client, &wm_surface_protocol);
-        gracht_client_register_protocol(m_client, &wm_buffer_protocol);
+        gracht_client_register_protocol(m_client, &wm_core_client_protocol);
+        gracht_client_register_protocol(m_client, &wm_screen_client_protocol);
+        gracht_client_register_protocol(m_client, &wm_surface_client_protocol);
+        gracht_client_register_protocol(m_client, &wm_buffer_client_protocol);
         
         // kick off a chain reaction by asking for all objects
         return wm_core_get_objects(m_client, nullptr);
@@ -90,7 +130,7 @@ namespace Asgaard {
         char* messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
         while (true) {
-            if (gracht_client_wait_message(m_client, messageBuffer)) {
+            if (gracht_client_wait_message(m_client, nullptr, messageBuffer, GRACHT_WAIT_BLOCK)) {
                 // todo log it
             }
         }

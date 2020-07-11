@@ -4,6 +4,6 @@ APP_NAME := wintest
 APP_SOURCES_CXX := main.cpp
 
 INCLUDES := -I$(VALI_DDK_PATH)/include
-LFLAGS := asgaard.lib libgracht.lib ddk.lib libfreetype.lib
+LFLAGS := -LIBPATH:$(VALI_DDK_PATH)/lib asgaard.lib static_libgracht.lib static_libddk.lib libfreetype.lib
 
 include ../application.mk

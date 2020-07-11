@@ -7,7 +7,7 @@ SOURCES = $(wildcard generator/*.cpp) \
 		  macia.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
-CXXFLAGS = $(VALI_CXXFLAGS) -O3 $(VALI_INCLUDES)
+CXXFLAGS = $(VALI_CXXFLAGS) -O3 -I${VALI_APPLICATION_PATH}/include/c++/v1 $(VALI_INCLUDES)
 LFLAGS = /entry:__CrtConsoleEntry $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS)
 
 .PHONY: all

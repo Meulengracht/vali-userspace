@@ -24,12 +24,12 @@
 
 #include "protocols/hid_events_protocol.h"
 
-void hid_events_key_event_callback(struct gracht_recv_message* message, struct hid_events_key_event_args* input)
+void hid_events_event_key_event_callback(struct gracht_recv_message* message, struct hid_events_key_event_event* input)
 {
     
 }
 
-void hid_events_pointer_event_callback(struct gracht_recv_message* message, struct hid_events_pointer_event_args* input)
+void hid_events_event_pointer_event_callback(struct gracht_recv_message* message, struct hid_events_pointer_event_event* input)
 {
     
 }

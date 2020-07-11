@@ -29,10 +29,11 @@ export LD := $(CROSS)/bin/lld-link
 export LIB := $(CROSS)/bin/llvm-lib
 export AS := nasm
 
-export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/cxx -I$(VALI_SDK_PATH)/include -I$(VALI_APPLICATION_PATH)/include
+export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/clang-9.0.0 -I$(VALI_APPLICATION_PATH)/include -I$(VALI_SDK_PATH)/include 
 export VALI_LIBRARIES = -LIBPATH:$(VALI_SDK_PATH)/lib -LIBPATH:$(VALI_APPLICATION_PATH)/lib
-export VALI_SDK_CLIBS = crt.lib compiler-rt.lib c.lib m.lib
+export VALI_SDK_CLIBS = static_libcrt.lib static_librt.lib c.lib m.lib
 export VALI_SDK_CXXLIBS = $(VALI_SDK_CLIBS) static_c++.lib static_c++abi.lib unwind.lib
+export LIBCXX_BOOTSTRAP := true
 
 # Setup default build rules
 include config/$(VALI_ARCH).mk
@@ -45,7 +46,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_apps build_wm
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_llvm build_apps build_wm
 	
 .PHONY: package
 package: build
@@ -58,11 +59,15 @@ $(VALI_APPLICATION_PATH):
 	@mkdir -p $(VALI_APPLICATION_PATH)/include
 	@mkdir -p $(VALI_APPLICATION_PATH)/lib
 
+.PHONY:
+build_rt:
+	@$(MAKE) -s -C libcxx -f makefile
+
 .PHONY: build_apps
-build_apps: build_zlib build_libpng build_libfreetype build_asgaard build_macia build_wintest build_alumni
+build_apps: build_asgaard build_macia build_wintest build_alumni
 
 .PHONY: build_wm
-build_wm: build_llvm build_mesa build_glm build_vioarr
+build_wm: build_mesa build_glm build_vioarr
 
 .PHONY: build_zlib
 build_zlib:
@@ -99,9 +104,42 @@ build_macia:
 	@printf "%b" "\033[1;35mChecking if macia needs to be built\033[m\n"
 	@$(MAKE) -s -C macia -f makefile
 
-llvm-build:
+# Repositories
+llvm/projects/libcxx:
+	cd llvm/projects && git clone https://github.com/Meulengracht/libcxx.git
+
+llvm/projects/libcxxabi:
+	cd llvm/projects && git clone https://github.com/Meulengracht/libcxxabi.git
+
+llvm/projects/libunwind:
+	cd llvm/projects && git clone https://github.com/Meulengracht/libunwind.git
+
+llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
 	mkdir -p llvm-build
-	cd llvm-build && cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../llvm/cmake/platforms/Vali.cmake ../llvm
+	cd llvm-build && cmake -G "Unix Makefiles" \
+		-DLLVM_BOOTSTRAP_RUNTIME=ON \
+		-DLIBUNWIND_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
+		-DLIBUNWIND_INCLUDE_DOCS=OFF \
+		-DLIBCXXABI_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
+		-DLIBCXXABI_VALI_BOOTSTRAP=ON \
+		-DLIBCXXABI_HERMETIC_STATIC_LIBRARY=ON \
+		-DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+		-DLIBCXXABI_HAS_EXTERNAL_THREAD_API=ON \
+		-DLIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS=OFF \
+		-DLIBCXX_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
+		-DLIBCXX_VALI_BOOTSTRAP=ON \
+		-DLIBCXX_HERMETIC_STATIC_LIBRARY=ON \
+		-DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
+		-DLIBCXX_HAS_EXTERNAL_THREAD_API=ON \
+		-DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
+		-DLIBCXX_INCLUDE_BENCHMARKS=OFF \
+		-DLIBCXX_INCLUDE_TESTS=OFF \
+		-DLIBCXX_INCLUDE_BENCHMARKS=OFF \
+		-DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../llvm/cmake/platforms/Vali.cmake \
+		../llvm
 
 .PHONY: build_llvm
 build_llvm: llvm-build
