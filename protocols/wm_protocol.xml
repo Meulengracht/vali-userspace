@@ -18,6 +18,7 @@
             <enums>
                 <enum name="object_type">
                     <value name="object_type_screen"></value>
+                    <value name="object_type_pointer"></value>
                     <value name="object_type_memory"></value>
                     <value name="object_type_memory_pool"></value>
                     <value name="object_type_surface"></value>
@@ -259,6 +260,50 @@
             <events>
                 <event name="release">
                     <param name="buffer_id" type="uint32_t"/>
+                </event>
+            </events>
+        </protocol>
+
+        <protocol name="pointer" id="0x16">
+            <functions>
+                <function name="set_surface">
+                    <request>
+                        <param name="pointer_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t"/>
+                    </request>
+                </function>
+            </functions>
+            
+            <events>
+                <event name="enter">
+                    <param name="pointer_id" type="uint32_t"/>
+                    <param name="surface_id" type="uint32_t"/>
+                    <param name="surface_x" type="int"/>
+                    <param name="surface_y" type="int"/>
+                </event>
+                <event name="leave">
+                    <param name="pointer_id" type="uint32_t"/>
+                    <param name="surface_id" type="uint32_t"/>
+                </event>
+                <event name="move">
+                    <param name="pointer_id" type="uint32_t"/>
+                    <param name="surface_x" type="int"/>
+                    <param name="surface_y" type="int"/>
+                </event>
+                <event name="click">
+                    <param name="pointer_id" type="uint32_t"/>
+                    <param name="button" type="uint32_t"/>
+                    <param name="state" type="uint32_t"/>
+                </event>
+            </events>
+        </protocol>
+
+        <protocol name="keyboard" id="0x17">            
+            <events>
+                <event name="key">
+                    <param name="pointer_id" type="uint32_t"/>
+                    <param name="keycode" type="uint32_t"/>
+                    <param name="flags" type="uint32_t"/>
                 </event>
             </events>
         </protocol>

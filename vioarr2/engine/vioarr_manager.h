@@ -22,27 +22,19 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
-#include "protocols/ctt_input_protocol_client.h"
-#include "engine/vioarr_input.h"
+#ifndef __VIOARR_MANAGER_H__
+#define __VIOARR_MANAGER_H__
 
-void ctt_input_event_properties_callback(struct ctt_input_properties_event* event)
-{
-    vioarr_input_register(event->device_id,
-        event->device_type == input_type_mouse ? 
-            VIOARR_INPUT_POINTER : VIOARR_INPUT_KEYBOARD);
-}
+#include <os/osdefs.h>
 
-void ctt_input_event_button_callback(struct ctt_input_button_event* event)
-{
-    // vioarr_input_t* input = vioarr_input_find(event->device_id);
-    // vioarr_renderer_input_event()
-}
+typedef struct vioarr_surface vioarr_surface_t;
 
-void ctt_input_event_cursor_callback(struct ctt_input_cursor_event* event)
-{
-    if (event->rel_x || event->rel_y || event->rel_z) {
-        vioarr_input_axis_event(event->device_id, event->rel_x, event->rel_y, event->rel_z);
-    }
-    vioarr_input_pointer_click(event->device_id, event->buttons_set);
-}
- 
+void              vioarr_manager_register_surface(vioarr_surface_t* surface);
+void              vioarr_manager_unregister_surface(vioarr_surface_t* surface);
+void              vioarr_manager_render_start(list_t** surfaces, list_t** cursors);
+void              vioarr_manager_render_end(void);
+vioarr_surface_t* vioarr_manager_front_surface(void);
+vioarr_surface_t* vioarr_manager_surface_at(int x, int y);
+void              vioarr_manager_push_to_front(vioarr_surface_t* surface);
+
+#endif //!__VIOARR_MANAGER_H__

@@ -23,13 +23,16 @@
  */
 
 #include <errno.h>
+#include <ddk/service.h>
 #include <gracht/link/socket.h>
 #include <gracht/link/vali.h>
 #include <gracht/server.h>
 #include <os/process.h>
 #include <stdio.h>
 
-#include "protocols/hid_events_protocol_client.h"
+#include "protocols/ctt_input_protocol_client.h"
+#include "protocols/svc_device_protocol_client.h"
+
 #include "protocols/wm_core_protocol_server.h"
 #include "protocols/wm_screen_protocol_server.h"
 #include "protocols/wm_memory_protocol_server.h"
@@ -40,15 +43,25 @@
 #include "engine/vioarr_engine.h"
 #include "engine/vioarr_utils.h"
 
-
-extern void hid_events_event_key_event_callback(struct hid_events_key_event_event*);
-extern void hid_events_event_pointer_event_callback(struct hid_events_pointer_event_event*);
-
-static gracht_protocol_function_t hid_events_callbacks[2] = {
-    { PROTOCOL_HID_EVENTS_EVENT_KEY_EVENT_ID , hid_events_event_key_event_callback },
-    { PROTOCOL_HID_EVENTS_EVENT_POINTER_EVENT_ID , hid_events_event_pointer_event_callback },
+extern void ctt_input_event_properties_callback(struct ctt_input_properties_event*);
+extern void ctt_input_event_button_callback(struct ctt_input_button_event*);
+extern void ctt_input_event_cursor_callback(struct ctt_input_cursor_event*);
+ 
+static gracht_protocol_function_t ctt_input_callbacks[3] = {
+    { PROTOCOL_CTT_INPUT_EVENT_PROPERTIES_ID , ctt_input_event_properties_callback },
+    { PROTOCOL_CTT_INPUT_EVENT_BUTTON_ID , ctt_input_event_button_callback },
+    { PROTOCOL_CTT_INPUT_EVENT_CURSOR_ID , ctt_input_event_cursor_callback },
 };
-DEFINE_HID_EVENTS_CLIENT_PROTOCOL(hid_events_callbacks, 2);
+DEFINE_CTT_INPUT_CLIENT_PROTOCOL(ctt_input_callbacks, 3);
+
+static void svc_device_event_protocol_device_callback(struct svc_device_protocol_device_event*);
+static void svc_device_event_device_update_callback(struct svc_device_device_update_event*);
+ 
+static gracht_protocol_function_t svc_device_callbacks[2] = {
+    { PROTOCOL_SVC_DEVICE_EVENT_PROTOCOL_DEVICE_ID , svc_device_event_protocol_device_callback },
+    { PROTOCOL_SVC_DEVICE_EVENT_DEVICE_UPDATE_ID , svc_device_event_device_update_callback },
+};
+DEFINE_SVC_DEVICE_CLIENT_PROTOCOL(svc_device_callbacks, 2);
 
 extern void wm_core_sync_callback(struct gracht_recv_message* message, struct wm_core_sync_args*);
 extern void wm_core_get_objects_callback(struct gracht_recv_message* message);
@@ -122,6 +135,25 @@ static gracht_protocol_function_t wm_surface_callbacks[11] = {
 };
 DEFINE_WM_SURFACE_SERVER_PROTOCOL(wm_surface_callbacks, 11);
 
+static gracht_client_t* valiClient = NULL;
+
+int client_initialize(void)
+{
+    struct gracht_client_configuration clientConfiguration;
+    int                                status;
+
+    status = gracht_link_vali_client_create(&clientConfiguration.link);
+    if (status) {
+        return status;
+    }
+
+    status = gracht_client_create(&clientConfiguration, &valiClient);
+    if (status) {
+        return status;
+    }
+    return status;
+}
+
 int server_initialize(void)
 {
     struct socket_server_configuration linkConfiguration;
@@ -134,9 +166,34 @@ int server_initialize(void)
     
     status = gracht_server_initialize(&serverConfiguration);
     if (status) {
-        printf("error initializing server library %i", errno);
+        ERROR("error initializing server library %i", errno);
     }
     return status;
+}
+
+void server_get_hid_devices(void)
+{
+    struct vali_link_message msg = VALI_MSG_INIT_HANDLE(GetDeviceService());
+
+    // query all input devices
+    svc_device_get_devices_by_protocol(valiClient, &msg.base, PROTOCOL_CTT_INPUT_ID);
+    svc_device_subscribe(valiClient, &msg.base);
+}
+
+void svc_device_event_protocol_device_callback(struct svc_device_protocol_device_event* input)
+{
+    struct vali_link_message msg = VALI_MSG_INIT_HANDLE(input->driver_id);
+
+    // subscribe to the driver
+    ctt_input_subscribe(valiClient, &msg.base);
+
+    // get properties of the device
+    ctt_input_get_properties(valiClient, &msg.base, input->device_id);
+}
+
+void svc_device_event_device_update_callback(struct svc_device_device_update_event* input)
+{
+    // todo handle connection of new devices and disconnection
 }
 
 int server_run(void)
@@ -147,7 +204,9 @@ int server_run(void)
     // Spawn the launcher application
     ProcessSpawn("$bin/wintest.app", NULL, &pid);
 #endif //VIOARR_WINTEST
-    
+
+    server_get_hid_devices();
+
     // Call the main sever loop
     return gracht_server_main_loop();
 }
@@ -157,7 +216,12 @@ int server_run(void)
  *******************************************/
 int main(int argc, char **argv)
 {
-    int status = server_initialize();
+    int status = client_initialize();
+    if (status) {
+        return status;
+    }
+    
+    status = server_initialize();
     if (status) {
         return status;
     }
@@ -166,13 +230,19 @@ int main(int argc, char **argv)
     if (status) {
         return status;
     }
+
+    // add the protocols we would like to support
+    gracht_client_register_protocol(valiClient, &svc_device_client_protocol);
+    gracht_client_register_protocol(valiClient, &ctt_input_client_protocol);
     
-    //gracht_server_register_protocol(&hid_events_protocol);
+    // add the server protocols we support
     gracht_server_register_protocol(&wm_core_server_protocol);
     gracht_server_register_protocol(&wm_screen_server_protocol);
     gracht_server_register_protocol(&wm_memory_server_protocol);
     gracht_server_register_protocol(&wm_memory_pool_server_protocol);
     gracht_server_register_protocol(&wm_buffer_server_protocol);
     gracht_server_register_protocol(&wm_surface_server_protocol);
+
+    gracht_server_listen_client(valiClient);
     return server_run();
 }

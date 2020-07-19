@@ -39,6 +39,7 @@ typedef struct vioarr_surface_properties {
     int border_width;
     int border_color;
     
+    vioarr_region_t*       input_region;
     vioarr_region_t*       drop_shadow;
     vioarr_region_t*       dirt;
     vioarr_buffer_t*       content;
@@ -91,12 +92,18 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
     vioarr_region_add(surface->dimensions, 0, 0, width, height);
     vioarr_region_set_position(surface->dimensions, x, y);
     
-    surface->properties.dirt                = vioarr_region_create();
-    surface->properties.drop_shadow         = vioarr_region_create();
-    surface->pending_properties.dirt        = vioarr_region_create();
-    surface->pending_properties.drop_shadow = vioarr_region_create();
-    if (!surface->properties.dirt || !surface->properties.drop_shadow ||
-        !surface->pending_properties.dirt || !surface->pending_properties.drop_shadow) {
+    surface->properties.dirt                 = vioarr_region_create();
+    surface->properties.drop_shadow          = vioarr_region_create();
+    surface->properties.input_region         = vioarr_region_create();
+    surface->pending_properties.dirt         = vioarr_region_create();
+    surface->pending_properties.drop_shadow  = vioarr_region_create();
+    surface->pending_properties.input_region = vioarr_region_create();
+    if (!surface->properties.dirt ||
+        !surface->properties.drop_shadow ||
+        !surface->properties.input_region ||
+        !surface->pending_properties.dirt || 
+        !surface->pending_properties.drop_shadow || 
+        !surface->pending_properties.input_region) {
         vioarr_surface_destroy(surface);
         return -1;
     }
@@ -146,6 +153,10 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         itr = next;
     }
 
+    if (surface->pending_properties.input_region) {
+        free(surface->pending_properties.input_region);
+    }
+    
     if (surface->pending_properties.drop_shadow) {
         free(surface->pending_properties.drop_shadow);
     }
@@ -156,6 +167,10 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
     
     if (surface->properties.content) {
         vioarr_buffer_destroy(surface->properties.content);
+    }
+
+    if (surface->properties.input_region) {
+        free(surface->properties.input_region);
     }
 
     if (surface->properties.drop_shadow) {
@@ -231,7 +246,20 @@ void vioarr_surface_set_drop_shadow(vioarr_surface_t* surface, int x, int y, int
     }
     
     mtx_lock(&surface->sync_object);
+    vioarr_region_zero(surface->pending_properties.drop_shadow);
     vioarr_region_add(surface->pending_properties.drop_shadow, x, y, width, height);
+    mtx_unlock(&surface->sync_object);
+}
+
+void vioarr_surface_set_input_region(vioarr_surface_t* surface, int x, int y, int width, int height)
+{
+    if (!surface) {
+        return;
+    }
+    
+    mtx_lock(&surface->sync_object);
+    vioarr_region_zero(surface->pending_properties.input_region);
+    vioarr_region_add(surface->pending_properties.input_region, x, y, width, height);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -351,6 +379,7 @@ static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t
     surface->properties.border_color  = surface->pending_properties.border_color;
     surface->properties.corner_radius = surface->pending_properties.corner_radius;
     vioarr_region_copy(surface->properties.drop_shadow, surface->pending_properties.drop_shadow);
+    vioarr_region_copy(surface->properties.input_region, surface->pending_properties.input_region);
     
     if (surface->pending_properties.children) {
         // append the new children

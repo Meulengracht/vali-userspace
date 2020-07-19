@@ -69,7 +69,7 @@ void wm_surface_set_input_region_callback(struct gracht_recv_message* message, s
         return;
     }
     
-    ERROR("[wm_surface_set_input_region_callback] FIXME: STUB FUNCTION");
+    vioarr_surface_set_input_region(surface, input->x, input->y, input->width, input->height);
 }
 
 void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args* input)

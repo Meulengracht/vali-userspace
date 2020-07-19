@@ -21,28 +21,18 @@
  *   for communication between compositor clients and the server. The server renders
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
-
-#include "protocols/ctt_input_protocol_client.h"
-#include "engine/vioarr_input.h"
-
-void ctt_input_event_properties_callback(struct ctt_input_properties_event* event)
-{
-    vioarr_input_register(event->device_id,
-        event->device_type == input_type_mouse ? 
-            VIOARR_INPUT_POINTER : VIOARR_INPUT_KEYBOARD);
-}
-
-void ctt_input_event_button_callback(struct ctt_input_button_event* event)
-{
-    // vioarr_input_t* input = vioarr_input_find(event->device_id);
-    // vioarr_renderer_input_event()
-}
-
-void ctt_input_event_cursor_callback(struct ctt_input_cursor_event* event)
-{
-    if (event->rel_x || event->rel_y || event->rel_z) {
-        vioarr_input_axis_event(event->device_id, event->rel_x, event->rel_y, event->rel_z);
-    }
-    vioarr_input_pointer_click(event->device_id, event->buttons_set);
-}
  
+#ifndef __VIOARR_INPUT_H__
+#define __VIOARR_INPUT_H__
+
+#include <os/osdefs.h>
+
+#define VIOARR_INPUT_POINTER  0
+#define VIOARR_INPUT_KEYBOARD 1
+
+void vioarr_input_register(UUId_t deviceId, int);
+void vioarr_input_unregister(UUId_t deviceId);
+void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z);
+void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons);
+
+#endif //!__VIOARR_INPUT_H__
