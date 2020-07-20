@@ -34,8 +34,7 @@ void ctt_input_event_properties_callback(struct ctt_input_properties_event* even
 
 void ctt_input_event_button_callback(struct ctt_input_button_event* event)
 {
-    // vioarr_input_t* input = vioarr_input_find(event->device_id);
-    // vioarr_renderer_input_event()
+    vioarr_input_keyboard_click(event->device_id, (uint32_t)event->key_code, (uint32_t)event->modifiers);
 }
 
 void ctt_input_event_cursor_callback(struct ctt_input_cursor_event* event)

@@ -31,6 +31,8 @@ typedef struct vioarr_surface vioarr_surface_t;
 
 void              vioarr_manager_register_surface(vioarr_surface_t* surface);
 void              vioarr_manager_unregister_surface(vioarr_surface_t* surface);
+void              vioarr_manager_promote_cursor(vioarr_surface_t* surface);
+void              vioarr_manager_demote_cursor(vioarr_surface_t* surface);
 void              vioarr_manager_render_start(list_t** surfaces, list_t** cursors);
 void              vioarr_manager_render_end(void);
 vioarr_surface_t* vioarr_manager_front_surface(void);

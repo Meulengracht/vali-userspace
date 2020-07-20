@@ -147,3 +147,15 @@ int vioarr_region_is_zero(vioarr_region_t* region)
     }
     return 0;
 }
+
+void vioarr_region_contains(vioarr_region_t*, int x , int y)
+{
+    if (!region) {
+        return 0;
+    }
+
+    if (region->width == 0 || region->height == 0) {
+        return 0;
+    }
+    return x >= region->x && y >= region->y;
+}

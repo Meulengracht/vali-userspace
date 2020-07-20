@@ -32,6 +32,7 @@
 #include <string.h>
 #include <threads.h>
 
+#include "../protocols/wm_surface_protocol_server.h"
 #include "../protocols/wm_buffer_protocol_server.h"
 
 typedef struct vioarr_surface_properties {
@@ -263,6 +264,27 @@ void vioarr_surface_set_input_region(vioarr_surface_t* surface, int x, int y, in
     mtx_unlock(&surface->sync_object);
 }
 
+int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
+{
+    if (!surface) {
+        return 0;
+    }
+
+    // check children
+    if (vioarr_region_contains(surface->properties.input_region, x, y)) {
+        return 1;
+    }
+}
+
+int vioarr_surface_contains(vioarr_surface_t* surface, int x, int y)
+{
+    if (!surface) {
+        return 0;
+    }
+
+    return vioarr_region_contains(surface->dimensions, x, y);
+}
+
 void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int width, int height)
 {
     if (!surface) {
@@ -296,12 +318,29 @@ void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
     mtx_unlock(&surface->sync_object);
 }
 
+void vioarr_surface_focus(vioarr_surface_t* surface, int focus)
+{
+    if (!surface) {
+        return;
+    }
+
+    wm_surface_event_focus_single(surface->client, surface->id, focus);
+}
+
 uint32_t vioarr_surface_id(vioarr_surface_t* surface)
 {
     if (!surface) {
         return 0;
     }
     return surface->id;
+}
+
+int vioarr_surface_client(vioarr_surface_t* surface)
+{
+    if (!surface) {
+        return -1;
+    }
+    return surface->client;
 }
 
 vioarr_screen_t* vioarr_surface_screen(vioarr_surface_t* surface)
@@ -312,7 +351,7 @@ vioarr_screen_t* vioarr_surface_screen(vioarr_surface_t* surface)
     return surface->screen;
 }
 
-vioarr_region_t* vioarr_dimensions(vioarr_surface_t* surface)
+vioarr_region_t* vioarr_surface_dimensions(vioarr_surface_t* surface)
 {
     if (!surface) {
         return NULL;

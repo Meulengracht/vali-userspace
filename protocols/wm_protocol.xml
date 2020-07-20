@@ -245,6 +245,10 @@
                     <param name="height" type="int"/>
                     <param name="edges" type="edge"/>
                 </event>
+                <event name="focus">
+                    <param name="surface_id" type="uint32_t"/>
+                    <param name="focus" type="int"/>
+                </event>
             </events>
         </protocol>
         
@@ -292,8 +296,7 @@
                 </event>
                 <event name="click">
                     <param name="pointer_id" type="uint32_t"/>
-                    <param name="button" type="uint32_t"/>
-                    <param name="state" type="uint32_t"/>
+                    <param name="buttons" type="uint32_t"/>
                 </event>
             </events>
         </protocol>

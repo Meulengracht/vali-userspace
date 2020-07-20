@@ -34,5 +34,6 @@ void vioarr_input_register(UUId_t deviceId, int);
 void vioarr_input_unregister(UUId_t deviceId);
 void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z);
 void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons);
+void vioarr_input_keyboard_click(UUId_t deviceId, uint32_t keycode, uint32_t modifiers);
 
 #endif //!__VIOARR_INPUT_H__

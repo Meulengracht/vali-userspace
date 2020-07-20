@@ -28,6 +28,8 @@
 #include "vioarr_manager.h"
 #include "vioarr_objects.h"
 #include "../protocols/wm_core_protocol.h"
+#include "../protocols/wm_pointer_protocol.h"
+#include "../protocols/wm_keyboard_protocol.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,10 +40,11 @@ typedef struct vioarr_input_source {
     int       type;
     union {
         struct {
-            int      x;
-            int      y;
-            int      z;
-            uint32_t buttons;
+            int               x;
+            int               y;
+            int               z;
+            uint32_t          buttons;
+            vioarr_surface_t* surface;
         } pointer;
     } state;
 } vioarr_input_source_t;
@@ -62,22 +65,47 @@ void vioarr_input_register(UUId_t deviceId, int type)
 
     sourceId = vioarr_objects_create_server_object(source, object_type_pointer);
 
+    ELEMENT_INIT(&source->header, (uintptr_t)deviceId, source);
     source->id       = sourceId;
     source->deviceId = deviceId;
     source->type     = type;
+
+    list_append(&inputDevices, &source->header);
 }
 
 void vioarr_input_unregister(UUId_t deviceId)
 {
+    vioarr_input_source_t* source = list_find_value(&inputDevices, (void*)(uintptr_t)deviceId);
+    if (!source) {
+        return;
+    }
 
+    list_remove(&inputDevices, &source->header);
+    if (source->state.pointer.surface) {
+        vioarr_manager_demote_cursor(source->state.pointer.surface);
+    }
+
+    // destroy server object
+    vioarr_objects_remove_object(-1, source->id);
+    free(source);
 }
 
-void vioarr_input_set_surface(vioarr_input_source_t* input)
+void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* surface)
 {
-    // unregister the surface from the renderer
-    // vioarr_screen_unregister_surface(vioarr_surface_screen(child_surface), child_surface);
+    if (!input) {
+        return;
+    }
 
-    // register the surface as the cursor
+    if (input->state.pointer.surface) {
+        vioarr_manager_demote_cursor(input->state.pointer.surface);
+    }
+
+    if (surface) {
+        vioarr_manager_promote_cursor(surface);
+    }
+
+    // update the stored surface pointer
+    input->state.pointer.surface = surface;
 }
 
 void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
@@ -85,7 +113,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     vioarr_input_source_t* source = list_find_value(&inputDevices, (void*)(uintptr_t)deviceId);
     vioarr_surface_t*      currentSurface;
     vioarr_surface_t*      surfaceAfterMove;
-    vioarr_surface_t*      eventSurface;
+    int                    sendUpdates;
     if (!source) {
         return;
     }
@@ -93,26 +121,43 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     // ... we currently do not use z
     currentSurface   = vioarr_manager_surface_at(source->state.pointer.x, source->state.pointer.y);
     surfaceAfterMove = vioarr_manager_surface_at(source->state.pointer.x + x, source->state.pointer.y + y);
-    eventSurface     = vioarr_surface_input_at(surfaceAfterMove, x, y);
+    sendUpdates      = vioarr_surface_supports_input(surfaceAfterMove, source->state.pointer.x + x, source->state.pointer.y + y);
+
+    // send events
+    if (currentSurface != surfaceAfterMove) {
+        if (vioarr_surface_supports_input(currentSurface, source->state.pointer.x, source->state.pointer.y)) {
+            wm_pointer_event_leave_single(
+                vioarr_surface_client(currentSurface),
+                source->id,
+                vioarr_surface_id(currentSurface));
+        }
+        if (sendUpdates) {
+            wm_pointer_event_enter_single(
+                vioarr_surface_client(surfaceAfterMove),
+                source->id,
+                vioarr_surface_id(surfaceAfterMove),
+                source->state.pointer.x + x,
+                source->state.pointer.y + y);
+            
+            // skip move event
+            sendUpdates = 0;
+        }
+    }
 
     // update values before proceeding
     source->state.pointer.x += x;
     source->state.pointer.y += y;
     source->state.pointer.z += z;
 
-    // send events
-    if (currentSurface != surfaceAfterMove) {
-        if (currentSurface) {
-            // send leave
-        }
-        if (surfaceAfterMove) {
-            // send enter
-        }
-    }
-
     // send move event
-    if (eventSurface) {
+    if (sendUpdates) {
         // send move event with surface local coordinates
+        vioarr_surface_t* region = vioarr_surface_dimensions(surfaceAfterMove);
+        wm_pointer_event_move_single(
+            vioarr_surface_client(surfaceAfterMove),
+            source->id,
+            source->state.pointer.x - vioarr_region_x(region),
+            source->state.pointer.y - vioarr_region_y(region));
     }
 }
 
@@ -128,29 +173,31 @@ void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons)
     if (source->state.pointer.buttons == buttons) {
         return;
     }
+    source->state.pointer.buttons = buttons;
 
     // get the current surface, check against current active one
-    clickedSurface = vioarr_manager_surface_at(source->state.pointer.x, source->state.pointer.y);
     currentSurface = vioarr_manager_front_surface();
+    clickedSurface = vioarr_manager_surface_at(source->state.pointer.x, source->state.pointer.y);
     if (clickedSurface != currentSurface) {
         // this means we clicked on a non-active surface, we want to active it
         vioarr_manager_push_to_front(clickedSurface);
         if (currentSurface) {
-            // send focus event
+            vioarr_surface_focus(currentSurface, 0);
         }
         if (clickedSurface) {
-            // send focus event
+            vioarr_surface_focus(currentSurface, 1);
         }
     }
-    source->state.pointer.buttons = buttons;
+
+    if (vioarr_surface_supports_input(clickedSurface, source->state.pointer.x, source->state.pointer.y)) {
+        wm_pointer_event_click_single(vioarr_surface_client(surfaceAfterMove), source->id, buttons);
+    }
 }
 
-void vioarr_input_keyboard_click(UUId_t deviceId, uint8_t keycode, uint32_t flags)
+void vioarr_input_keyboard_click(UUId_t deviceId, uint32_t keycode, uint32_t modifiers)
 {
     vioarr_surface_t* currentSurface = vioarr_manager_front_surface();
     if (currentSurface) {
-        // send event
+        wm_keyboard_event_key_single(vioarr_surface_client(currentSurface), keycode, modifiers);
     }
-
-    
 }

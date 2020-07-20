@@ -31,11 +31,12 @@ vioarr_region_t* vioarr_region_create(void);
 void             vioarr_region_zero(vioarr_region_t*);
 void             vioarr_region_copy(vioarr_region_t*, vioarr_region_t*);
 void             vioarr_region_set_position(vioarr_region_t*, int, int);
-void             vioarr_region_add(vioarr_region_t*, int, int, int, int);
+void             vioarr_region_add(vioarr_region_t*, int x, int y, int width, int height);
 int              vioarr_region_x(vioarr_region_t*);
 int              vioarr_region_y(vioarr_region_t*);
 int              vioarr_region_width(vioarr_region_t*);
 int              vioarr_region_height(vioarr_region_t*);
 int              vioarr_region_is_zero(vioarr_region_t*);
+void             vioarr_region_contains(vioarr_region_t*, int x , int y);
 
 #endif //!__VIOARR_REGION_H__

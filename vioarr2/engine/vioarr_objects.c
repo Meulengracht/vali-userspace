@@ -119,7 +119,9 @@ int vioarr_objects_remove_object(int client, uint32_t id)
     }
     
     list_remove(&objects, &object->link);
-    //wm_core_event_object_all(id); DESTROY EVENT
+    if (id >= SERVER_ID_START) {
+        wm_core_event_object_all(id);
+    }
     free(object);
     return 0;
 }
