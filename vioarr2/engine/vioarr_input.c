@@ -24,12 +24,13 @@
 
 #include <ds/list.h>
 #include "vioarr_input.h"
-#include "vioarr_surface.h"
-#include "vioarr_manager.h"
 #include "vioarr_objects.h"
+#include "vioarr_manager.h"
+#include "vioarr_region.h"
+#include "vioarr_surface.h"
 #include "../protocols/wm_core_protocol.h"
-#include "../protocols/wm_pointer_protocol.h"
-#include "../protocols/wm_keyboard_protocol.h"
+#include "../protocols/wm_pointer_protocol_server.h"
+#include "../protocols/wm_keyboard_protocol_server.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -152,7 +153,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     // send move event
     if (sendUpdates) {
         // send move event with surface local coordinates
-        vioarr_surface_t* region = vioarr_surface_region(surfaceAfterMove);
+        vioarr_region_t* region = vioarr_surface_region(surfaceAfterMove);
         wm_pointer_event_move_single(
             vioarr_surface_client(surfaceAfterMove),
             source->id,
@@ -190,7 +191,7 @@ void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons)
     }
 
     if (vioarr_surface_supports_input(clickedSurface, source->state.pointer.x, source->state.pointer.y)) {
-        wm_pointer_event_click_single(vioarr_surface_client(surfaceAfterMove), source->id, buttons);
+        wm_pointer_event_click_single(vioarr_surface_client(clickedSurface), source->id, buttons);
     }
 }
 

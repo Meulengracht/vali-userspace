@@ -23,6 +23,8 @@ APP_PROTOCOLS_C := protocols/wm_core_protocol_server.c \
 				   protocols/wm_memory_pool_protocol_server.c \
 				   protocols/wm_buffer_protocol_server.c \
 				   protocols/wm_surface_protocol_server.c \
+				   protocols/wm_pointer_protocol_server.c \
+				   protocols/wm_keyboard_protocol_server.c \
 				   protocols/ctt_input_protocol_client.c \
 				   protocols/svc_device_protocol_client.c
 

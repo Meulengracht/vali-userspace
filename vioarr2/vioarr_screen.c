@@ -27,6 +27,7 @@
 #include "engine/vioarr_screen.h"
 #include "engine/vioarr_surface.h"
 #include "engine/vioarr_objects.h"
+#include "engine/vioarr_manager.h"
 #include "engine/vioarr_utils.h"
 #include <gracht/server.h>
 #include <errno.h>

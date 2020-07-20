@@ -27,6 +27,7 @@
 
 #include <os/osdefs.h>
 
+typedef struct list list_t;
 typedef struct vioarr_surface vioarr_surface_t;
 
 void              vioarr_manager_register_surface(vioarr_surface_t* surface);

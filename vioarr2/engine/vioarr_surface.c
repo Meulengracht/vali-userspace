@@ -283,6 +283,7 @@ int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
             itr = itr->link;
         }
     }
+    return 0;
 }
 
 int vioarr_surface_contains(vioarr_surface_t* surface, int x, int y)

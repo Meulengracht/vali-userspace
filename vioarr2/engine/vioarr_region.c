@@ -170,10 +170,10 @@ int vioarr_region_intersects(vioarr_region_t* region1, vioarr_region_t* region2)
         return 0;
     }
 
-    if ( region1->x                    < (region2->x + region2.width)   &&
-        (region1->x + region1->width)  > region2->x                     &&
+    if ( region1->x                    < (region2->x + region2->width)  &&
+        (region1->x + region1->width)  >  region2->x                     &&
          region1->y                    > (region2->y + region2->height) &&
-        (region1->y + region1->height) < region2->y) {
+        (region1->y + region1->height) <  region2->y) {
         return 1;
     }
     return 0;
