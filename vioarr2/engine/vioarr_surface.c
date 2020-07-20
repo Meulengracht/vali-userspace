@@ -270,9 +270,18 @@ int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
         return 0;
     }
 
-    // check children
     if (vioarr_region_contains(surface->properties.input_region, x, y)) {
         return 1;
+    }
+    else {
+        // check children if they support input
+        vioarr_surface_t* itr = surface->properties.children;
+        while (itr) {
+            if (vioarr_surface_supports_input(itr, x, y)) {
+                return 1;
+            }
+            itr = itr->link;
+        }
     }
 }
 

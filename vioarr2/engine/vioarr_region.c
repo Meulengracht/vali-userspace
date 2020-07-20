@@ -157,7 +157,11 @@ int vioarr_region_contains(vioarr_region_t* region, int x , int y)
     if (region->width == 0 || region->height == 0) {
         return 0;
     }
-    return x >= region->x && y >= region->y;
+
+    return
+        x >= region->x && y >= region->y &&
+        x < (region->x + region->width) && 
+        y < (region->y + region->height);
 }
 
 int vioarr_region_intersects(vioarr_region_t* region1, vioarr_region_t* region2)
