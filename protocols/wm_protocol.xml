@@ -274,6 +274,8 @@
                     <request>
                         <param name="pointer_id" type="uint32_t"/>
                         <param name="surface_id" type="uint32_t"/>
+                        <param name="x_offset" type="int"/>
+                        <param name="y_offset" type="int"/>
                     </request>
                 </function>
             </functions>

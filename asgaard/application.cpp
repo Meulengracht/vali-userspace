@@ -36,6 +36,8 @@
 #include "protocols/wm_screen_protocol_client.h"
 #include "protocols/wm_surface_protocol_client.h"
 #include "protocols/wm_buffer_protocol_client.h"
+#include "protocols/wm_pointer_protocol_client.h"
+#include "protocols/wm_keyboard_protocol_client.h"
 
 extern "C" {
     static void wm_core_event_error_callback(struct wm_core_error_event*);
@@ -61,13 +63,15 @@ extern "C" {
     static void wm_surface_event_format_callback(struct wm_surface_format_event*);
     static void wm_surface_event_frame_callback(struct wm_surface_frame_event*);
     static void wm_surface_event_resize_callback(struct wm_surface_resize_event*);
+    static void wm_surface_event_focus_callback(struct wm_surface_focus_event*);
 
-    static gracht_protocol_function_t wm_surface_callbacks[3] = {
+    static gracht_protocol_function_t wm_surface_callbacks[4] = {
         { PROTOCOL_WM_SURFACE_EVENT_FORMAT_ID , (void*)wm_surface_event_format_callback },
         { PROTOCOL_WM_SURFACE_EVENT_FRAME_ID ,  (void*)wm_surface_event_frame_callback },
         { PROTOCOL_WM_SURFACE_EVENT_RESIZE_ID , (void*)wm_surface_event_resize_callback },
+        { PROTOCOL_WM_SURFACE_EVENT_FOCUS_ID , (void*)wm_surface_event_focus_callback },
     };
-    DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 3);
+    DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 4);
 
     static void wm_buffer_event_release_callback(struct wm_buffer_release_event*);
 
@@ -75,6 +79,26 @@ extern "C" {
         { PROTOCOL_WM_BUFFER_EVENT_RELEASE_ID , (void*)wm_buffer_event_release_callback },
     };
     DEFINE_WM_BUFFER_CLIENT_PROTOCOL(wm_buffer_callbacks, 1);
+
+    static void wm_pointer_event_enter_callback(struct wm_pointer_enter_event*);
+    static void wm_pointer_event_leave_callback(struct wm_pointer_leave_event*);
+    static void wm_pointer_event_move_callback(struct wm_pointer_move_event*);
+    static void wm_pointer_event_click_callback(struct wm_pointer_click_event*);
+ 
+    static gracht_protocol_function_t wm_pointer_callbacks[4] = {
+        { PROTOCOL_WM_POINTER_EVENT_ENTER_ID , (void*)wm_pointer_event_enter_callback },
+        { PROTOCOL_WM_POINTER_EVENT_LEAVE_ID , (void*)wm_pointer_event_leave_callback },
+        { PROTOCOL_WM_POINTER_EVENT_MOVE_ID ,  (void*)wm_pointer_event_move_callback },
+        { PROTOCOL_WM_POINTER_EVENT_CLICK_ID , (void*)wm_pointer_event_click_callback },
+    };
+    DEFINE_WM_POINTER_CLIENT_PROTOCOL(wm_pointer_callbacks, 4);
+ 
+    static void wm_keyboard_event_key_callback(struct wm_keyboard_key_event*);
+ 
+    static gracht_protocol_function_t wm_keyboard_callbacks[1] = {
+        { PROTOCOL_WM_KEYBOARD_EVENT_KEY_ID , (void*)wm_keyboard_event_key_callback },
+    };
+    DEFINE_WM_KEYBOARD_CLIENT_PROTOCOL(wm_keyboard_callbacks, 1);
 }
 
 int gracht_os_get_server_client_address(struct sockaddr_storage* address, int* address_length_out)
@@ -120,6 +144,8 @@ namespace Asgaard {
         gracht_client_register_protocol(m_client, &wm_screen_client_protocol);
         gracht_client_register_protocol(m_client, &wm_surface_client_protocol);
         gracht_client_register_protocol(m_client, &wm_buffer_client_protocol);
+        gracht_client_register_protocol(m_client, &wm_pointer_client_protocol);
+        gracht_client_register_protocol(m_client, &wm_keyboard_client_protocol);
         
         // kick off a chain reaction by asking for all objects
         return wm_core_get_objects(m_client, nullptr);
@@ -300,6 +326,11 @@ extern "C"
         
         object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_RESIZE, input);
     }
+
+    void wm_surface_event_focus_callback(struct wm_surface_focus_event*)
+    {
+
+    }
     
     // BUFFER PROTOCOL EVENTS
     void wm_buffer_event_release_callback(struct wm_buffer_release_event* input)
@@ -311,5 +342,32 @@ extern "C"
         }
         
         object->ExternalEvent(Asgaard::Object::ObjectEvent::BUFFER_RELEASE, input);
+    }
+
+    // POINTER PROTOCOL EVENTS
+    void wm_pointer_event_enter_callback(struct wm_pointer_enter_event* event)
+    {
+
+    }
+
+    void wm_pointer_event_leave_callback(struct wm_pointer_leave_event* event)
+    {
+
+    }
+
+    void wm_pointer_event_move_callback(struct wm_pointer_move_event* event)
+    {
+
+    }
+
+    void wm_pointer_event_click_callback(struct wm_pointer_click_event* event)
+    {
+
+    }
+
+    // KEYBOARD PROTOCOL EVENTS
+    void wm_keyboard_event_key_callback(struct wm_keyboard_key_event* event)
+    {
+
     }
 }

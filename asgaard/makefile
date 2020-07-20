@@ -15,6 +15,8 @@ APP_PROTOCOLS_C := protocols/wm_core_protocol_client.c \
 				   protocols/wm_memory_pool_protocol_client.c \
 				   protocols/wm_buffer_protocol_client.c \
 				   protocols/wm_surface_protocol_client.c \
+				   protocols/wm_pointer_protocol_client.c \
+				   protocols/wm_keyboard_protocol_client.c \
 				   protocols/hid_events_protocol_client.c
 
 APP_DEFINES := -DGL_VIOARR_LOADER -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
@@ -57,6 +59,14 @@ protocols/wm_memory_pool_protocol_client.c: ../protocols/wm_protocol.xml
 	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --client --out ./protocols/
 
 protocols/wm_buffer_protocol_client.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --client --out ./protocols/
+
+protocols/wm_pointer_protocol_client.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --client --out ./protocols/
+
+protocols/wm_keyboard_protocol_client.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
 	python $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --client --out ./protocols/
 

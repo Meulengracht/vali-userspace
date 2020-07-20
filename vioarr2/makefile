@@ -78,6 +78,14 @@ protocols/wm_surface_protocol_server.c: ../protocols/wm_protocol.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
 	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
 
+protocols/wm_pointer_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_keyboard_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
 protocols/ctt_input_protocol_client.c: $(VALI_DDK_PATH)/share/vali/protocols/contract_protocols.xml
 	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
 	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --include input --lang-c --client --out ./protocols/

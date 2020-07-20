@@ -328,6 +328,17 @@ void vioarr_surface_move(vioarr_surface_t* surface, int x, int y)
     mtx_unlock(&surface->sync_object);
 }
 
+void vioarr_surface_move_absolute(vioarr_surface_t* surface, int x, int y)
+{
+    if (!surface) {
+        return;
+    }
+
+    mtx_lock(&surface->sync_object);
+    vioarr_region_set_position(surface->dimensions, x, y);
+    mtx_unlock(&surface->sync_object);
+}
+
 void vioarr_surface_focus(vioarr_surface_t* surface, int focus)
 {
     if (!surface) {

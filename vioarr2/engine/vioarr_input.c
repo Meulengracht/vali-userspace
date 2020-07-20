@@ -91,7 +91,7 @@ void vioarr_input_unregister(UUId_t deviceId)
     free(source);
 }
 
-void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* surface)
+void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* surface, int xOffset, int yOffset)
 {
     if (!input) {
         return;
@@ -103,6 +103,9 @@ void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* su
 
     if (surface) {
         vioarr_manager_promote_cursor(surface);
+        vioarr_surface_move_absolute(surface, 
+            input->state.pointer.x + xOffset,
+            input->state.pointer.y + yOffset);
     }
 
     // update the stored surface pointer
@@ -149,6 +152,9 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     source->state.pointer.x += x;
     source->state.pointer.y += y;
     source->state.pointer.z += z;
+    if (source->state.pointer.surface) {
+        vioarr_surface_move(source->state.pointer.surface, x, y);
+    }
 
     // send move event
     if (sendUpdates) {
