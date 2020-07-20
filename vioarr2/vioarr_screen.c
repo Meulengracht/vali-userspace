@@ -107,7 +107,7 @@ void wm_screen_create_surface_callback(struct gracht_recv_message* message, stru
     }
 
     // register surface with screen
-    vioarr_screen_register_surface(screen, surface);
+    vioarr_manager_register_surface(surface);
     vioarr_objects_create_client_object(message->client, input->surface_id, surface, object_type_surface);
     wm_core_event_object_single(message->client, input->surface_id, UUID_INVALID, object_type_surface);
 }

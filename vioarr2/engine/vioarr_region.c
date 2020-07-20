@@ -148,7 +148,7 @@ int vioarr_region_is_zero(vioarr_region_t* region)
     return 0;
 }
 
-void vioarr_region_contains(vioarr_region_t*, int x , int y)
+int vioarr_region_contains(vioarr_region_t* region, int x , int y)
 {
     if (!region) {
         return 0;
@@ -158,4 +158,19 @@ void vioarr_region_contains(vioarr_region_t*, int x , int y)
         return 0;
     }
     return x >= region->x && y >= region->y;
+}
+
+int vioarr_region_intersects(vioarr_region_t* region1, vioarr_region_t* region2)
+{
+    if (!region1 || !region2) {
+        return 0;
+    }
+
+    if ( region1->x                    < (region2->x + region2.width)   &&
+        (region1->x + region1->width)  > region2->x                     &&
+         region1->y                    > (region2->y + region2->height) &&
+        (region1->y + region1->height) < region2->y) {
+        return 1;
+    }
+    return 0;
 }

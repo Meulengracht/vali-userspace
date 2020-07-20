@@ -290,22 +290,6 @@ int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
         vioarr_region_height(screen->dimensions), 60);
 }
 
-void vioarr_screen_register_surface(vioarr_screen_t* screen, vioarr_surface_t* surface)
-{
-    if (!screen) {
-        return;
-    }
-    vioarr_renderer_register_surface(screen->renderer, surface);
-}
-
-void vioarr_screen_unregister_surface(vioarr_screen_t* screen, vioarr_surface_t* surface)
-{
-    if (!screen) {
-        return;
-    }
-    vioarr_renderer_unregister_surface(screen->renderer, surface);
-}
-
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
     vioarr_renderer_render(screen->renderer);

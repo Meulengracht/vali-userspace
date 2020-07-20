@@ -29,21 +29,19 @@
 #include "vioarr_renderer.h"
 #include "vioarr_screen.h"
 #include "vioarr_surface.h"
+#include "vioarr_manager.h"
 #include "vioarr_utils.h"
 #include <stdlib.h>
 #include <threads.h>
 
 typedef struct vioarr_renderer {
-    NVGcontext* context;
-    int         width;
-    int         height;
-    int         scale;
-    int         rotation;
-    float       pixel_ratio;
-    mtx_t       sync_object;
-
-    list_t entities;
-    list_t front_entities;
+    NVGcontext*      context;
+    vioarr_screen_t* screen;
+    int              width;
+    int              height;
+    int              scale;
+    int              rotation;
+    float            pixel_ratio;
 } vioarr_renderer_t;
 
 static void opengl_initialize(int width, int height)
@@ -77,10 +75,7 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         return NULL;
     }
     
-    mtx_init(&renderer->sync_object, mtx_plain);
-    list_construct(&renderer->entities);
-    list_construct(&renderer->front_entities);
-
+    renderer->screen      = screen;
     renderer->width       = width;
     renderer->height      = height;
     renderer->pixel_ratio = (float)width / (float)height;
@@ -124,62 +119,31 @@ int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
     return renderer->rotation;
 }
 
-void vioarr_renderer_register_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
-{
-    if (!renderer || !surface) {
-        ERROR("[vioarr_renderer_register_surface] null parameters");
-        return;
-    }
-
-    element_t* element = malloc(sizeof(element_t));
-    if (!element) {
-        ERROR("[vioarr_renderer_register_surface] out of memory");
-        return;
-    }
-
-    ELEMENT_INIT(element, (uintptr_t)vioarr_surface_id(surface), surface);
-    
-    mtx_lock(&renderer->sync_object);
-    list_append(&renderer->entities, element);
-    mtx_unlock(&renderer->sync_object);
-}
-
-void vioarr_renderer_unregister_surface(vioarr_renderer_t* renderer, vioarr_surface_t* surface)
-{
-    if (!renderer || !surface) {
-        ERROR("[vioarr_renderer_register_surface] null parameters");
-        return;
-    }
-
-    mtx_lock(&renderer->sync_object);
-    element_t* element = list_find(&renderer->entities, (void*)(uintptr_t)vioarr_surface_id(surface));
-    if (!element) {
-        mtx_unlock(&renderer->sync_object); 
-        return;
-    }
-
-    list_remove(&renderer->entities, element);
-    mtx_unlock(&renderer->sync_object);
-}
-
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
-    element_t* i;
+    element_t*       i;
+    list_t*          surfaces;
+    list_t*          cursors;
+    vioarr_region_t* drawRegion = vioarr_screen_region(renderer->screen);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
     
-    mtx_lock(&renderer->sync_object);
-    _foreach(i, &renderer->entities) {
+    vioarr_manager_render_start(&surfaces, &cursors);
+    _foreach(i, surfaces) {
         vioarr_surface_t* surface = i->value;
-        vioarr_surface_render(renderer->context, surface);
+        if (vioarr_region_intersects(drawRegion, vioarr_surface_region(surface))) {
+            vioarr_surface_render(renderer->context, surface);
+        }
     }
     
-    _foreach(i, &renderer->front_entities) {
+    _foreach(i, cursors) {
         vioarr_surface_t* surface = i->value;
-        vioarr_surface_render(renderer->context, surface);
+        if (vioarr_region_intersects(drawRegion, vioarr_surface_region(surface))) {
+            vioarr_surface_render(renderer->context, surface);
+        }
     }
-    mtx_unlock(&renderer->sync_object);
+    vioarr_manager_render_end();
     
     nvgEndFrame(renderer->context);
     glFinish();

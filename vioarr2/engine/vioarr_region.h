@@ -37,6 +37,7 @@ int              vioarr_region_y(vioarr_region_t*);
 int              vioarr_region_width(vioarr_region_t*);
 int              vioarr_region_height(vioarr_region_t*);
 int              vioarr_region_is_zero(vioarr_region_t*);
-void             vioarr_region_contains(vioarr_region_t*, int x , int y);
+int              vioarr_region_contains(vioarr_region_t*, int x , int y);
+int              vioarr_region_intersects(vioarr_region_t*, vioarr_region_t*);
 
 #endif //!__VIOARR_REGION_H__

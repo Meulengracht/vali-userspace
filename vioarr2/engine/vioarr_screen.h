@@ -39,8 +39,6 @@ vioarr_region_t*         vioarr_screen_region(vioarr_screen_t*);
 int                      vioarr_screen_scale(vioarr_screen_t*);
 enum wm_screen_transform vioarr_screen_transform(vioarr_screen_t*);
 int                      vioarr_screen_publish_modes(vioarr_screen_t*, int);
-void                     vioarr_screen_register_surface(vioarr_screen_t*, vioarr_surface_t*);
-void                     vioarr_screen_unregister_surface(vioarr_screen_t*, vioarr_surface_t*);
 void                     vioarr_screen_frame(vioarr_screen_t*);
 
 #endif //!__VIOARR_SCREEN_H__

@@ -125,7 +125,7 @@ void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, str
     }
 
     // unregister the surface
-    vioarr_screen_unregister_surface(vioarr_surface_screen(child_surface), child_surface);
+    vioarr_manager_unregister_surface(child_surface);
     
     status = vioarr_surface_add_child(parent_surface, child_surface, input->x, input->y);
     if (status) {
@@ -179,6 +179,6 @@ void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_
         return;
     }
 
-    vioarr_screen_unregister_surface(vioarr_surface_screen(surface), surface);
+    vioarr_manager_unregister_surface(surface);
     vioarr_surface_destroy(surface);
 }

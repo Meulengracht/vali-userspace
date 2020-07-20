@@ -351,7 +351,7 @@ vioarr_screen_t* vioarr_surface_screen(vioarr_surface_t* surface)
     return surface->screen;
 }
 
-vioarr_region_t* vioarr_surface_dimensions(vioarr_surface_t* surface)
+vioarr_region_t* vioarr_surface_region(vioarr_surface_t* surface)
 {
     if (!surface) {
         return NULL;

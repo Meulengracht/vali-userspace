@@ -152,7 +152,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     // send move event
     if (sendUpdates) {
         // send move event with surface local coordinates
-        vioarr_surface_t* region = vioarr_surface_dimensions(surfaceAfterMove);
+        vioarr_surface_t* region = vioarr_surface_region(surfaceAfterMove);
         wm_pointer_event_move_single(
             vioarr_surface_client(surfaceAfterMove),
             source->id,
