@@ -24,9 +24,11 @@
 
 #include "protocols/ctt_input_protocol_client.h"
 #include "engine/vioarr_input.h"
+#include "engine/vioarr_utils.h"
 
 void ctt_input_event_properties_callback(struct ctt_input_properties_event* event)
 {
+    TRACE("[ctt_input_event_properties_callback] %u", event->device_type);
     vioarr_input_register(event->device_id,
         event->device_type == input_type_mouse ? 
             VIOARR_INPUT_POINTER : VIOARR_INPUT_KEYBOARD);
@@ -34,11 +36,14 @@ void ctt_input_event_properties_callback(struct ctt_input_properties_event* even
 
 void ctt_input_event_button_callback(struct ctt_input_button_event* event)
 {
+    TRACE("[ctt_input_event_button_callback] %u", event->key_code);
     vioarr_input_keyboard_click(event->device_id, (uint32_t)event->key_code, (uint32_t)event->modifiers);
 }
 
 void ctt_input_event_cursor_callback(struct ctt_input_cursor_event* event)
 {
+    TRACE("[ctt_input_event_button_callback] %i, %i, %i, 0x%x",
+        event->rel_x, event->rel_y, event->rel_z, event->buttons_set);
     if (event->rel_x || event->rel_y || event->rel_z) {
         vioarr_input_axis_event(event->device_id, event->rel_x, event->rel_y, event->rel_z);
     }

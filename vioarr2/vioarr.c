@@ -27,8 +27,11 @@
 #include <gracht/link/socket.h>
 #include <gracht/link/vali.h>
 #include <gracht/server.h>
+#include <io.h>
+#include <ioset.h>
 #include <os/process.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "protocols/ctt_input_protocol_client.h"
 #include "protocols/svc_device_protocol_client.h"
@@ -154,7 +157,7 @@ int client_initialize(void)
     return status;
 }
 
-int server_initialize(void)
+int server_initialize(int* eventIodOut)
 {
     struct socket_server_configuration linkConfiguration;
     struct gracht_server_configuration serverConfiguration;
@@ -163,26 +166,41 @@ int server_initialize(void)
     gracht_os_get_server_client_address(&linkConfiguration.server_address, &linkConfiguration.server_address_length);
     gracht_os_get_server_packet_address(&linkConfiguration.dgram_address, &linkConfiguration.dgram_address_length);
     gracht_link_socket_server_create(&serverConfiguration.link, &linkConfiguration);
+
+    // Create the set descriptor we are listening to
+    serverConfiguration.set_descriptor = ioset(0);
+    serverConfiguration.set_descriptor_provided = 1;
+    if (serverConfiguration.set_descriptor < 0) {
+        ERROR("error creating event descriptor %i", errno);
+        return -1;
+    }
     
     status = gracht_server_initialize(&serverConfiguration);
     if (status) {
         ERROR("error initializing server library %i", errno);
+        close(serverConfiguration.set_descriptor);
     }
+
+    *eventIodOut = serverConfiguration.set_descriptor;
     return status;
 }
 
 void server_get_hid_devices(void)
 {
     struct vali_link_message msg = VALI_MSG_INIT_HANDLE(GetDeviceService());
+    TRACE("[server_get_hid_devices]");
+
+    // subscribe to events from the device manager
+    svc_device_subscribe(valiClient, &msg.base);
 
     // query all input devices
     svc_device_get_devices_by_protocol(valiClient, &msg.base, PROTOCOL_CTT_INPUT_ID);
-    svc_device_subscribe(valiClient, &msg.base);
 }
 
 void svc_device_event_protocol_device_callback(struct svc_device_protocol_device_event* input)
 {
     struct vali_link_message msg = VALI_MSG_INIT_HANDLE(input->driver_id);
+    TRACE("[svc_device_event_protocol_device_callback] %u", input->device_id);
 
     // subscribe to the driver
     ctt_input_subscribe(valiClient, &msg.base);
@@ -196,8 +214,13 @@ void svc_device_event_device_update_callback(struct svc_device_device_update_eve
     // todo handle connection of new devices and disconnection
 }
 
-int server_run(void)
+int server_run(int eventIod)
 {
+    struct ioset_event events[32];
+    int                serverRunning = 1;
+    void*              dataBuffer = malloc(GRACHT_MAX_MESSAGE_SIZE);
+    int                clientIod;
+
 #ifdef VIOARR_WINTEST
     UUId_t pid;
     
@@ -205,10 +228,32 @@ int server_run(void)
     ProcessSpawn("$bin/wintest.app", NULL, &pid);
 #endif //VIOARR_WINTEST
 
+    // listen to client events as well
+    clientIod = gracht_client_iod(valiClient);
+    ioset_ctrl(eventIod, IOSET_ADD, clientIod,
+               &(struct ioset_event) {
+                       .data.iod = clientIod,
+                       .events   = IOSETIN | IOSETCTL | IOSETLVT
+               });
+
+    // Initialize the chain of events by retrieving all input devices
     server_get_hid_devices();
 
-    // Call the main sever loop
-    return gracht_server_main_loop();
+    // Server main loop
+    while (serverRunning) {
+        int num_events = ioset_wait(eventIod, &events[0], 32, 0);
+        for (int i = 0; i < num_events; i++) {
+            if (events[i].data.iod == clientIod) {
+                gracht_client_wait_message(valiClient, NULL, dataBuffer, 0);
+            }
+            else {
+                gracht_server_handle_event(events[i].data.iod, events[i].events);
+            }
+        }
+    }
+
+    free(dataBuffer);
+    return 0;
 }
 
 /*******************************************
@@ -216,12 +261,14 @@ int server_run(void)
  *******************************************/
 int main(int argc, char **argv)
 {
+    int eventIod;
+
     int status = client_initialize();
     if (status) {
         return status;
     }
     
-    status = server_initialize();
+    status = server_initialize(&eventIod);
     if (status) {
         return status;
     }
@@ -243,6 +290,5 @@ int main(int argc, char **argv)
     gracht_server_register_protocol(&wm_buffer_server_protocol);
     gracht_server_register_protocol(&wm_surface_server_protocol);
 
-    gracht_server_listen_client(valiClient);
-    return server_run();
+    return server_run(eventIod);
 }
