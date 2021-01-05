@@ -26,6 +26,7 @@
 #include "backend/nanovg.h"
 #include "backend/nanovg_gl.h"
 #include <ds/list.h>
+#include "vioarr_buffer.h"
 #include "vioarr_renderer.h"
 #include "vioarr_screen.h"
 #include "vioarr_surface.h"
@@ -36,6 +37,7 @@
 
 typedef struct vioarr_renderer {
     NVGcontext*      context;
+    mtx_t            context_sync;
     vioarr_screen_t* screen;
     int              width;
     int              height;
@@ -75,6 +77,7 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         return NULL;
     }
     
+    mtx_init(&renderer->context_sync, mtx_plain);
     renderer->screen      = screen;
     renderer->width       = width;
     renderer->height      = height;
@@ -119,6 +122,53 @@ int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
     return renderer->rotation;
 }
 
+int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* buffer)
+{
+    int resourceId;
+
+    if (!renderer) {
+        return -1;
+    }
+
+    if (!vioarr_buffer_data(buffer)) {
+        return -1;
+    }
+
+    mtx_lock(&renderer->context_sync);
+    resourceId = nvgCreateImageRGBA(renderer->context,
+            vioarr_buffer_width(buffer), vioarr_buffer_height(buffer),
+            /* NVG_IMAGE_FLIPY */ 0,
+            (const uint8_t*)vioarr_buffer_data(buffer));
+    mtx_unlock(&renderer->context_sync);
+    return resourceId;
+}
+
+void vioarr_renderer_refresh_image(vioarr_renderer_t* renderer, int resourceId, vioarr_buffer_t* buffer)
+{
+    if (!renderer) {
+        return;
+    }
+
+    if (!vioarr_buffer_data(buffer)) {
+        return;
+    }
+
+    mtx_lock(&renderer->context_sync);
+    nvgUpdateImage(renderer->context, resourceId, (const uint8_t*)vioarr_buffer_data(buffer));
+    mtx_unlock(&renderer->context_sync);
+}
+
+void vioarr_renderer_destroy_image(vioarr_renderer_t* renderer, int resourceId)
+{
+    if (!renderer) {
+        return;
+    }
+
+    mtx_lock(&renderer->context_sync);
+    nvgDeleteImage(renderer->context, resourceId);
+    mtx_unlock(&renderer->context_sync);
+}
+
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
     element_t*       i;
@@ -127,6 +177,8 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     vioarr_region_t* drawRegion = vioarr_screen_region(renderer->screen);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    
+    mtx_lock(&renderer->context_sync);
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
     
     vioarr_manager_render_start(&surfaces, &cursors);
@@ -146,5 +198,7 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     vioarr_manager_render_end();
     
     nvgEndFrame(renderer->context);
+    mtx_unlock(&renderer->context_sync);
+    
     glFinish();
 }

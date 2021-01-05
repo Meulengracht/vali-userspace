@@ -67,6 +67,25 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "typeinfo": "cpp",
-        "__config": "cpp"
+        "__config": "cpp",
+        "__bit_reference": "c",
+        "__functional_base": "c",
+        "__node_handle": "c",
+        "__memory": "c",
+        "filesystem": "c",
+        "locale": "c",
+        "scoped_allocator": "c",
+        "variant": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "queue": "c",
+        "stack": "c",
+        "*.inc": "c",
+        "simd": "c",
+        "hash_map": "c",
+        "hash_set": "c",
+        "span": "c",
+        "valarray": "c"
     }
 }

@@ -46,6 +46,7 @@ namespace Asgaard {
             , m_fillColor(0, 0, 0)
             , m_outlineColor(0, 0, 0)
         {
+        
         }
         
         void Painter::SetFillColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)

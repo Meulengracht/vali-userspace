@@ -23,7 +23,9 @@
  */
 
 #include "vioarr_surface.h"
+#include "vioarr_screen.h"
 #include "vioarr_region.h"
+#include "vioarr_renderer.h"
 #include "vioarr_buffer.h"
 #include "vioarr_objects.h"
 #include "vioarr_utils.h"
@@ -42,32 +44,46 @@ typedef struct vioarr_surface_properties {
     
     vioarr_region_t*       input_region;
     vioarr_region_t*       drop_shadow;
-    vioarr_region_t*       dirt;
-    vioarr_buffer_t*       content;
     struct vioarr_surface* children;
 } vioarr_surface_properties_t;
+
+typedef struct vioarr_surface_backbuffer {
+    int              resource_id;
+    vioarr_buffer_t* content;
+} vioarr_surface_backbuffer_t;
 
 typedef struct vioarr_surface {
     int              client;
     uint32_t         id;
     vioarr_screen_t* screen;
     int              visible;
-    atomic_int       swap_properties;
     mtx_t            sync_object;
+    atomic_int       swap_properties;
 
-    // non-versioned data
     vioarr_region_t*       dimensions;
     struct vioarr_surface* parent;
     struct vioarr_surface* link;
-    int                    resource_id;
+    vioarr_region_t*       dirt;
     
-    // versioned data
-    vioarr_surface_properties_t properties;
-    vioarr_surface_properties_t pending_properties;
+    vioarr_surface_properties_t properties[2];
+
+    atomic_int                  swap_backbuffers;
+    atomic_int                  backbuffer_index;
+    vioarr_surface_backbuffer_t backbuffers[2];
 } vioarr_surface_t;
 
-static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface);
-static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
+#define ACTIVE_PROPERTIES(surface)  surface->properties[0]
+#define PENDING_PROPERTIES(surface) surface->properties[1]
+
+#define ACTIVE_BACKBUFFER(surface)  surface->backbuffers[atomic_load(&surface->backbuffer_index)]
+#define PENDING_BACKBUFFER(surface) surface->backbuffers[atomic_load(&surface->backbuffer_index) ^ 1]
+
+static int  __initialize_surface_properties(vioarr_surface_properties_t* properties);
+static void __cleanup_surface_properties(vioarr_surface_properties_t* properties);
+static void __cleanup_surface_backbuffer(vioarr_screen_t* screen, vioarr_surface_backbuffer_t* backbuffer);
+static void __swap_properties(vioarr_surface_t* surface);
+static void __update_surface(vioarr_surface_t* surface);
+static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
 int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int x, int y,
     int width, int height, vioarr_surface_t** surfaceOut)
@@ -84,7 +100,11 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
     }
     
     memset(surface, 0, sizeof(vioarr_surface_t));
-    
+    mtx_init(&surface->sync_object, mtx_plain);
+    surface->client  = client;
+    surface->id      = id;
+    surface->screen  = screen;
+
     surface->dimensions = vioarr_region_create();
     if (!surface->dimensions) {
         free(surface);
@@ -92,29 +112,20 @@ int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int 
     }
     vioarr_region_add(surface->dimensions, 0, 0, width, height);
     vioarr_region_set_position(surface->dimensions, x, y);
+
+    surface->dirt = vioarr_region_create();
+    if (!surface->dirt) {
+        free(surface->dimensions);
+        free(surface);
+        return -1;
+    }
     
-    surface->properties.dirt                 = vioarr_region_create();
-    surface->properties.drop_shadow          = vioarr_region_create();
-    surface->properties.input_region         = vioarr_region_create();
-    surface->pending_properties.dirt         = vioarr_region_create();
-    surface->pending_properties.drop_shadow  = vioarr_region_create();
-    surface->pending_properties.input_region = vioarr_region_create();
-    if (!surface->properties.dirt ||
-        !surface->properties.drop_shadow ||
-        !surface->properties.input_region ||
-        !surface->pending_properties.dirt || 
-        !surface->pending_properties.drop_shadow || 
-        !surface->pending_properties.input_region) {
+    if (__initialize_surface_properties(&surface->properties[0]) ||
+        __initialize_surface_properties(&surface->properties[1])) {
         vioarr_surface_destroy(surface);
         return -1;
     }
     
-    mtx_init(&surface->sync_object, mtx_plain);
-    surface->client          = client;
-    surface->id              = id;
-    surface->screen          = screen;
-    surface->swap_properties = ATOMIC_VAR_INIT(0);
-
     *surfaceOut = surface;
     return 0;
 }
@@ -129,9 +140,9 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
 
     // if this surface is a child, remove it from the parent
     if (surface->parent) {
-        itr = surface->parent->properties.children;
+        itr = ACTIVE_PROPERTIES(surface->parent).children;
         if (itr == surface) {
-            surface->parent->properties.children = surface->link;
+            ACTIVE_PROPERTIES(surface->parent).children = surface->link;
         }
         else {
             while (itr->link != surface) {
@@ -143,7 +154,7 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
     }
 
     // if we have children, go through them and promote them to regular surfaces
-    itr = surface->properties.children;
+    itr = ACTIVE_PROPERTIES(surface).children;
     while (itr) {
         vioarr_surface_t* next = itr->link;
 
@@ -154,34 +165,12 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         itr = next;
     }
 
-    if (surface->pending_properties.input_region) {
-        free(surface->pending_properties.input_region);
-    }
-    
-    if (surface->pending_properties.drop_shadow) {
-        free(surface->pending_properties.drop_shadow);
-    }
-    
-    if (surface->pending_properties.dirt) {
-        free(surface->pending_properties.dirt);
-    }
-    
-    if (surface->properties.content) {
-        vioarr_buffer_destroy(surface->properties.content);
-    }
+    __cleanup_surface_properties(&surface->properties[0]);
+    __cleanup_surface_properties(&surface->properties[1]);
+    __cleanup_surface_backbuffer(surface->screen, &surface->backbuffers[0]);
+    __cleanup_surface_backbuffer(surface->screen, &surface->backbuffers[1]);
 
-    if (surface->properties.input_region) {
-        free(surface->properties.input_region);
-    }
-
-    if (surface->properties.drop_shadow) {
-        free(surface->properties.drop_shadow);
-    }
-    
-    if (surface->properties.dirt) {
-        free(surface->properties.dirt);
-    }
-
+    free(surface->dirt);
     free(surface->dimensions);
     free(surface);
 }
@@ -195,17 +184,18 @@ int vioarr_surface_add_child(vioarr_surface_t* parent, vioarr_surface_t* child, 
     if (child->parent) {
         return -1;
     }
+    
     child->parent = parent;
 
     TRACE("[vioarr_surface_add_child]");
     mtx_lock(&parent->sync_object);
     // the list that we keep updated is actually the one in pending properties
     // which means all list changes are performed there
-    if (parent->pending_properties.children == NULL) {
-        parent->pending_properties.children = child;
+    if (PENDING_PROPERTIES(parent).children == NULL) {
+        PENDING_PROPERTIES(parent).children = child;
     }
     else {
-        vioarr_surface_t* itr = parent->pending_properties.children;
+        vioarr_surface_t* itr = PENDING_PROPERTIES(parent).children;
         while (itr->link) {
             itr = itr->link;
         }
@@ -220,12 +210,31 @@ int vioarr_surface_add_child(vioarr_surface_t* parent, vioarr_surface_t* child, 
 
 void vioarr_surface_set_buffer(vioarr_surface_t* surface, vioarr_buffer_t* content)
 {
+    int resourceId = -1;
+
     if (!surface) {
         return;
     }
 
+    if (content) {
+        vioarr_buffer_acquire(content);
+        resourceId = vioarr_renderer_create_image(vioarr_screen_renderer(surface->screen), content);
+        TRACE("[vioarr_surface_set_buffer] initialized new content %i 0x%llx", resourceId, content);
+    }
+    
     mtx_lock(&surface->sync_object);
-    surface->pending_properties.content = content;
+    if (PENDING_BACKBUFFER(surface).content) {
+        TRACE("[vioarr_surface_set_buffer] cleaning up previous %i 0x%llx",
+            PENDING_BACKBUFFER(surface).resource_id,
+            PENDING_BACKBUFFER(surface).content);
+        vioarr_renderer_destroy_image(vioarr_screen_renderer(surface->screen), PENDING_BACKBUFFER(surface).resource_id);
+        vioarr_buffer_destroy(PENDING_BACKBUFFER(surface).content);
+    }
+
+    PENDING_BACKBUFFER(surface).content = content;
+    PENDING_BACKBUFFER(surface).resource_id = resourceId;
+
+    atomic_store(&surface->swap_backbuffers, 1);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -247,8 +256,8 @@ void vioarr_surface_set_drop_shadow(vioarr_surface_t* surface, int x, int y, int
     }
     
     mtx_lock(&surface->sync_object);
-    vioarr_region_zero(surface->pending_properties.drop_shadow);
-    vioarr_region_add(surface->pending_properties.drop_shadow, x, y, width, height);
+    vioarr_region_zero(PENDING_PROPERTIES(surface).drop_shadow);
+    vioarr_region_add(PENDING_PROPERTIES(surface).drop_shadow, x, y, width, height);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -259,8 +268,8 @@ void vioarr_surface_set_input_region(vioarr_surface_t* surface, int x, int y, in
     }
     
     mtx_lock(&surface->sync_object);
-    vioarr_region_zero(surface->pending_properties.input_region);
-    vioarr_region_add(surface->pending_properties.input_region, x, y, width, height);
+    vioarr_region_zero(PENDING_PROPERTIES(surface).input_region);
+    vioarr_region_add(PENDING_PROPERTIES(surface).input_region, x, y, width, height);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -270,12 +279,12 @@ int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
         return 0;
     }
 
-    if (vioarr_region_contains(surface->properties.input_region, x, y)) {
+    if (vioarr_region_contains(ACTIVE_PROPERTIES(surface).input_region, x, y)) {
         return 1;
     }
     else {
         // check children if they support input
-        vioarr_surface_t* itr = surface->properties.children;
+        vioarr_surface_t* itr = ACTIVE_PROPERTIES(surface).children;
         while (itr) {
             if (vioarr_surface_supports_input(itr, x, y)) {
                 return 1;
@@ -302,7 +311,7 @@ void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int widt
     }
     
     mtx_lock(&surface->sync_object);
-    vioarr_region_add(surface->pending_properties.dirt, x, y, width, height);
+    vioarr_region_add(surface->dirt, x, y, width, height);
     mtx_unlock(&surface->sync_object);
 }
 
@@ -311,6 +320,26 @@ void vioarr_surface_commit(vioarr_surface_t* surface)
     if (!surface) {
         return;
     }
+
+    // Update dirty surface, however we do not want to this if we are swapping backbuffers
+    mtx_lock(&surface->sync_object);
+    if (!vioarr_region_is_zero(surface->dirt)) {
+        if (ACTIVE_BACKBUFFER(surface).content) {
+            TRACE("[vioarr_surface_commit] refreshing content %i 0x%llx",    
+                ACTIVE_BACKBUFFER(surface).resource_id,
+                ACTIVE_BACKBUFFER(surface).content);
+            vioarr_renderer_refresh_image(
+                vioarr_screen_renderer(surface->screen),
+                ACTIVE_BACKBUFFER(surface).resource_id,
+                ACTIVE_BACKBUFFER(surface).content);
+
+            // Now we are done with the user-buffer, send the release event
+            wm_buffer_event_release_single(surface->client, vioarr_buffer_id(ACTIVE_BACKBUFFER(surface).content));
+        }
+
+        vioarr_region_zero(surface->dirt);
+    }
+    mtx_unlock(&surface->sync_object);
     
     atomic_store(&surface->swap_properties, 1);
 }
@@ -390,10 +419,10 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
         return;
     }
 
-    TRACE("[vioarr_surface_render] %u [%i, %i]", 
-        surface->id, vioarr_region_x(surface->dimensions),
-        vioarr_region_y(surface->dimensions));
-    vioarr_surface_update(context, surface);
+    //TRACE("[vioarr_surface_render] %u [%i, %i]", 
+    //    surface->id, vioarr_region_x(surface->dimensions),
+    //    vioarr_region_y(surface->dimensions));
+    __update_surface(surface);
     if (!surface->visible) {
         return;
     }
@@ -404,22 +433,22 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
         (float)vioarr_region_y(surface->dimensions)
     );
 
-    if (surface->properties.content) {
+    if (ACTIVE_BACKBUFFER(surface).content) {
         TRACE("[vioarr_surface_render] rendering content");
-        if (!vioarr_region_is_zero(surface->properties.drop_shadow)) {
-            render_drop_shadow(context, surface);
+        if (!vioarr_region_is_zero(ACTIVE_PROPERTIES(surface).drop_shadow)) {
+            __render_drop_shadow(context, surface);
         }
         
-        stream_paint = nvgImagePattern(context, 0.0f, 0.0f, width, height, 0.0f, surface->resource_id, 1.0f);
+        stream_paint = nvgImagePattern(context, 0.0f, 0.0f, width, height, 0.0f, 
+            ACTIVE_BACKBUFFER(surface).resource_id, 1.0f);
         nvgBeginPath(context);
         nvgRect(context, 0.0f, 0.0f, width, height);
         nvgFillPaint(context, stream_paint);
         nvgFill(context);
     }
 
-    if (surface->properties.children) {
-        TRACE("[vioarr_surface_render] rendering children");
-        vioarr_surface_t* child = surface->properties.children;
+    if (ACTIVE_PROPERTIES(surface).children) {
+        vioarr_surface_t* child = ACTIVE_PROPERTIES(surface).children;
         while (child) {
             vioarr_surface_render(context, child);
             child = child->link;
@@ -429,100 +458,98 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     nvgRestore(context);
 }
 
-static void vioarr_surface_swap_properties(NVGcontext* context, vioarr_surface_t* surface)
+static void __update_surface(vioarr_surface_t* surface)
 {
-    TRACE("[vioarr_surface_swap_properties]");
-    mtx_lock(&surface->sync_object);
+    //TRACE("[__update_surface]");
 
-    // handle basic properties
-    surface->properties.border_width  = surface->pending_properties.border_width;
-    surface->properties.border_color  = surface->pending_properties.border_color;
-    surface->properties.corner_radius = surface->pending_properties.corner_radius;
-    vioarr_region_copy(surface->properties.drop_shadow, surface->pending_properties.drop_shadow);
-    vioarr_region_copy(surface->properties.input_region, surface->pending_properties.input_region);
-    
-    if (surface->pending_properties.children) {
-        // append the new children
-        if (surface->properties.children) {
-            vioarr_surface_t* itr = surface->properties.children;
-            while (itr->link) {
-                itr = itr->link;
-            }
-            itr->link = surface->pending_properties.children;
-        }
-        else {
-            surface->properties.children = surface->pending_properties.children;
-        }
-        surface->pending_properties.children = NULL;
-    }
-
-    // Handle any cleanup if the content is changing
-    if (surface->pending_properties.content) {
-        TRACE("[vioarr_surface_swap_properties] initializing new content");
-        if (surface->resource_id) {
-            TRACE("[vioarr_surface_swap_properties] cleaning up previous");
-            nvgDeleteImage(context, surface->resource_id);
-            vioarr_buffer_destroy(surface->properties.content);
-        }
-        
-        vioarr_buffer_acquire(surface->pending_properties.content);
-        surface->resource_id = nvgCreateImageRGBA(context, 
-            vioarr_buffer_width(surface->pending_properties.content),
-            vioarr_buffer_height(surface->pending_properties.content),
-            /* NVG_IMAGE_FLIPY */ 0, 
-            (const uint8_t*)vioarr_buffer_data(surface->pending_properties.content));
-
-        surface->properties.content         = surface->pending_properties.content;
-        surface->pending_properties.content = NULL;
-    }
-    
-    vioarr_region_copy(surface->properties.dirt, surface->pending_properties.dirt);
-    vioarr_region_zero(surface->pending_properties.dirt);
-    mtx_unlock(&surface->sync_object);
-
-    atomic_store(&surface->swap_properties, 0);
-}
-
-static void vioarr_surface_update(NVGcontext* context, vioarr_surface_t* surface)
-{
-    TRACE("[vioarr_surface_update]");
     if (atomic_load(&surface->swap_properties)) {
-        vioarr_surface_swap_properties(context, surface);
-    }
-    
-    // Only update the image data if the region is not empty
-    if (!vioarr_region_is_zero(surface->properties.dirt)) {
-        TRACE("[vioarr_surface_update] refreshing conent");
-        nvgUpdateImage(context, surface->resource_id,
-            (const uint8_t*)vioarr_buffer_data(surface->properties.content));
-        
-        // Now we are done with the user-buffer, send the release event
-        wm_buffer_event_release_single(surface->client, vioarr_buffer_id(surface->properties.content));
+        int swap_backbuffers = atomic_load(&surface->swap_backbuffers);
+        if (swap_backbuffers) {
+            int backbuffer_index = atomic_load(&surface->backbuffer_index);
+            atomic_store(&surface->backbuffer_index, backbuffer_index ^ 1);
+            atomic_store(&surface->swap_backbuffers, 0);
+        }
 
-        // clear dirt
-        vioarr_region_zero(surface->properties.dirt);
+        __swap_properties(surface);
+        atomic_store(&surface->swap_properties, 0);
     }
     
     // Determine other attributes about this surface. Is it visible?
-    surface->visible = surface->properties.content != NULL;
-    TRACE("[vioarr_surface_update] is visible: %i", surface->visible);
+    surface->visible = ACTIVE_BACKBUFFER(surface).content != NULL;
+
+    //TRACE("[__update_surface] is visible: %i", surface->visible);
 }
 
-static void render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
+static void __swap_properties(vioarr_surface_t* surface)
+{
+    //TRACE("[__swap_properties]");
+
+    // handle basic properties
+    ACTIVE_PROPERTIES(surface).border_width  = PENDING_PROPERTIES(surface).border_width;
+    ACTIVE_PROPERTIES(surface).border_color  = PENDING_PROPERTIES(surface).border_color;
+    ACTIVE_PROPERTIES(surface).corner_radius = PENDING_PROPERTIES(surface).corner_radius;
+    vioarr_region_copy(ACTIVE_PROPERTIES(surface).drop_shadow,  PENDING_PROPERTIES(surface).drop_shadow);
+    vioarr_region_copy(ACTIVE_PROPERTIES(surface).input_region, PENDING_PROPERTIES(surface).input_region);
+    
+    if (PENDING_PROPERTIES(surface).children) {
+        // append the new children
+        if (ACTIVE_PROPERTIES(surface).children) {
+            vioarr_surface_t* itr = ACTIVE_PROPERTIES(surface).children;
+            while (itr->link) {
+                itr = itr->link;
+            }
+            itr->link = PENDING_PROPERTIES(surface).children;
+        }
+        else {
+            ACTIVE_PROPERTIES(surface).children = PENDING_PROPERTIES(surface).children;
+        }
+        PENDING_PROPERTIES(surface).children = NULL;
+    }
+}
+
+static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
 {
     float    width        = (float)vioarr_region_width(surface->dimensions);
     float    height       = (float)vioarr_region_height(surface->dimensions);
 	NVGpaint shadow_paint = nvgBoxGradient(context, 0, 0 + 2.0f, width, height, 
-	    surface->properties.corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
+	    ACTIVE_PROPERTIES(surface).corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
 	nvgBeginPath(context);
 	//nvgRect(context, -10, -10, width + 20, height + 30);
 	//nvgRoundedRect(context, 0, 0, surface->width, surface->height, surface->properties.corner_radius);
 	nvgRect(context, 
-        (float)vioarr_region_x(surface->properties.drop_shadow),
-        (float)vioarr_region_y(surface->properties.drop_shadow),
-        width + (float)vioarr_region_width(surface->properties.drop_shadow),
-        height + (float)vioarr_region_height(surface->properties.drop_shadow));
+        (float)vioarr_region_x(ACTIVE_PROPERTIES(surface).drop_shadow),
+        (float)vioarr_region_y(ACTIVE_PROPERTIES(surface).drop_shadow),
+        width + (float)vioarr_region_width(ACTIVE_PROPERTIES(surface).drop_shadow),
+        height + (float)vioarr_region_height(ACTIVE_PROPERTIES(surface).drop_shadow));
 	nvgPathWinding(context, NVG_HOLE);
 	nvgFillPaint(context, shadow_paint);
 	nvgFill(context);
+}
+
+static int __initialize_surface_properties(vioarr_surface_properties_t* properties)
+{
+    properties->drop_shadow  = vioarr_region_create();
+    properties->input_region = vioarr_region_create();
+    if (!properties->drop_shadow || !properties->input_region)
+        return -1;
+    return 0;
+}
+
+static void __cleanup_surface_properties(vioarr_surface_properties_t* properties)
+{
+    if (properties->input_region) {
+        free(properties->input_region);
+    }
+
+    if (properties->drop_shadow) {
+        free(properties->drop_shadow);
+    }
+}
+
+static void __cleanup_surface_backbuffer(vioarr_screen_t* screen, vioarr_surface_backbuffer_t* backbuffer)
+{
+    if (backbuffer->content) {
+        vioarr_renderer_destroy_image(vioarr_screen_renderer(screen), backbuffer->resource_id);
+        vioarr_buffer_destroy(backbuffer->content);
+    }
 }

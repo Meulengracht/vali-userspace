@@ -22,6 +22,7 @@
  */
 
 #include "include/application.hpp"
+#include "include/key_event.hpp"
 #include "include/object_manager.hpp"
 #include "include/memory_buffer.hpp"
 #include "include/surface.hpp"
@@ -91,6 +92,10 @@ namespace Asgaard {
             
             case ObjectEvent::SURFACE_FRAME: {
                 OnFrame();
+            } break;
+
+            case ObjectEvent::KEY_EVENT: {
+                OnKeyEvent(KeyEvent((struct wm_keyboard_key_event*)data));
             } break;
             
             default:

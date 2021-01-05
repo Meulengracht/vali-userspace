@@ -277,6 +277,14 @@ enum wm_screen_transform vioarr_screen_transform(vioarr_screen_t* screen)
     return no_transform; // TODO
 }
 
+vioarr_renderer_t* vioarr_screen_renderer(vioarr_screen_t* screen)
+{
+    if (!screen) {
+        return NULL;
+    }
+    return screen->renderer;
+}
+
 int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
 {
     if (!screen) {

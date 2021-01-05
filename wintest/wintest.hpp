@@ -26,7 +26,9 @@
 #include <asgaard/window_decoration.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
+#include <asgaard/key_event.hpp>
 #include <asgaard/drawing/painter.hpp>
+#include <os/keycodes.h>
 
 class TestWindow : public Asgaard::WindowBase {
 public:
@@ -56,7 +58,7 @@ protected:
             // Now all resources are created
             SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
             SetBuffer(m_buffer);
-            Redraw();         
+            Redraw();
         }
     }
     
@@ -75,6 +77,13 @@ protected:
     void OnResized(enum Asgaard::Surface::SurfaceEdges edges, int width, int height) override
     {
         
+    }
+
+    void OnKeyEvent(const Asgaard::KeyEvent& keyEvent) override
+    {
+        if (keyEvent.KeyCode() == VK_R && !keyEvent.Pressed()) {
+            Redraw();
+        }
     }
 
     void Teardown() override

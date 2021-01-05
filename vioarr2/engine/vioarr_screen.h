@@ -31,6 +31,7 @@
 #include "vioarr_surface.h"
 
 typedef struct vioarr_screen vioarr_screen_t;
+typedef struct vioarr_renderer vioarr_renderer_t;
 
 vioarr_screen_t*         vioarr_screen_create(VideoDescriptor_t*);
 void                     vioarr_screen_set_scale(vioarr_screen_t*, int);
@@ -38,6 +39,7 @@ void                     vioarr_screen_set_transform(vioarr_screen_t*, enum wm_s
 vioarr_region_t*         vioarr_screen_region(vioarr_screen_t*);
 int                      vioarr_screen_scale(vioarr_screen_t*);
 enum wm_screen_transform vioarr_screen_transform(vioarr_screen_t*);
+vioarr_renderer_t*       vioarr_screen_renderer(vioarr_screen_t*);
 int                      vioarr_screen_publish_modes(vioarr_screen_t*, int);
 void                     vioarr_screen_frame(vioarr_screen_t*);
 

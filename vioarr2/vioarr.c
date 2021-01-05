@@ -221,13 +221,6 @@ int server_run(int eventIod)
     void*              dataBuffer = malloc(GRACHT_MAX_MESSAGE_SIZE);
     int                clientIod;
 
-#ifdef VIOARR_WINTEST
-    UUId_t pid;
-    
-    // Spawn the launcher application
-    ProcessSpawn("$bin/wintest.app", NULL, &pid);
-#endif //VIOARR_WINTEST
-
     // listen to client events as well
     clientIod = gracht_client_iod(valiClient);
     ioset_ctrl(eventIod, IOSET_ADD, clientIod,
@@ -238,6 +231,13 @@ int server_run(int eventIod)
 
     // Initialize the chain of events by retrieving all input devices
     server_get_hid_devices();
+
+#ifdef VIOARR_WINTEST
+    UUId_t pid;
+    
+    // Spawn the launcher application
+    ProcessSpawn("$bin/wintest.app", NULL, &pid);
+#endif //VIOARR_WINTEST
 
     // Server main loop
     while (serverRunning) {

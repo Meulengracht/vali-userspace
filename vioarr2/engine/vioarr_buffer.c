@@ -81,8 +81,6 @@ int vioarr_buffer_acquire(vioarr_buffer_t* buffer)
         // tried to acquire destroyed buffer
         return -1;
     }
-    
-    
     return 0;
 }
 
@@ -131,5 +129,6 @@ void* vioarr_buffer_data(vioarr_buffer_t* buffer)
     if (!buffer) {
         return NULL;
     }
+
     return buffer->data;
 }

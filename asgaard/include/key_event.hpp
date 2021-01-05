@@ -22,12 +22,12 @@
  */
 #pragma once
 
-struct hid_events_key_event_args;
+struct wm_keyboard_key_event;
 
 namespace Asgaard {
     class KeyEvent {
     public:
-        KeyEvent(struct hid_events_key_event_args*);
+        KeyEvent(struct wm_keyboard_key_event*);
         
         char          KeyAscii() const;
         unsigned int  KeyUnicode() const;

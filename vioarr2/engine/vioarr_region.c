@@ -23,6 +23,7 @@
  */
  
 #include "vioarr_region.h"
+#include "vioarr_utils.h"
 #include <stdlib.h>
 
 typedef struct vioarr_region {
@@ -171,9 +172,9 @@ int vioarr_region_intersects(vioarr_region_t* region1, vioarr_region_t* region2)
     }
 
     if ( region1->x                    < (region2->x + region2->width)  &&
-        (region1->x + region1->width)  >  region2->x                     &&
-         region1->y                    > (region2->y + region2->height) &&
-        (region1->y + region1->height) <  region2->y) {
+        (region1->x + region1->width)  >  region2->x                    &&
+         region1->y                    < (region2->y + region2->height) &&
+        (region1->y + region1->height) >  region2->y) {
         return 1;
     }
     return 0;

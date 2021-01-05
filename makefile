@@ -118,6 +118,7 @@ llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
 	mkdir -p llvm-build
 	cd llvm-build && cmake -G "Unix Makefiles" \
 		-DLLVM_BOOTSTRAP_RUNTIME=ON \
+		-DLLVM_ENABLE_DUMP=ON \
 		-DLIBUNWIND_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
 		-DLIBUNWIND_INCLUDE_DOCS=OFF \
 		-DLIBCXXABI_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
@@ -150,7 +151,12 @@ build_llvm: llvm-build
 
 .PHONY: build_mesa
 build_mesa:
+	#$(eval CPU_COUNT = $(shell nproc))
 	cd mesa && make && make install
+
+.PHONY: clean_mesa
+clean_mesa:
+	cd mesa && make clean
 
 .PHONY: build_glm
 build_glm:

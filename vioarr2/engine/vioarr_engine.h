@@ -27,4 +27,9 @@
 
 int vioarr_engine_initialize(void);
 
+int vioarr_engine_x_minimum(void);
+int vioarr_engine_x_maximum(void);
+int vioarr_engine_y_minimum(void);
+int vioarr_engine_y_maximum(void);
+
 #endif //!__VIOARR_ENGINE_H__

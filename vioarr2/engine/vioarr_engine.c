@@ -57,17 +57,38 @@ int vioarr_engine_initialize(void)
     return thrd_create(&screen_thread, vioarr_engine_update, primary_screen);
 }
 
+
+int vioarr_engine_x_minimum(void)
+{
+    return vioarr_region_x(vioarr_screen_region(primary_screen));
+}
+
+int vioarr_engine_x_maximum(void)
+{
+    return vioarr_region_width(vioarr_screen_region(primary_screen));
+}
+
+int vioarr_engine_y_minimum(void)
+{
+    return vioarr_region_y(vioarr_screen_region(primary_screen));
+}
+
+int vioarr_engine_y_maximum(void)
+{
+    return vioarr_region_height(vioarr_screen_region(primary_screen));
+}
+
 static int vioarr_engine_setup_screens(void)
 {
     VideoDescriptor_t video;
-    OsStatus_t        os_status;
+    OsStatus_t        osStatus;
     
     vioarr_utils_trace("[vioarr] [initialize] quering screen information");
     // Get screens available from OS.
-    os_status = QueryDisplayInformation(&video);
-    if (os_status != OsSuccess) {
-        vioarr_utils_error("[vioarr] [initialize] failed to query screens, status %u", os_status);
-        OsStatusToErrno(os_status);
+    osStatus = QueryDisplayInformation(&video);
+    if (osStatus != OsSuccess) {
+        vioarr_utils_error("[vioarr] [initialize] failed to query screens, status %u", osStatus);
+        OsStatusToErrno(osStatus);
         return -1;
     }
     
@@ -85,7 +106,7 @@ static int vioarr_engine_setup_screens(void)
 static int vioarr_engine_update(void* context)
 {
     vioarr_screen_t* screen = context;
-    clock_t start, end, diff_ms;
+    clock_t start, end, diffMs;
     
     vioarr_utils_trace("[vioarr] [renderer_thread] started");
     while (1) {
@@ -94,9 +115,9 @@ static int vioarr_engine_update(void* context)
         vioarr_screen_frame(screen);
         
         end = clock();
-        diff_ms = (end - start) / CLOCKS_PER_SEC;
+        diffMs = (end - start) / CLOCKS_PER_SEC;
         start = end;
         
-        thrd_sleepex(ENGINE_SCREEN_REFRESH_MS - (diff_ms % ENGINE_SCREEN_REFRESH_MS));
+        thrd_sleepex(ENGINE_SCREEN_REFRESH_MS - (diffMs % ENGINE_SCREEN_REFRESH_MS));
     }
 }

@@ -22,20 +22,22 @@
  */
  
 #include "include/key_event.hpp"
+#include "protocols/wm_keyboard_protocol_client.h"
+#include <os/keycodes.h>
 
 namespace Asgaard {
-    KeyEvent::KeyEvent(struct hid_events_key_event_args*)
-        : m_modifiers(0)
+    KeyEvent::KeyEvent(struct wm_keyboard_key_event* event)
+        : m_modifiers(event->flags)
         , m_keyUnicode(0)
-        , m_keyAscii(0)
-        , m_keyCode(0)
+        , m_keyAscii(TranslateKeyCode((KeyCode_t)event->keycode, (KeyModifiers_t)event->flags))
+        , m_keyCode((unsigned char)event->keycode)
     {
         
     }
     
     char KeyEvent::KeyAscii() const
     {
-        return 0;
+        return m_keyAscii;
     }
     
     unsigned int KeyEvent::KeyUnicode() const
@@ -45,11 +47,11 @@ namespace Asgaard {
     
     unsigned char KeyEvent::KeyCode() const
     {
-        return 0;
+        return m_keyCode;
     }
     
     bool KeyEvent::Pressed() const
     {
-        return false;
+        return (m_modifiers & VK_MODIFIER_RELEASED) == 0;
     }
 }

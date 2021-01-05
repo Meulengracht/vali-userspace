@@ -368,6 +368,12 @@ extern "C"
     // KEYBOARD PROTOCOL EVENTS
     void wm_keyboard_event_key_callback(struct wm_keyboard_key_event* event)
     {
-
+        auto object = Asgaard::OM[event->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::KEY_EVENT, event);
     }
 }

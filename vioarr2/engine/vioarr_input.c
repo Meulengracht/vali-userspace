@@ -23,6 +23,7 @@
  */
 
 #include <ds/list.h>
+#include "vioarr_engine.h"
 #include "vioarr_input.h"
 #include "vioarr_objects.h"
 #include "vioarr_manager.h"
@@ -118,14 +119,22 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     vioarr_surface_t*      currentSurface;
     vioarr_surface_t*      surfaceAfterMove;
     int                    sendUpdates;
+    int                    clampedX = x;
+    int                    clampedY = y;
     if (!source) {
         return;
     }
 
+    // clamp the axis values
+    if (source->state.pointer.x + x > vioarr_engine_x_maximum())      clampedX = vioarr_engine_x_maximum() - source->state.pointer.x;
+    else if (source->state.pointer.x + x < vioarr_engine_x_minimum()) clampedX = source->state.pointer.x;
+    if (source->state.pointer.y + y > vioarr_engine_y_maximum())      clampedY = vioarr_engine_y_maximum() - source->state.pointer.y;
+    else if (source->state.pointer.y + y < vioarr_engine_y_minimum()) clampedY = source->state.pointer.y;
+
     // ... we currently do not use z
     currentSurface   = vioarr_manager_surface_at(source->state.pointer.x, source->state.pointer.y);
-    surfaceAfterMove = vioarr_manager_surface_at(source->state.pointer.x + x, source->state.pointer.y + y);
-    sendUpdates      = vioarr_surface_supports_input(surfaceAfterMove, source->state.pointer.x + x, source->state.pointer.y + y);
+    surfaceAfterMove = vioarr_manager_surface_at(source->state.pointer.x + clampedX, source->state.pointer.y + clampedY);
+    sendUpdates      = vioarr_surface_supports_input(surfaceAfterMove, source->state.pointer.x + clampedX, source->state.pointer.y + clampedY);
 
     // send events
     if (currentSurface != surfaceAfterMove) {
@@ -140,8 +149,8 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
                 vioarr_surface_client(surfaceAfterMove),
                 source->id,
                 vioarr_surface_id(surfaceAfterMove),
-                source->state.pointer.x + x,
-                source->state.pointer.y + y);
+                source->state.pointer.x + clampedX,
+                source->state.pointer.y + clampedY);
             
             // skip move event
             sendUpdates = 0;
@@ -149,11 +158,11 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     }
 
     // update values before proceeding
-    source->state.pointer.x += x;
-    source->state.pointer.y += y;
+    source->state.pointer.x += clampedX;
+    source->state.pointer.y += clampedY;
     source->state.pointer.z += z;
     if (source->state.pointer.surface) {
-        vioarr_surface_move(source->state.pointer.surface, x, y);
+        vioarr_surface_move(source->state.pointer.surface, clampedX, clampedY);
     }
 
     // send move event
@@ -205,6 +214,10 @@ void vioarr_input_keyboard_click(UUId_t deviceId, uint32_t keycode, uint32_t mod
 {
     vioarr_surface_t* currentSurface = vioarr_manager_front_surface();
     if (currentSurface) {
-        wm_keyboard_event_key_single(vioarr_surface_client(currentSurface), keycode, modifiers);
+        wm_keyboard_event_key_single(
+            vioarr_surface_client(currentSurface),
+            vioarr_surface_id(currentSurface),
+            keycode, 
+            modifiers);
     }
 }

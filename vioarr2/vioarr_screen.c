@@ -24,6 +24,7 @@
 
 #include "protocols/wm_screen_protocol_server.h"
 #include "protocols/wm_core_protocol_server.h"
+#include "engine/vioarr_renderer.h"
 #include "engine/vioarr_screen.h"
 #include "engine/vioarr_surface.h"
 #include "engine/vioarr_objects.h"
@@ -92,9 +93,9 @@ void wm_screen_set_transform_callback(struct gracht_recv_message* message, struc
 void wm_screen_create_surface_callback(struct gracht_recv_message* message, struct wm_screen_create_surface_args* input)
 {
     vioarr_utils_trace("[wm_screen_create_surface_callback] client %i", message->client);
-    vioarr_screen_t*  screen = vioarr_objects_get_object(-1, input->screen_id);
-    vioarr_surface_t* surface;
-    int               status;
+    vioarr_screen_t*   screen = vioarr_objects_get_object(-1, input->screen_id);
+    vioarr_surface_t*  surface;
+    int                status;
     if (!screen) {
         wm_core_event_error_single(message->client, input->screen_id, ENOENT, "wm_screen: object does not exist");
         return;

@@ -40,6 +40,7 @@ namespace Asgaard {
             SURFACE_FRAME,
             SURFACE_FOCUSED,
             SURFACE_UNFOCUSED,
+            KEY_EVENT,
             BUFFER_RELEASE
         };
         
