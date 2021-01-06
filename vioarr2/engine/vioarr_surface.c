@@ -82,7 +82,8 @@ static int  __initialize_surface_properties(vioarr_surface_properties_t* propert
 static void __cleanup_surface_properties(vioarr_surface_properties_t* properties);
 static void __cleanup_surface_backbuffer(vioarr_screen_t* screen, vioarr_surface_backbuffer_t* backbuffer);
 static void __swap_properties(vioarr_surface_t* surface);
-static void __update_surface(vioarr_surface_t* surface);
+static void __update_surface(NVGcontext* context, vioarr_surface_t* surface);
+static void __refresh_content(NVGcontext* context, vioarr_surface_t* surface);
 static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
 
 int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int x, int y,
@@ -320,27 +321,6 @@ void vioarr_surface_commit(vioarr_surface_t* surface)
     if (!surface) {
         return;
     }
-
-    // Update dirty surface, however we do not want to this if we are swapping backbuffers
-    mtx_lock(&surface->sync_object);
-    if (!vioarr_region_is_zero(surface->dirt)) {
-        if (ACTIVE_BACKBUFFER(surface).content) {
-            TRACE("[vioarr_surface_commit] refreshing content %i 0x%llx",    
-                ACTIVE_BACKBUFFER(surface).resource_id,
-                ACTIVE_BACKBUFFER(surface).content);
-            vioarr_renderer_refresh_image(
-                vioarr_screen_renderer(surface->screen),
-                ACTIVE_BACKBUFFER(surface).resource_id,
-                ACTIVE_BACKBUFFER(surface).content);
-
-            // Now we are done with the user-buffer, send the release event
-            wm_buffer_event_release_single(surface->client, vioarr_buffer_id(ACTIVE_BACKBUFFER(surface).content));
-        }
-
-        vioarr_region_zero(surface->dirt);
-    }
-    mtx_unlock(&surface->sync_object);
-    
     atomic_store(&surface->swap_properties, 1);
 }
 
@@ -422,7 +402,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     //TRACE("[vioarr_surface_render] %u [%i, %i]", 
     //    surface->id, vioarr_region_x(surface->dimensions),
     //    vioarr_region_y(surface->dimensions));
-    __update_surface(surface);
+    __update_surface(context, surface);
     if (!surface->visible) {
         return;
     }
@@ -458,7 +438,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     nvgRestore(context);
 }
 
-static void __update_surface(vioarr_surface_t* surface)
+static void __update_surface(NVGcontext* context, vioarr_surface_t* surface)
 {
     //TRACE("[__update_surface]");
 
@@ -470,6 +450,7 @@ static void __update_surface(vioarr_surface_t* surface)
             atomic_store(&surface->swap_backbuffers, 0);
         }
 
+        __refresh_content(context, surface);
         __swap_properties(surface);
         atomic_store(&surface->swap_properties, 0);
     }
@@ -478,6 +459,20 @@ static void __update_surface(vioarr_surface_t* surface)
     surface->visible = ACTIVE_BACKBUFFER(surface).content != NULL;
 
     //TRACE("[__update_surface] is visible: %i", surface->visible);
+}
+
+static void __refresh_content(NVGcontext* context, vioarr_surface_t* surface)
+{
+    if (!vioarr_region_is_zero(surface->dirt)) {
+        vioarr_buffer_t* buffer     = ACTIVE_BACKBUFFER(surface).content;
+        int              resourceId = ACTIVE_BACKBUFFER(surface).resource_id;
+        if (buffer) {
+            nvgUpdateImage(context, resourceId, (const uint8_t*)vioarr_buffer_data(buffer));
+            wm_buffer_event_release_single(surface->client, vioarr_buffer_id(buffer));
+        }
+        
+        vioarr_region_zero(surface->dirt);
+    }
 }
 
 static void __swap_properties(vioarr_surface_t* surface)

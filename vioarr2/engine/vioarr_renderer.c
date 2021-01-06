@@ -143,21 +143,6 @@ int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* b
     return resourceId;
 }
 
-void vioarr_renderer_refresh_image(vioarr_renderer_t* renderer, int resourceId, vioarr_buffer_t* buffer)
-{
-    if (!renderer) {
-        return;
-    }
-
-    if (!vioarr_buffer_data(buffer)) {
-        return;
-    }
-
-    mtx_lock(&renderer->context_sync);
-    nvgUpdateImage(renderer->context, resourceId, (const uint8_t*)vioarr_buffer_data(buffer));
-    mtx_unlock(&renderer->context_sync);
-}
-
 void vioarr_renderer_destroy_image(vioarr_renderer_t* renderer, int resourceId)
 {
     if (!renderer) {

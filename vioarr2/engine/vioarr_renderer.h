@@ -37,7 +37,6 @@ int                vioarr_renderer_scale(vioarr_renderer_t*);
 int                vioarr_renderer_rotation(vioarr_renderer_t*);
 
 int                vioarr_renderer_create_image(vioarr_renderer_t*, vioarr_buffer_t*);
-void               vioarr_renderer_refresh_image(vioarr_renderer_t*, int, vioarr_buffer_t*);
 void               vioarr_renderer_destroy_image(vioarr_renderer_t*, int);
 
 void               vioarr_renderer_render(vioarr_renderer_t*);
