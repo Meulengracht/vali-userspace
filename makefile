@@ -167,12 +167,12 @@ build_glm:
 .PHONY: build_vioarr
 build_vioarr:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr2 -f makefile
+	@$(MAKE) -s -C vioarr -f makefile
 
 .PHONY: clean_vioarr
 clean_vioarr:
 	@printf "%b" "\033[1;35mChecking if vioarr needs to be built\033[m\n"
-	@$(MAKE) -s -C vioarr2 -f makefile clean
+	@$(MAKE) -s -C vioarr -f makefile clean
 
 .PHONY: clean_apps
 clean_apps:
@@ -193,7 +193,7 @@ clean:
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C mesa -f makefile clean
-	@$(MAKE) -s -C vioarr2 -f makefile clean
+	@$(MAKE) -s -C vioarr -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf llvm-build
 	@rm -rf $(VALI_APPLICATION_PATH)

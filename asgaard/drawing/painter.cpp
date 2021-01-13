@@ -107,7 +107,7 @@ namespace Asgaard {
                 unsigned char g = (unsigned char)((1.0f - p) * g1 + p * g2 + 0.5);
                 unsigned char b = (unsigned char)((1.0f - p) * b1 + p * b2 + 0.5);
                 SetFillColor(r, g, b);
-                RenderLine(dimensions.X(), y, dimensions.Width(), y);
+                RenderLine(dimensions.X(), y, dimensions.X() + dimensions.Width(), y);
             }
             m_fillColor = originalColor;
         }
@@ -130,8 +130,8 @@ namespace Asgaard {
 
         void Painter::RenderFill(const Rectangle& dimensions)
         {
-            for (int y = dimensions.Y(); y < dimensions.Height(); y++) {
-                RenderLine(dimensions.X(), y, dimensions.Width(), y);
+            for (int y = dimensions.Y(); y < (dimensions.Y() + dimensions.Height()); y++) {
+                RenderLine(dimensions.X(), y, dimensions.X() + dimensions.Width(), y);
             }
         }
         

@@ -272,43 +272,6 @@ struct GLNVGcontext {
 };
 typedef struct GLNVGcontext GLNVGcontext;
 
-#ifdef GL_VIOARR_LOADER
-#define glGetUniformLocation sOpenGL.glGetUniformLocation
-#define glGetUniformBlockIndex sOpenGL.glGetUniformBlockIndex
-#define glGenVertexArrays sOpenGL.glGenVertexArrays
-#define glGenBuffers sOpenGL.glGenBuffers
-#define glUniformBlockBinding sOpenGL.glUniformBlockBinding
-#define glGenerateMipmap sOpenGL.glGenerateMipmap
-#define glUseProgram sOpenGL.glUseProgram
-#define glActiveTexture sOpenGL.glActiveTexture
-#define glBindBuffer sOpenGL.glBindBuffer
-#define glBufferData sOpenGL.glBufferData
-#define glBindVertexArray sOpenGL.glBindVertexArray
-#define glEnableVertexAttribArray sOpenGL.glEnableVertexAttribArray
-#define glVertexAttribPointer sOpenGL.glVertexAttribPointer
-#define glUniform1i sOpenGL.glUniform1i
-#define glUniform2fv sOpenGL.glUniform2fv
-#define glBindBufferRange sOpenGL.glBindBufferRange
-#define glStencilOpSeparate sOpenGL.glStencilOpSeparate
-#define glBlendFuncSeparate sOpenGL.glBlendFuncSeparate
-#define glDisableVertexAttribArray sOpenGL.glDisableVertexAttribArray
-#define glDeleteProgram sOpenGL.glDeleteProgram
-#define glDeleteShader sOpenGL.glDeleteShader
-#define glDeleteBuffers sOpenGL.glDeleteBuffers
-#define glDeleteVertexArrays sOpenGL.glDeleteVertexArrays
-#define glCreateProgram sOpenGL.glCreateProgram
-#define glCreateShader sOpenGL.glCreateShader
-#define glShaderSource sOpenGL.glShaderSource
-#define glCompileShader sOpenGL.glCompileShader
-#define glGetShaderiv sOpenGL.glGetShaderiv
-#define glAttachShader sOpenGL.glAttachShader
-#define glBindAttribLocation sOpenGL.glBindAttribLocation
-#define glLinkProgram sOpenGL.glLinkProgram
-#define glGetProgramiv sOpenGL.glGetProgramiv
-#define glGetShaderInfoLog sOpenGL.glGetShaderInfoLog
-#define glGetProgramInfoLog sOpenGL.glGetProgramInfoLog
-#endif
-
 static int glnvg__maxi(int a, int b) { return a > b ? a : b; }
 
 #ifdef NANOVG_GLES2

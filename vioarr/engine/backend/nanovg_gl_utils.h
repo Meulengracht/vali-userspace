@@ -42,7 +42,7 @@ void nvgluDeleteFramebuffer(NVGLUframebuffer* fb);
 #elif defined(NANOVG_GL2)
 // On OS X including glext defines FBO on GL2 too.
 #	ifdef __APPLE__
-#		include <OpenGL/glext.h>
+#		include <OpenGL/glext.h>§
 #		define NANOVG_FBO_VALID 1
 #	endif
 #endif

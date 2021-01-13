@@ -99,6 +99,7 @@ protected:
     void OnKeyEvent(const Asgaard::KeyEvent&) override;
     
 private:
+    void PrepareBuffer();
     void FinishCurrentLine();
     void ScrollToLine(bool clearInput);
 

@@ -79,7 +79,6 @@ void ResolverVali::PrintCommandHeader()
         m_terminal->Print("[ %s | %s ]\n", m_profile.c_str(), m_currentDirectory.c_str());
         m_terminal->Print("$ ");
     }
-    m_terminal->Invalidate();
 }
 
 void ResolverVali::WaitForProcess()
@@ -217,7 +216,6 @@ void ResolverVali::StdoutListener()
     m_stdout = pipe(0x1000, 0);
     if (m_stdout == -1) {
         m_terminal->Print("FAILED TO CREATE STDOUT\n");
-        m_terminal->Invalidate();
         return;
     }
 
@@ -225,7 +223,6 @@ void ResolverVali::StdoutListener()
         std::memset(&ReadBuffer[0], 0, sizeof(ReadBuffer));
         read(m_stdout, &ReadBuffer[0], sizeof(ReadBuffer));
         m_terminal->Print(&ReadBuffer[0]);
-        m_terminal->Invalidate();
     }
 }
 
@@ -236,7 +233,6 @@ void ResolverVali::StderrListener()
     m_stderr = pipe(0x1000, 0);
     if (m_stderr == -1) {
         m_terminal->Print("FAILED TO CREATE STDERR\n");
-        m_terminal->Invalidate();
         return;
     }
 
@@ -244,6 +240,5 @@ void ResolverVali::StderrListener()
         std::memset(&ReadBuffer[0], 0, sizeof(ReadBuffer));
         read(m_stderr, &ReadBuffer[0], sizeof(ReadBuffer));
         m_terminal->Print(&ReadBuffer[0]);
-        m_terminal->Invalidate();
     }
 }

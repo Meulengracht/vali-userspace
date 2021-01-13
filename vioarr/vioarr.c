@@ -232,12 +232,10 @@ int server_run(int eventIod)
     // Initialize the chain of events by retrieving all input devices
     server_get_hid_devices();
 
-#ifdef VIOARR_WINTEST
+#ifdef VIOARR_LAUNCHER
     UUId_t pid;
-    
-    // Spawn the launcher application
-    ProcessSpawn("$bin/wintest.app", NULL, &pid);
-#endif //VIOARR_WINTEST
+    ProcessSpawn("$bin/" VIOARR_LAUNCHER, NULL, &pid);
+#endif //VIOARR_LAUNCHER
 
     // Server main loop
     while (serverRunning) {

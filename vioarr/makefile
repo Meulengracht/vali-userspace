@@ -1,61 +1,114 @@
 # Makefile for building a generic userspace application
+# Include all the definitions for os
+
+INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
+LFLAGS := -LIBPATH:$(VALI_DDK_PATH)/lib static_libds.lib static_libddk.lib static_libgracht.lib libfreetype.lib gallium-osmesa.lib
+
 ifeq ($(VALI_ARCH),i386)
-	ASFLAGS = -f win32 -Xvc
+	ASFLAGS = -f win32 -Xvc -DVIOARR_REVERSE_FB_BLIT
 else
-	ASFLAGS = -f win64 -Xvc
-endif
-INCLUDES = $(VALI_INCLUDES) -I$(VALI_DDK_PATH)/include -I. -Igraphics
-SHARED_SOURCES = $(wildcard engine/elements/*.cpp) \
-				 $(wildcard engine/dialogs/*.cpp) \
-				 $(wildcard engine/*.cpp) \
-				 $(wildcard scenes/*.cpp) \
-				 $(wildcard utils/*.cpp) \
-				 $(wildcard *.cpp)
-SHARED_OBJECTS = $(SHARED_SOURCES:.cpp=.o)
-
-NVG_SOURCES = engine/backend/nanovg.c
-OSMESA_ASM = graphics/opengl/osmesa/display_$(VALI_ARCH).s
-OSMESA_OBJECTS = $(OSMESA_ASM:.s=.o) $(NVG_SOURCES:.c=.o)
-
-SOFT_SOURCES = 
-SOFT_ASM = graphics/displays/fb/display_framebuffer_$(VALI_ARCH).s
-SOFT_OBJECTS = $(SOFT_SOURCES:.cpp=.o) $(SOFT_ASM:.s=.o)
-
-CFLAGS = $(VALI_CFLAGS) -O3 -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE $(INCLUDES)
-CXXFLAGS = $(VALI_CXXFLAGS) -O3 -std=c++17 $(INCLUDES)
-ifeq ($(MAKECMDGOALS),osmesa)
-	OBJECTS = $(SHARED_OBJECTS) $(OSMESA_OBJECTS)
-	CXXFLAGS += -D_VIOARR_OSMESA -D_VIOARR_OPENGL -DGL_GLEXT_PROTOTYPES -DGL_VIOARR_LOADER -DNANOVG_GL3_IMPLEMENTATION
-	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) ddk.lib gallium-osmesa.lib libfreetype.lib
-else ifeq ($(MAKECMDGOALS),soft)
-	OBJECTS = $(SHARED_OBJECTS) $(SOFT_OBJECTS)
-	LFLAGS = $(VALI_LFLAGS) /entry:__CrtConsoleEntry $(VALI_SDK_CXXLIBS) libpng.lib
-else
-	OBJECTS = $(SHARED_OBJECTS) $(OSMESA_OBJECTS) $(SOFT_OBJECTS)
+	ASFLAGS = -f win64 -Xvc -DVIOARR_REVERSE_FB_BLIT
 endif
 
+APP_SOURCES_ASM := 
+APP_SOURCES_C := loader/src/glad.c \
+				 $(wildcard engine/backend/*.c) \
+				 $(wildcard engine/memory/*.c) \
+				 $(wildcard engine/*.c) \
+		         $(wildcard *.c)
+		         
+APP_PROTOCOLS_C := protocols/wm_core_protocol_server.c \
+				   protocols/wm_screen_protocol_server.c \
+				   protocols/wm_memory_protocol_server.c \
+				   protocols/wm_memory_pool_protocol_server.c \
+				   protocols/wm_buffer_protocol_server.c \
+				   protocols/wm_surface_protocol_server.c \
+				   protocols/wm_pointer_protocol_server.c \
+				   protocols/wm_keyboard_protocol_server.c \
+				   protocols/ctt_input_protocol_client.c \
+				   protocols/svc_device_protocol_client.c
+
+APP_DEFINES := -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
 ifdef VALI_HEADLESS
-CFLAGS += -DVALI_HEADLESS
-CXXFLAGS += -DVALI_HEADLESS
+APP_SOURCES_C += engine/screen/vioarr_screen_headless.c
+APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_HEADLESS
+else
+APP_SOURCES_C += engine/screen/vioarr_screen_osmesa.c
+APP_SOURCES_ASM += engine/screen/vioarr_screen_$(VALI_ARCH).s
+APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_OSMESA -DVIOARR_REVERSE_FB_BLIT
 endif
 
-.PHONY: all
-all: $(VALI_APPLICATION_PATH)/bin/vioarr.app
+APP_CFLAGS = $(VALI_CFLAGS) $(CFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
+APP_CXXFLAGS = $(VALI_CXXFLAGS) $(CXXFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
+APP_LFLAGS = /entry:__CrtConsoleEntry $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS) $(LFLAGS)
 
-.PHONY: osmesa
-osmesa: all
+APP_OBJECTS = $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_CXX:.cpp=.o) $(APP_SOURCES_C:.c=.o) $(APP_SOURCES_ASM:.s=.o)
 
-$(VALI_APPLICATION_PATH)/bin/vioarr.app: $(OBJECTS)
+.PHONE: all
+all: protocols loader $(VALI_APPLICATION_PATH)/bin/vioarr.app
+
+$(VALI_APPLICATION_PATH)/bin/vioarr.app: $(APP_OBJECTS)
 	@printf "%b" "\033[0;36mCreating application " $@ "\033[m\n"
-	@$(LD) $(LFLAGS) $(OBJECTS) /out:$@
-	
+	@$(LD) $(APP_LFLAGS) $(APP_OBJECTS) /out:$@
+
+protocols:
+	@mkdir -p $@
+
+protocols/wm_core_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_screen_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_memory_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_memory_pool_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_buffer_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_surface_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_pointer_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/wm_keyboard_protocol_server.c: ../protocols/wm_protocol.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --lang-c --server --out ./protocols/
+
+protocols/ctt_input_protocol_client.c: $(VALI_DDK_PATH)/share/vali/protocols/contract_protocols.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --include input --lang-c --client --out ./protocols/
+
+protocols/svc_device_protocol_client.c: $(VALI_DDK_PATH)/share/vali/protocols/service_protocols.xml
+	@printf "%b" "\033[0;36mRegenerating protocol " $@ "\033[m\n"
+	python3 $(VALI_DDK_PATH)/share/vali/parser.py --protocol $< --include device --lang-c --client --out ./protocols/
+
+loader:
+	@mkdir -p $@
+
+loader/src/glad.c: loader
+	@printf "%b" "\033[0;36mRegenerating opengl loader files " $@ "\033[m\n"
+	@pip3 install --upgrade git+https://github.com/meulengracht/glad.git#egg=glad
+	@python3 -m glad --generator=c --profile=core --out-path=loader
+
 %.o : %.cpp
 	@printf "%b" "\033[0;32mCompiling C++ source object " $< "\033[m\n"
-	@$(CC) -c $(CXXFLAGS) -o $@ $<
+	@$(CC) -c $(APP_CXXFLAGS) -o $@ $<
 
 %.o : %.c
 	@printf "%b" "\033[0;32mCompiling C source object " $< "\033[m\n"
-	@$(CC) -c $(CFLAGS) -o $@ $<
+	@$(CC) -c $(APP_CFLAGS) -o $@ $<
 
 %.o : %.s
 	@printf "%b" "\033[0;32mAssembling source object " $< "\033[m\n"
@@ -63,4 +116,6 @@ $(VALI_APPLICATION_PATH)/bin/vioarr.app: $(OBJECTS)
 
 .PHONY: clean
 clean:
-	@rm -f $(OBJECTS)
+	@rm -rf loader/*
+	@rm -f protocols/*
+	@rm -f $(APP_OBJECTS)

@@ -134,8 +134,9 @@ void Terminal::TerminalLine::Update(std::shared_ptr<Asgaard::MemoryBuffer>& buff
 void Terminal::TerminalLine::SetText(const std::string& text)
 {
     Reset();
-    m_text   = text;
-    m_cursor = text.length();
+    m_text       = text;
+    m_textLength = m_font->GetTextMetrics(m_text).Width();
+    m_cursor     = text.length();
 }
 
 std::string Terminal::TerminalLine::GetInput()
@@ -234,17 +235,17 @@ void Terminal::FinishCurrentLine()
 
 void Terminal::ScrollToLine(bool clearInput)
 {
-    int historyStart = m_historyIndex - m_lineIndex;
-    for (int i = 0; i < m_rows; i++) {
-        if (i == m_lineIndex && !clearInput) {
-            break;
-        }
-
-        m_lines[i]->Reset();
-        if (historyStart < m_historyIndex) {
-            m_lines[i]->SetText(m_history[historyStart++]);
-        }
+    // If clear input is given, we need the last row free
+    int clearCount   = m_rows - (clearInput ? 1 : 0);
+    int historyStart = m_historyIndex - clearCount;
+    for (int i = 0; i < clearCount; i++, historyStart++) {
+        m_lines[i]->SetText(m_history[historyStart]);
         m_lines[i]->Update(m_buffer);
+    }
+
+    if (clearInput) {
+        m_lines[m_rows - 1]->Reset();
+        m_lines[m_rows - 1]->Update(m_buffer);
     }
 }
 
@@ -308,6 +309,14 @@ void Terminal::Invalidate()
     ApplyChanges();
 }
 
+void Terminal::PrepareBuffer()
+{
+    Asgaard::Drawing::Painter paint(m_buffer);
+    
+    paint.SetFillColor(0, 0, 0);
+    paint.RenderFill();
+}
+
 void Terminal::OnCreated(Asgaard::Object* createdObject)
 {
     if (createdObject->Id() == Id()) {
@@ -326,9 +335,9 @@ void Terminal::OnCreated(Asgaard::Object* createdObject)
     }
     else if (createdObject->Id() == m_buffer->Id()) {
         // Now all resources are created
+        PrepareBuffer();
         SetBuffer(m_buffer);
         m_resolver->PrintCommandHeader();
-        Invalidate();
     }
 }
 

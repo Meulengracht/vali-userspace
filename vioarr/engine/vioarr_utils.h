@@ -1,6 +1,6 @@
 /* MollenOS
  *
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2020, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,24 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * MollenOS - Vioarr Engine System (V8)
- *  - The Vioarr V8 Graphics Engine.
+ * Vioarr - Vali Compositor
+ * - Implements the default system compositor for Vali. It utilizies the gracht library
+ *   for communication between compositor clients and the server. The server renders
+ *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
-#pragma once
-#include "../entity.hpp"
-#include <string>
 
-class CSprite : public CEntity {
-public:
-    CSprite(CEntity* Parent, NVGcontext* VgContext, const std::string &Path, int Width, int Height);
-    CSprite(NVGcontext* VgContext, const std::string &Path, int Width, int Height);
-    ~CSprite();
+#ifndef __VIOARR_UTILS_H__
+#define __VIOARR_UTILS_H__
 
-protected:
-    // Override the inherited methods
-    void Draw(NVGcontext* VgContext);
+//#define __TRACE
+//#define VIOARR_TRACEMODE
+#define VIOARR_LAUNCHER "alumni.app"
+//#define VIOARR_REVERSE_FB_BLIT // must be given to asm aswell
 
-private:
-    int m_ResourceId;
-    int m_Width;
-    int m_Height;
-};
+#include <stdint.h>
+#include <ddk/utils.h>
+
+#define vioarr_utils_trace TRACE
+#define vioarr_utils_error ERROR
+
+#endif //!__VIOARR_UTILS_H__
