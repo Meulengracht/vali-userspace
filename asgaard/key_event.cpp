@@ -54,4 +54,19 @@ namespace Asgaard {
     {
         return (m_modifiers & VK_MODIFIER_RELEASED) == 0;
     }
+
+    bool KeyEvent::LeftControl() const
+    {
+        return (m_modifiers & VK_MODIFIER_LCTRL) == 0;
+    }
+
+    bool KeyEvent::RightControl() const
+    {
+        return (m_modifiers & VK_MODIFIER_RCTRL) == 0;
+    }
+
+    bool KeyEvent::Control() const
+    {
+        return LeftControl() || RightControl();
+    }
 }

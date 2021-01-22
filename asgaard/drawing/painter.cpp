@@ -28,13 +28,13 @@
 #include <string> 
 
 namespace {
-    unsigned int AlphaBlendAXGX(unsigned int colorA, unsigned int colorB, unsigned int alpha)
+    unsigned int AlphaBlendAXGX(unsigned int colorA, unsigned int colorB, unsigned int alpha, unsigned int resultAlpha)
     {
         unsigned int rb1 = ((0x100 - alpha) * (colorA & 0xFF00FF)) >> 8;
         unsigned int rb2 = (alpha * (colorB & 0xFF00FF)) >> 8;
         unsigned int g1  = ((0x100 - alpha) * (colorA & 0x00FF00)) >> 8;
         unsigned int g2  = (alpha * (colorB & 0x00FF00)) >> 8;
-        return ((rb1 | rb2) & 0xFF00FF) + ((g1 | g2) & 0x00FF00) | 0xFF000000;
+        return ((rb1 | rb2) & 0xFF00FF) + ((g1 | g2) & 0x00FF00) | (resultAlpha << 24);
     }
 }
 
@@ -49,6 +49,11 @@ namespace Asgaard {
         
         }
         
+        void Painter::SetFillColor(const Color& color)
+        {
+            m_fillColor = color;
+        }
+        
         void Painter::SetFillColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
         {
             m_fillColor = Color(a, r, g, b);
@@ -59,6 +64,11 @@ namespace Asgaard {
             SetFillColor(0xFF, r, g, b);
         }
         
+        void Painter::SetOutlineColor(const Color& color)
+        {
+            m_outlineColor = color;
+        }
+
         void Painter::SetOutlineColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b)
         {
             m_outlineColor = Color(a, r, g, b);
@@ -150,7 +160,8 @@ namespace Asgaard {
                 return;
             }
 
-            unsigned int color = m_fillColor.GetFormatted(m_canvas->Format());
+            unsigned int bgColor = m_fillColor.GetFormatted(m_canvas->Format());
+            unsigned int fgColor = m_outlineColor.GetFormatted(m_canvas->Format());
             if (m_font->GetCharacterBitmap(character, bitmap)) {
                 uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer(
                     x + bitmap.indentX, y + bitmap.indentY));
@@ -159,11 +170,14 @@ namespace Asgaard {
                     for (int column = 0; column < bitmap.width; column++) { // @todo might need to be reverse
                         uint8_t alpha = source[column];
                         if (alpha == 255) {
-                            pointer[column] = color;
+                            pointer[column] = fgColor;
+                        }
+                        else if (alpha == 0) {
+                            pointer[column] = bgColor;
                         }
                         else if (alpha > 0) {
                             // pointer[Column] = m_FgColor; if CACHED_BITMAP
-                            pointer[column] = AlphaBlendAXGX(pointer[column], color, alpha);
+                            pointer[column] = AlphaBlendAXGX(bgColor, fgColor, alpha, m_outlineColor.Alpha());
                         }
                     }
                     
@@ -208,9 +222,12 @@ namespace Asgaard {
                             if (alpha == 255) {
                                 pointer[column] = fgColor;
                             }
+                            else if (alpha == 0) {
+                                pointer[column] = bgColor;
+                            }
                             else {
                                 // pointer[Column] = m_FgColor; if CACHED_BITMAP
-                                pointer[column] = AlphaBlendAXGX(bgColor, fgColor, alpha);
+                                pointer[column] = AlphaBlendAXGX(bgColor, fgColor, alpha, m_outlineColor.Alpha());
                             }
                         }
                         

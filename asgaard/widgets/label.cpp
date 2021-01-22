@@ -23,6 +23,7 @@
  
 #include "../include/widgets/label.hpp"
 #include "../include/drawing/painter.hpp"
+#include "../include/drawing/font.hpp"
 #include "../include/memory_pool.hpp"
 #include "../include/memory_buffer.hpp"
 #include "../include/rectangle.hpp"
@@ -35,6 +36,11 @@ namespace Asgaard {
             , m_buffer(nullptr)
             , m_font(nullptr)
             , m_text("")
+            , m_anchors(Anchors::TOP | Anchors::LEFT)
+            , m_textColor(0xFF, 0xFF, 0xFF, 0xFF)
+            , m_fillColor(0x0, 0xF0, 0xF0, 0xF0)
+            , m_redraw(false)
+            , m_redrawReady(false)
         {
             
         }
@@ -43,42 +49,99 @@ namespace Asgaard {
         {
             
         }
+            
+        void Label::SetBackgroundColor(const Drawing::Color& color)
+        {
+            m_fillColor = color;
+        }
+
+        void Label::SetTextColor(const Drawing::Color& color)
+        {
+            m_textColor = color;
+        }
         
         void Label::SetFont(const std::shared_ptr<Drawing::Font>& font)
         {
             m_font = font;
-            
-            if (Valid() && m_text != "") {
-                Redraw();
-            }
         }
         
         void Label::SetText(const std::string& text)
         {
             m_text = text;
-            
-            if (Valid() && m_font) {
+        }
+
+        void Label::SetAnchors(Anchors anchors)
+        {
+            m_anchors = anchors;
+        }
+
+        void Label::RequestRedraw()
+        {
+            bool shouldRedraw = m_redrawReady.exchange(false);
+            if (shouldRedraw) {
                 Redraw();
+                MarkDamaged(Dimensions());
+                ApplyChanges();
+            }
+            else {
+                m_redraw = true;
+            }
+        }
+
+        void Label::RedrawReady()
+        {
+            if (m_redraw) {
+                Redraw();
+                MarkDamaged(Dimensions());
+                ApplyChanges();
+                m_redraw = false;
+            }
+            else {
+                m_redrawReady.store(true);
             }
         }
         
         void Label::Redraw()
         {
             Drawing::Painter paint(m_buffer);
-            
-            // Set background [white] transparent
-            paint.SetFillColor(0, 0xF0, 0xF0, 0xF0);
+            Rectangle textDimensions(m_font->GetTextMetrics(m_text));
+            int x = CalculateXCoordinate(textDimensions);
+            int y = CalculateYCoordinate(textDimensions);
+
+            paint.SetFillColor(m_fillColor);
             paint.RenderFill();
             
-            // Set font
             paint.SetFont(m_font);
+            paint.SetOutlineColor(m_textColor);
+            paint.RenderText(x, y, m_text);
+        }
 
-            // Render text
-            paint.SetOutlineColor(0, 0, 0);
-            paint.RenderText(0, 0, m_text);
-            
-            MarkDamaged(Dimensions());
-            ApplyChanges();
+        int Label::CalculateXCoordinate(const Rectangle& textDimensions)
+        {
+            if ((m_anchors & Anchors::RIGHT) == Anchors::RIGHT) {
+                return std::max(0, Dimensions().Width() - textDimensions.Width());
+            }
+            else if ((m_anchors & Anchors::CENTER) == Anchors::CENTER) {
+                int centerDims = Dimensions().Width() >> 1;
+                int centerText = textDimensions.Width() >> 1;
+                return std::max(0, centerDims - centerText);
+            }
+
+            return 0;
+        }
+
+        int Label::CalculateYCoordinate(const Rectangle& textDimensions)
+        {
+            if ((m_anchors & Anchors::BOTTOM) == Anchors::BOTTOM) {
+                return std::max(0, Dimensions().Height() - textDimensions.Height());
+            }
+            else if ((m_anchors & Anchors::CENTER) == Anchors::CENTER) {
+                int centerDims = Dimensions().Height() >> 1;
+                int centerText = textDimensions.Height() >> 1;
+                return std::max(0, centerDims - centerText);
+            }
+
+            return 0;
         }
         
         void Label::ExternalEvent(enum ObjectEvent event, void* data)
@@ -128,7 +191,12 @@ namespace Asgaard {
                     case MemoryBuffer::BufferEvent::CREATED: {
                         SetBuffer(m_buffer);
                         SetValid(true);
+                        RedrawReady();
                         Notify(static_cast<int>(LabelEvent::CREATED));
+                    } break;
+
+                    case MemoryBuffer::BufferEvent::REFRESHED: {
+                        RedrawReady();
                     } break;
                     
                     default:

@@ -22,19 +22,21 @@
  */
 #pragma once
 
+#include <atomic>
 #include <memory>
+#include "../utils/bitset_enum.hpp"
 #include "../surface.hpp"
+#include "../drawing/color.hpp"
 #include <string>
 
 namespace Asgaard {
     class Surface;
     class MemoryPool;
     class MemoryBuffer;
-    
     namespace Drawing {
         class Font;
     }
-    
+
     namespace Widgets {
         class Label : public Surface {
         public:
@@ -42,12 +44,23 @@ namespace Asgaard {
                 CREATED,
                 ERROR
             };
+            enum class Anchors {
+                TOP = 0x1,
+                CENTER = 0x2,
+                BOTTOM = 0x4,
+                RIGHT = 0x8,
+                LEFT = 0x10
+            };
         public:
             Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
             ~Label();
             
+            void SetBackgroundColor(const Drawing::Color& color);
+            void SetTextColor(const Drawing::Color& color);
             void SetFont(const std::shared_ptr<Drawing::Font>& font);
             void SetText(const std::string& text);
+            void SetAnchors(Anchors anchors);
+            void RequestRedraw();
             
         public:
             void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
@@ -57,12 +70,28 @@ namespace Asgaard {
             
         private:
             void Redraw();
+            void RedrawReady();
+            int  CalculateXCoordinate(const Rectangle& textDimensions);
+            int  CalculateYCoordinate(const Rectangle& textDimensions);
     
         private:
             std::shared_ptr<Asgaard::MemoryPool>   m_memory;
             std::shared_ptr<Asgaard::MemoryBuffer> m_buffer;
             std::shared_ptr<Drawing::Font>         m_font;
-            std::string                            m_text;
+
+            std::string    m_text;
+            Anchors        m_anchors;
+            Drawing::Color m_textColor;
+            Drawing::Color m_fillColor;
+        
+            bool              m_redraw;
+            std::atomic<bool> m_redrawReady;
         };
     }
 }
+
+// Enable bitset operations for the anchors enum
+template<>
+struct enable_bitmask_operators<Asgaard::Widgets::Label::Anchors> {
+    static const bool enable = true;
+};

@@ -22,9 +22,14 @@
  */
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include "surface.hpp"
+
+#define DECORATION_FILL_COLOR Drawing::Color(0x0, 0x0C, 0x35, 0x33)
+#define DECORATION_TEXT_COLOR Drawing::Color(0x28, 0x57, 0x5A)
+#define DECORATION_TEXT_SIZE  12
 
 namespace Asgaard {
     class MemoryPool;
@@ -46,17 +51,29 @@ namespace Asgaard {
             ERROR
         };
     public:
-        WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
+        WindowDecoration(uint32_t id, 
+            const std::shared_ptr<Screen>& screen, 
+            uint32_t parentId, 
+            const Rectangle&);
+
+        WindowDecoration(uint32_t id, 
+            const std::shared_ptr<Screen>& screen, 
+            uint32_t parentId, 
+            const Rectangle&,
+            const std::shared_ptr<Drawing::Font>& font);
+
         ~WindowDecoration();
         
         void SetTitle(const std::string& title);
         void SetIcon(const std::string& iconPath);
+        void RequestRedraw();
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
     
     private:
         void Redraw();
+        void RedrawReady();
         void Notification(Publisher*, int = 0, void* = 0) override;
         void CheckCreation();
 
@@ -66,14 +83,16 @@ namespace Asgaard {
         // a buffer with the application title
         // a buffer with the application icon
         // a buffer with the close icon
-        std::string                              m_titleText;
-        std::shared_ptr<Asgaard::MemoryPool>     m_memory;
-        std::shared_ptr<Asgaard::MemoryBuffer>   m_buffer;
-        std::shared_ptr<Asgaard::Drawing::Font>  m_appFont;
-        std::shared_ptr<Asgaard::Widgets::Label> m_appTitle;
-        std::shared_ptr<Asgaard::Widgets::Icon>  m_appIcon;
-        std::shared_ptr<Asgaard::Widgets::Icon>  m_minIcon;
-        std::shared_ptr<Asgaard::Widgets::Icon>  m_maxIcon;
-        std::shared_ptr<Asgaard::Widgets::Icon>  m_closeIcon;
+        std::shared_ptr<MemoryPool>     m_memory;
+        std::shared_ptr<MemoryBuffer>   m_buffer;
+        std::shared_ptr<Drawing::Font>  m_appFont;
+        std::shared_ptr<Widgets::Label> m_appTitle;
+        std::shared_ptr<Widgets::Icon>  m_appIcon;
+        std::shared_ptr<Widgets::Icon>  m_minIcon;
+        std::shared_ptr<Widgets::Icon>  m_maxIcon;
+        std::shared_ptr<Widgets::Icon>  m_closeIcon;
+
+        bool              m_redraw;
+        std::atomic<bool> m_redrawReady;
     };
 }

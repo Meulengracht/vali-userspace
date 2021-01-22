@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include <ddk/service.h>
+#include <ddk/utils.h>
 #include <gracht/link/socket.h>
 #include <gracht/link/vali.h>
 #include <gracht/server.h>
@@ -260,6 +261,10 @@ int server_run(int eventIod)
 int main(int argc, char **argv)
 {
     int eventIod;
+
+#ifndef VIOARR_TRACEMODE
+    MollenOSEndBoot();
+#endif
 
     int status = client_initialize();
     if (status) {

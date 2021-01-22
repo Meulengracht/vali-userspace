@@ -91,6 +91,11 @@ protected:
         
     }
 
+    void DescriptorEvent(int iod, unsigned int events) override
+    {
+        
+    }
+
 private:
     void Redraw()
     {

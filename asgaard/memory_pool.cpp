@@ -47,16 +47,16 @@ namespace Asgaard {
             case ObjectEvent::CREATION: {
                 struct wm_core_object_event* event =
                     (struct wm_core_object_event*)data;
-                int status;
+                OsStatus_t status;
                 
                 status = dma_attach(event->system_handle, &m_attachment);
-                if (status) {
+                if (status != OsSuccess) {
                     Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
                     return;
                 }
                 
                 status = dma_attachment_map(&m_attachment);
-                if (status) {
+                if (status != OsSuccess) {
                     Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
                     return;
                 }

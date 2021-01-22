@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <memory>
 #include <vector>
@@ -30,10 +31,15 @@
 
 #include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
+#include <asgaard/window_decoration.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
 #include <asgaard/drawing/font.hpp>
 #include <asgaard/drawing/painter.hpp>
+
+#define ALUMNI_MARGIN_TOP   40
+#define ALUMNI_MARGIN_LEFT  10
+#define ALUMNI_MARGIN_RIGHT 10
 
 class ResolverBase;
 
@@ -48,7 +54,7 @@ private:
         bool AddInput(int character);
         bool RemoveInput();
         bool AddCharacter(int character);
-        void Update(std::shared_ptr<Asgaard::MemoryBuffer>&);
+        void Redraw(std::shared_ptr<Asgaard::MemoryBuffer>&);
 
         void SetText(const std::string& text);
         void HideCursor();
@@ -73,11 +79,11 @@ private:
 
 public:
     Terminal(uint32_t id, const Asgaard::Rectangle&, const std::shared_ptr<Asgaard::Drawing::Font>&,
-        const std::shared_ptr<ResolverBase>&);
+        const std::shared_ptr<ResolverBase>&, int stdoutDescriptor, int stderrDescriptor);
     ~Terminal();
 
     void Print(const char* format, ...);
-    void Invalidate();
+    void RequestRedraw();
 
     // Input manipulation
     std::string ClearInput(bool newline);
@@ -91,7 +97,7 @@ public:
     // Cursor manipulation
     void MoveCursorLeft();
     void MoveCursorRight();
-    
+
 protected:
     void OnCreated(Asgaard::Object*) override;
     void Teardown() override;
@@ -99,15 +105,21 @@ protected:
     void OnKeyEvent(const Asgaard::KeyEvent&) override;
     
 private:
+    void Redraw();
     void PrepareBuffer();
     void FinishCurrentLine();
     void ScrollToLine(bool clearInput);
 
+    // We do not allow override of these
+    void DescriptorEvent(int iod, unsigned int events) override;
+    void Notification(Publisher*, int = 0, void* = 0) override;
+
 private:
-    std::shared_ptr<Asgaard::MemoryPool>    m_memory;
-    std::shared_ptr<Asgaard::MemoryBuffer>  m_buffer;
-    std::shared_ptr<Asgaard::Drawing::Font> m_font;
-    std::shared_ptr<ResolverBase>           m_resolver;
+    std::shared_ptr<Asgaard::MemoryPool>       m_memory;
+    std::shared_ptr<Asgaard::MemoryBuffer>     m_buffer;
+    std::shared_ptr<Asgaard::WindowDecoration> m_decoration;
+    std::shared_ptr<Asgaard::Drawing::Font>    m_font;
+    std::shared_ptr<ResolverBase>              m_resolver;
     
     int                                        m_rows;
     std::vector<std::string>                   m_history;
@@ -116,4 +128,10 @@ private:
     int                                        m_lineIndex;
     char*                                      m_printBuffer;
     std::mutex                                 m_printLock;
+
+    int m_stdoutDescriptor;
+    int m_stderrDescriptor;
+
+    bool m_redraw;
+    std::atomic<bool> m_redrawReady;
 };

@@ -28,12 +28,13 @@
 
 class ResolverVali : public ResolverBase {
 public:
-    ResolverVali();
+    ResolverVali(int stdoutDescriptor, int stderrDescriptor);
     ~ResolverVali();
 
 public:
     bool HandleKeyCode(const Asgaard::KeyEvent&) override;
     void PrintCommandHeader() override;
+    void HandleDescriptorEvent(int iod, unsigned int events) override;
 
 protected:
     bool CommandResolver(const std::string&, const std::vector<std::string>&) override;
@@ -47,17 +48,12 @@ private:
     void UpdateWorkingDirectory();
     void WaitForProcess();
     
-    void StdoutListener();
-    void StderrListener();
-
 private:
     std::string m_profile;
     std::string m_currentDirectory;
-
-    int     m_stdout;
-    int     m_stderr;
-    UUId_t  m_application;
-
-    std::thread m_stdoutThread;
-    std::thread m_stderrThread;
+    UUId_t      m_application;
+    int         m_stdoutDescriptor;
+    int         m_stdinDescriptor;
+    int         m_stderrDescriptor;
+    int         m_processEvent;
 };

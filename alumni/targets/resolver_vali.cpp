@@ -21,10 +21,14 @@
  *   using freetype as the font renderer.
  */
 
+#include <asgaard/application.hpp>
+#include <asgaard/key_event.hpp>
 #include <os/mollenos.h>
 #include <os/process.h>
 #include <os/keycodes.h>
 #include <io.h>
+#include <ioset.h>
+#include <event.h>
 #include "../terminal_interpreter.hpp"
 #include "../terminal.hpp"
 #include "resolver_vali.hpp"
@@ -36,22 +40,22 @@ namespace {
     }
 }
 
-ResolverVali::ResolverVali()
+ResolverVali::ResolverVali(int stdoutDescriptor, int stderrDescriptor)
     : ResolverBase()
-    , m_profile("Philip")
+    , m_profile("philip")
     , m_currentDirectory("n/a")
-    , m_stdout(-1)
-    , m_stderr(-1)
     , m_application(UUID_INVALID)
-    , m_stdoutThread(std::bind(&ResolverVali::StdoutListener, this)), 
-      m_stderrThread(std::bind(&ResolverVali::StderrListener, this))
+    , m_stdoutDescriptor(stdoutDescriptor)
+    , m_stdinDescriptor(pipe(0x1000, 0))
+    , m_stderrDescriptor(stderrDescriptor)
+    , m_processEvent(-1)
 {
     UpdateWorkingDirectory();
 }
 
 ResolverVali::~ResolverVali()
 {
-    
+    close(m_stdinDescriptor);
 }
 
 void ResolverVali::UpdateWorkingDirectory()
@@ -67,26 +71,46 @@ void ResolverVali::UpdateWorkingDirectory()
     std::free(CurrentPath);
 }
 
-bool ResolverVali::HandleKeyCode(const Asgaard::KeyEvent&)
+bool ResolverVali::HandleKeyCode(const Asgaard::KeyEvent& key)
 {
-    return true;
+    if (m_application != UUID_INVALID) {
+        if (key.KeyCode() == VK_C && !key.Pressed() && key.LeftControl()) {
+            // send signal to terminate
+            ProcessKill(m_application);
+        }
+        else {
+            // redirect
+        }
+        return true;
+    }
+    return false;
 }
 
 void ResolverVali::PrintCommandHeader()
 {
     // Dont print the command header if an application is running
     if (m_application == UUID_INVALID) {
-        m_terminal->Print("[ %s | %s ]\n", m_profile.c_str(), m_currentDirectory.c_str());
-        m_terminal->Print("$ ");
+        m_terminal->Print("%s@%s~ ", m_profile.c_str(), m_currentDirectory.c_str());
+    }
+}
+
+void ResolverVali::HandleDescriptorEvent(int iod, unsigned int events)
+{
+    if (iod == m_processEvent) {
+        int exitCode;
+        
+        read(iod, &exitCode, sizeof(int));
+        m_terminal->Print("process exitted with code %i\n", exitCode);
+        m_application = UUID_INVALID;
     }
 }
 
 void ResolverVali::WaitForProcess()
 {
-    int ExitCode = 0;
-    ProcessJoin(m_application, 0, &ExitCode);
-    m_terminal->Print("process exitted with code %i\n", ExitCode);
-    m_application = UUID_INVALID;
+    int exitCode = 0;
+
+    ProcessJoin(m_application, 0, &exitCode);
+    write(m_processEvent, &exitCode, sizeof(int));
 }
 
 bool ResolverVali::ExecuteProgram(const std::string& Program, const std::vector<std::string>& Arguments)
@@ -108,13 +132,21 @@ bool ResolverVali::ExecuteProgram(const std::string& Program, const std::vector<
 
     // Set inheritation
     configuration.InheritFlags = PROCESS_INHERIT_STDOUT | PROCESS_INHERIT_STDIN | PROCESS_INHERIT_STDERR;
-    configuration.StdOutHandle = m_stdout;
-    configuration.StdInHandle  = STDIN_FILENO;
-    configuration.StdErrHandle = m_stderr;
+    configuration.StdOutHandle = m_stdoutDescriptor;
+    configuration.StdInHandle  = m_stdinDescriptor;
+    configuration.StdErrHandle = m_stderrDescriptor;
     
     ProcessSpawnEx(Program.c_str(), line.c_str(), &configuration, &m_application);
     if (m_application != UUID_INVALID) {
-        WaitForProcess();
+        // Create the sync descriptor on demand as we need the application environment to be initialized
+        // before adding descriptors
+        if (m_processEvent == -1) {
+            m_processEvent = eventd(0, EVT_RESET_EVENT);
+            Asgaard::APP.AddEventDescriptor(m_processEvent, IOSETSYN);
+        }
+
+        std::thread spawn(std::bind(&ResolverVali::WaitForProcess, this));
+        spawn.detach();
         return true;
     }
     return false;
@@ -207,38 +239,4 @@ bool ResolverVali::ChangeDirectory(const std::vector<std::string>& Arguments)
     }
     m_terminal->Print("cd: no argument given\n");
     return false;
-}
-
-void ResolverVali::StdoutListener()
-{
-    char ReadBuffer[256];
-
-    m_stdout = pipe(0x1000, 0);
-    if (m_stdout == -1) {
-        m_terminal->Print("FAILED TO CREATE STDOUT\n");
-        return;
-    }
-
-    while (Alive()) {
-        std::memset(&ReadBuffer[0], 0, sizeof(ReadBuffer));
-        read(m_stdout, &ReadBuffer[0], sizeof(ReadBuffer));
-        m_terminal->Print(&ReadBuffer[0]);
-    }
-}
-
-void ResolverVali::StderrListener()
-{
-    char ReadBuffer[256];
-
-    m_stderr = pipe(0x1000, 0);
-    if (m_stderr == -1) {
-        m_terminal->Print("FAILED TO CREATE STDERR\n");
-        return;
-    }
-
-    while (Alive()) {
-        std::memset(&ReadBuffer[0], 0, sizeof(ReadBuffer));
-        read(m_stderr, &ReadBuffer[0], sizeof(ReadBuffer));
-        m_terminal->Print(&ReadBuffer[0]);
-    }
 }

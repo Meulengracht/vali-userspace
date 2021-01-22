@@ -25,6 +25,8 @@
 #include <cctype>
 #include <cmath>
 
+#include <io.h>
+#include <ioset.h>
 #include <os/keycodes.h>
 
 #include <asgaard/object_manager.hpp>
@@ -37,9 +39,12 @@ const int PRINTBUFFER_SIZE = 4096;
 
 Terminal::TerminalLine::TerminalLine(const std::shared_ptr<Asgaard::Drawing::Font>& font, int row, int capacity)
     : m_font(font)
-    , m_dimensions(0, (row * font->GetFontHeight()) + 2, capacity, font->GetFontHeight())
+    , m_dimensions(ALUMNI_MARGIN_LEFT, (
+                   row * font->GetFontHeight()) + ALUMNI_MARGIN_TOP, 
+                   capacity - (ALUMNI_MARGIN_LEFT + ALUMNI_MARGIN_RIGHT), 
+                   font->GetFontHeight())
     , m_row(row)
-    , m_capacity(capacity - 6)
+    , m_capacity(capacity - (ALUMNI_MARGIN_LEFT + ALUMNI_MARGIN_RIGHT))
 {
     Reset();
 }
@@ -112,12 +117,12 @@ bool Terminal::TerminalLine::RemoveInput()
     return false;
 }
 
-void Terminal::TerminalLine::Update(std::shared_ptr<Asgaard::MemoryBuffer>& buffer)
+void Terminal::TerminalLine::Redraw(std::shared_ptr<Asgaard::MemoryBuffer>& buffer)
 {
     if (m_dirty) {
         Asgaard::Drawing::Painter paint(buffer);
         
-        paint.SetFillColor(0, 0, 0);
+        paint.SetFillColor(0x7F, 0x0C, 0x35, 0x33);
         paint.RenderFill(m_dimensions);
         
         paint.SetOutlineColor(0xFF, 0xFF, 0xFF);
@@ -160,14 +165,21 @@ void Terminal::TerminalLine::ShowCursor()
 }
 
 Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std::shared_ptr<Asgaard::Drawing::Font>& font,
-    const std::shared_ptr<ResolverBase>& resolver)
+    const std::shared_ptr<ResolverBase>& resolver, int stdoutDescriptor, int stderrDescriptor)
     : WindowBase(id, dimensions)
     , m_font(font)
     , m_resolver(resolver)
-    , m_rows((dimensions.Height() / font->GetFontHeight()) - 1)
+    , m_rows(-1)
     , m_historyIndex(0)
     , m_lineIndex(0)
+    , m_stdoutDescriptor(stdoutDescriptor)
+    , m_stderrDescriptor(stderrDescriptor)
+    , m_redraw(false)
+    , m_redrawReady(true)
 {
+    // Calculate row count taking into account the margins
+    m_rows = ((dimensions.Height() - ALUMNI_MARGIN_TOP) / font->GetFontHeight()) - 1;
+
     m_printBuffer = (char*)std::malloc(PRINTBUFFER_SIZE);
     for (int i = 0; i < m_rows; i++) {
         m_lines.push_back(std::make_unique<TerminalLine>(font, i, dimensions.Width()));
@@ -187,7 +199,6 @@ void Terminal::AddInput(int character)
         // uh todo, we should skip to next line
         return;
     }
-    m_lines[m_lineIndex]->Update(m_buffer);
 }
 
 void Terminal::RemoveInput()
@@ -196,7 +207,6 @@ void Terminal::RemoveInput()
         // uh todo, we should skip to prev line
         return;
     }
-    m_lines[m_lineIndex]->Update(m_buffer);
 }
 
 std::string Terminal::ClearInput(bool newline)
@@ -207,18 +217,14 @@ std::string Terminal::ClearInput(bool newline)
     }
     else {
         m_lines[m_lineIndex]->Reset();
-        m_lines[m_lineIndex]->Update(m_buffer);
     }
     return input;
 }
 
 void Terminal::FinishCurrentLine()
 {
-    // Only add to history if not an empty line
-    if (m_lines[m_lineIndex]->GetText().length() > 0) {
-        m_history.push_back(m_lines[m_lineIndex]->GetText());
-        m_historyIndex = m_history.size();
-    }
+    m_history.push_back(m_lines[m_lineIndex]->GetText());
+    m_historyIndex = m_history.size();
 
     // Are we at the end?
     if (m_lineIndex == m_rows - 1) {
@@ -226,10 +232,8 @@ void Terminal::FinishCurrentLine()
     }
     else {
         m_lines[m_lineIndex]->HideCursor();
-        m_lines[m_lineIndex]->Update(m_buffer);
         m_lineIndex++;
         m_lines[m_lineIndex]->ShowCursor();
-        m_lines[m_lineIndex]->Update(m_buffer);
     }
 }
 
@@ -240,12 +244,10 @@ void Terminal::ScrollToLine(bool clearInput)
     int historyStart = m_historyIndex - clearCount;
     for (int i = 0; i < clearCount; i++, historyStart++) {
         m_lines[i]->SetText(m_history[historyStart]);
-        m_lines[i]->Update(m_buffer);
     }
 
     if (clearInput) {
         m_lines[m_rows - 1]->Reset();
-        m_lines[m_rows - 1]->Update(m_buffer);
     }
 }
 
@@ -283,12 +285,13 @@ void Terminal::Print(const char* format, ...)
 {
     std::unique_lock<std::mutex> lockedSection(m_printLock);
     va_list arguments;
+    size_t  i;
 
     va_start(arguments, format);
     vsnprintf(m_printBuffer, PRINTBUFFER_SIZE, format, arguments);
     va_end(arguments);
 
-    for (size_t i = 0; i < PRINTBUFFER_SIZE && m_printBuffer[i]; i++) {
+    for (i = 0; i < PRINTBUFFER_SIZE && m_printBuffer[i]; i++) {
         if (m_printBuffer[i] == '\n') {
             FinishCurrentLine();
         }
@@ -299,12 +302,45 @@ void Terminal::Print(const char* format, ...)
             }
         }
     }
-    m_lines[m_lineIndex]->Update(m_buffer);
-    Invalidate();
+    RequestRedraw();
 }
 
-void Terminal::Invalidate()
+void Terminal::DescriptorEvent(int iod, unsigned int events)
 {
+    if (iod == m_stdoutDescriptor || iod == m_stderrDescriptor) {
+        char inputBuffer[256];
+
+        // read -1 bytes to account for the fact that we should always include a zero terminator
+        // which Print requires. Otherwise we can end up reading from the rest of the stack.
+        int bytesRead = read(iod, &inputBuffer[0], sizeof(inputBuffer) - 1);
+        while (bytesRead > 0) {
+            // set zero terminator
+            inputBuffer[bytesRead] = 0;
+            Print("%s", &inputBuffer[0]);
+            bytesRead = read(iod, &inputBuffer[0], sizeof(inputBuffer) - 1);
+        }
+    }
+    else {
+        m_resolver->HandleDescriptorEvent(iod, events);
+    }
+}
+
+void Terminal::RequestRedraw()
+{
+    bool shouldRedraw = m_redrawReady.exchange(false);
+    if (shouldRedraw) {
+        Redraw();
+    }
+    else {
+        m_redraw = true;
+    }
+}
+
+void Terminal::Redraw()
+{
+    for (int i = 0; i < m_rows; i++) {
+        m_lines[i]->Redraw(m_buffer);
+    }
     MarkDamaged(Dimensions());
     ApplyChanges();
 }
@@ -313,7 +349,7 @@ void Terminal::PrepareBuffer()
 {
     Asgaard::Drawing::Painter paint(m_buffer);
     
-    paint.SetFillColor(0, 0, 0);
+    paint.SetFillColor(0x7F, 0x0C, 0x35, 0x33);
     paint.RenderFill();
 }
 
@@ -331,19 +367,56 @@ void Terminal::OnCreated(Asgaard::Object* createdObject)
     else if (createdObject->Id() == m_memory->Id()) {
         // Create initial buffer the size of this surface
         m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-            Dimensions().Height(), Asgaard::PixelFormat::A8R8G8B8);
+            Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
     }
     else if (createdObject->Id() == m_buffer->Id()) {
+        Asgaard::Rectangle decorationDimensions(0, 0, Dimensions().Width(), 35);
+        m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions, m_font);
+        m_decoration->Subscribe(this);
+
         // Now all resources are created
         PrepareBuffer();
         SetBuffer(m_buffer);
+        SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
         m_resolver->PrintCommandHeader();
     }
 }
 
+void Terminal::Notification(Publisher* source, int event, void* data)
+{
+    auto object = dynamic_cast<Object*>(source);
+    if (object == nullptr) {
+        return;
+    }
+    
+    if (m_decoration != nullptr && object->Id() == m_decoration->Id()) {
+        switch (static_cast<Asgaard::WindowDecoration::Event>(event)) {
+            case Asgaard::WindowDecoration::Event::CREATED: {
+                m_decoration->SetTitle("Alumni Terminal v1.0-dev");
+                m_decoration->RequestRedraw();
+            } break;
+            
+            case Asgaard::WindowDecoration::Event::ERROR: {
+                // @todo 
+            } break;
+        }
+        return;
+    }
+
+    // must propegate creation events down if we did not handle them
+    WindowBase::Notification(source, event, data);
+}
+
 void Terminal::OnRefreshed(Asgaard::MemoryBuffer*)
 {
-    
+    // Request redraw
+    if (m_redraw) {
+        Redraw();
+        m_redraw = false;
+    }
+    else {
+        m_redrawReady.store(true);
+    }
 }
 
 void Terminal::Teardown()
@@ -353,14 +426,19 @@ void Terminal::Teardown()
 
 void Terminal::OnKeyEvent(const Asgaard::KeyEvent& key)
 {
+    // Check if we should forward input first
+    if (m_resolver->HandleKeyCode(key)) {
+        return;
+    }
+
     // Don't respond to released events
     if (!key.Pressed()) {
         return;
     }
-
+    
     if (key.KeyCode() == VK_BACK) {
         RemoveInput();
-        Invalidate();
+        RequestRedraw();
     }
     else if (key.KeyCode() == VK_ENTER) {
         std::string input = ClearInput(true);
@@ -373,22 +451,22 @@ void Terminal::OnKeyEvent(const Asgaard::KeyEvent& key)
     }
     else if (key.KeyCode() == VK_UP) {
         HistoryPrevious();
-        Invalidate();
+        RequestRedraw();
     }
     else if (key.KeyCode() == VK_DOWN) {
         HistoryNext();
-        Invalidate();
+        RequestRedraw();
     }
     else if (key.KeyCode() == VK_LEFT) {
         MoveCursorLeft();
-        Invalidate();
+        RequestRedraw();
     }
     else if (key.KeyCode() == VK_RIGHT) {
         MoveCursorRight();
-        Invalidate();
+        RequestRedraw();
     }
     else if (key.KeyAscii() != 0) {
         AddInput(key.KeyAscii());
-        Invalidate();
+        RequestRedraw();
     }
 }

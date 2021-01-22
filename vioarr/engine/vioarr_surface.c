@@ -414,7 +414,7 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
     );
 
     if (ACTIVE_BACKBUFFER(surface).content) {
-        TRACE("[vioarr_surface_render] rendering content");
+        //TRACE("[vioarr_surface_render] rendering content");
         if (!vioarr_region_is_zero(ACTIVE_PROPERTIES(surface).drop_shadow)) {
             __render_drop_shadow(context, surface);
         }

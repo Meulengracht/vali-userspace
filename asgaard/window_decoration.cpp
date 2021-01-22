@@ -37,16 +37,24 @@
 
 namespace Asgaard {
     WindowDecoration::WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
+        : WindowDecoration(id, screen, parentId, dimensions, Drawing::FM.CreateFont("$sys/fonts/DejaVuSansMono.ttf", DECORATION_TEXT_SIZE)) { }
+
+    WindowDecoration::WindowDecoration(uint32_t id, 
+        const std::shared_ptr<Screen>& screen,
+        uint32_t parentId,
+        const Rectangle& dimensions,
+        const std::shared_ptr<Drawing::Font>& font) 
         : Surface(id, screen, parentId, dimensions)
         , m_memory(nullptr)
         , m_buffer(nullptr)
-        , m_appFont(Drawing::FM.CreateFont("$sys/fonts/DejaVuSansMono.ttf", 12))
+        , m_appFont(font)
         , m_appTitle(nullptr)
         , m_appIcon(nullptr)
         , m_minIcon(nullptr)
         , m_maxIcon(nullptr)
         , m_closeIcon(nullptr)
-        , m_titleText("Untitled Application")
+        , m_redraw(false)
+        , m_redrawReady(false)
     {
         
     }
@@ -58,28 +66,50 @@ namespace Asgaard {
     
     void WindowDecoration::SetTitle(const std::string& title)
     {
-        m_titleText = title;
-
-        if (m_appTitle) {
+        if (m_appTitle && m_appTitle->Valid()) {
             m_appTitle->SetText(title);
+            m_appTitle->RequestRedraw();
         }
     }
     
     void WindowDecoration::SetIcon(const std::string& iconPath)
     {
-        
+        if (m_appIcon && m_appIcon->Valid()) {
+            m_appIcon->LoadIcon(iconPath);
+        }
     }
     
     void WindowDecoration::Redraw()
     {
         Drawing::Painter paint(m_buffer);
-        
-        //paint.SetColor(0xCF, 0xC9, 0xCB);
-        paint.SetFillColor(0xF0, 0xF0, 0xF0);
+        paint.SetFillColor(DECORATION_FILL_COLOR);
         paint.RenderFill();
         
         MarkDamaged(Dimensions());
         ApplyChanges();
+    }
+
+    void WindowDecoration::RequestRedraw()
+    {
+        bool shouldRedraw = m_redrawReady.exchange(false);
+        if (shouldRedraw) {
+            Redraw();
+        }
+        else {
+            m_redraw = true;
+        }
+    }
+
+    void WindowDecoration::RedrawReady()
+    {
+        // Request redraw
+        if (m_redraw) {
+            Redraw();
+            m_redraw = false;
+        }
+        else {
+            m_redrawReady.store(true);
+        }
     }
     
     void WindowDecoration::CheckCreation()
@@ -103,7 +133,7 @@ namespace Asgaard {
                 float halfHeight = (float)Dimensions().Height() / 2.0f;
                 int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
 
-                // create resources
+                // create memory resources
                 auto poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
                 m_memory = MemoryPool::Create(this, poolSize);
                 
@@ -175,8 +205,7 @@ namespace Asgaard {
             switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
                 case MemoryBuffer::BufferEvent::CREATED: {
                     SetBuffer(m_buffer);
-                    SetDropShadow(Rectangle(0, 0, 0, 10));
-                    Redraw();
+                    RedrawReady();
                 } break;
                 
                 default:
@@ -188,7 +217,9 @@ namespace Asgaard {
         
         if (m_appTitle && object->Id() == m_appTitle->Id()) {
             m_appTitle->SetFont(m_appFont);
-            m_appTitle->SetText(m_titleText);
+            m_appTitle->SetAnchors(Widgets::Label::Anchors::CENTER);
+            m_appTitle->SetBackgroundColor(DECORATION_FILL_COLOR);
+            m_appTitle->SetTextColor(DECORATION_TEXT_COLOR);
             CheckCreation();
             return;
         }

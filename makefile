@@ -158,6 +158,14 @@ build_mesa:
 clean_mesa:
 	cd mesa && make clean
 
+.PHONY: clean_asgaard
+clean_asgaard:
+	cd asgaard && make clean
+
+.PHONY: clean_alumni
+clean_alumni:
+	cd alumni && make clean
+
 .PHONY: build_glm
 build_glm:
 	@printf "%b" "\033[1;35mInstalling GLM\033[m\n"

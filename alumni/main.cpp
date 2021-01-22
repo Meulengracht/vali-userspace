@@ -21,6 +21,9 @@
  *   using freetype as the font renderer.
  */
 
+#include <io.h>
+#include <ioctl.h>
+#include <ioset.h>
 #include "targets/resolver_vali.hpp"
 #include "terminal.hpp"
 #include <asgaard/drawing/font_manager.hpp>
@@ -29,10 +32,20 @@ int main(int argc, char **argv)
 {
     std::string                             fontPath = "$sys/fonts/DejaVuSansMono.ttf";
     std::shared_ptr<Asgaard::Drawing::Font> font     = Asgaard::Drawing::FM.CreateFont(fontPath, 12);
-    std::shared_ptr<ResolverVali>           resolver = std::shared_ptr<ResolverVali>(new ResolverVali());
-    Asgaard::Rectangle                      initialSize(0, 0, 450, 300);
+    int                                     stdoutPipe = pipe(0x1000, 0);
+    int                                     stderrPipe = pipe(0x1000, 0);
+    std::shared_ptr<ResolverVali>           resolver = std::shared_ptr<ResolverVali>(new ResolverVali(stdoutPipe, stderrPipe));
+    Asgaard::Rectangle                      initialSize(0, 0, 600, 400);
+
+    // set pipes non-blocking
+    int opt = 1;
+    ioctl(stdoutPipe, FIONBIO, &opt);
+    ioctl(stderrPipe, FIONBIO, &opt);
     
-    Asgaard::APP.CreateWindow<Terminal>(initialSize, font, resolver);
+    // initialize application
+    Asgaard::APP.CreateWindow<Terminal>(initialSize, font, resolver, stdoutPipe, stderrPipe);
     Asgaard::APP.Initialize();
+    Asgaard::APP.AddEventDescriptor(stdoutPipe, IOSETIN | IOSETLVT);
+    Asgaard::APP.AddEventDescriptor(stderrPipe, IOSETIN | IOSETLVT);
     return Asgaard::APP.Execute();
 }

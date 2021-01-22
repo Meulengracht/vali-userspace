@@ -51,8 +51,12 @@ namespace Asgaard {
         void InititateResize(enum SurfaceEdges);
         void InitiateMove();
 
-    private:
+        // Protected function, allow override
         void Notification(Publisher*, int = 0, void* = 0) override;
+
+    // Application events that can be reacted to
+    public:
+        virtual void DescriptorEvent(int iod, unsigned int events) = 0;
 
     private:
         std::vector<enum PixelFormat> m_supportedFormats;

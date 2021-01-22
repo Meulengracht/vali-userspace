@@ -20,6 +20,7 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
+#pragma once
 
 #include "../pixel_format.hpp" 
 

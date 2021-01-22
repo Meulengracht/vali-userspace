@@ -33,6 +33,10 @@ namespace Asgaard {
         unsigned int  KeyUnicode() const;
         unsigned char KeyCode() const;
         bool          Pressed() const;
+
+        bool LeftControl() const;
+        bool RightControl() const;
+        bool Control() const;
         
     private:
         unsigned int  m_modifiers;

@@ -32,9 +32,31 @@ namespace Asgaard {
         Application();
         ~Application();
         
-        int Initialize();
+        /**
+         * Initialize
+         * Initializes the asgaard application environment, and must be invoked before any other
+         * call made in this class. 
+         * @throw ApplicationException
+         */
+        void Initialize();
+
+        /**
+         * AddEventDescriptor
+         * Adds a c-type io descriptor like a socket, pipe or file to listen for events on. 
+         * DescriptorEvent callback is then invoked in the window-class given when an event occurs.
+         * @param iod The C-io descriptor that should be listening for events on
+         * @param events The events to listen for, defined in <ioset.h>
+         * @throw ApplicationException
+         */
+        void AddEventDescriptor(int iod, unsigned int events);
+
+        /**
+         * Execute
+         * Starts the applications main loop. The application will run untill shutdown has been requested
+         * or any fault happens (caught exception).
+         * @return Status code of execution
+         */
         int Execute();
-        int Shutdown();
         
     public:
         template<class WC, typename... Params>
@@ -54,6 +76,8 @@ namespace Asgaard {
     private:
         gracht_client_t*            m_client;
         std::shared_ptr<WindowBase> m_window;
+        int                         m_ioset;
+        bool                        m_initialized;
     };
     
     extern Application APP;

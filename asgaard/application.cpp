@@ -22,14 +22,17 @@
  */
 
 #include <cstring>
+#include <errno.h>
 #include <gracht/client.h>
 #include <gracht/link/socket.h>
 #include "include/application.hpp"
 #include "include/screen.hpp"
 #include "include/object_manager.hpp"
 #include "include/window_base.hpp"
+#include "include/exceptions/application_exception.h"
 #include <inet/socket.h>
 #include <inet/local.h>
+#include <ioset.h>
 #include <type_traits>
 
 #include "protocols/wm_core_protocol_client.h"
@@ -38,6 +41,10 @@
 #include "protocols/wm_buffer_protocol_client.h"
 #include "protocols/wm_pointer_protocol_client.h"
 #include "protocols/wm_keyboard_protocol_client.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Waddress-of-temporary"
+#pragma clang diagnostic ignored "-Wwritable-strings"
 
 extern "C" {
     static void wm_core_event_error_callback(struct wm_core_error_event*);
@@ -120,11 +127,21 @@ namespace Asgaard {
     Application::Application() 
         : Object(0)
         , m_client(nullptr)
-        , m_window(nullptr) { }
+        , m_window(nullptr)
+        , m_ioset(-1)
+        , m_initialized(false)
+    {
+        
+    }
     
-    Application::~Application() { }
+    Application::~Application()
+    {
+        if (m_client != nullptr) {
+            gracht_client_shutdown(m_client);
+        }
+    }
 
-    int Application::Initialize()
+    void Application::Initialize()
     {
         struct socket_client_configuration linkConfiguration;
         struct gracht_client_configuration clientConfiguration;
@@ -136,8 +153,7 @@ namespace Asgaard {
         gracht_link_socket_client_create(&clientConfiguration.link, &linkConfiguration);
         status = gracht_client_create(&clientConfiguration, &m_client);
         if (status) {
-            // log
-            return -1;
+            throw new ApplicationException("failed to initialize gracht client library", status);
         }
         
         gracht_client_register_protocol(m_client, &wm_core_client_protocol);
@@ -146,18 +162,41 @@ namespace Asgaard {
         gracht_client_register_protocol(m_client, &wm_buffer_client_protocol);
         gracht_client_register_protocol(m_client, &wm_pointer_client_protocol);
         gracht_client_register_protocol(m_client, &wm_keyboard_client_protocol);
+
+        // Prepare the ioset to listen to multiple events
+        m_ioset = ioset(0);
+        if (m_ioset <= 0) {
+            throw new ApplicationException("failed to initialize the ioset descriptor", errno);
+        }
         
+        // mark us initialized before calling AddEventDescriptor
+        m_initialized = true;
+
+        // add the client as a target
+        AddEventDescriptor(gracht_client_iod(m_client), IOSETIN | IOSETCTL | IOSETLVT);
+
         // kick off a chain reaction by asking for all objects
-        return wm_core_get_objects(m_client, nullptr);
+        wm_core_get_objects(m_client, nullptr);
     }
     
     int Application::Execute()
     {
-        char* messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
+        char*              messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
+        struct ioset_event events[8];
+
+        if (!m_initialized) {
+            Initialize();
+        }
         
         while (true) {
-            if (gracht_client_wait_message(m_client, nullptr, messageBuffer, GRACHT_WAIT_BLOCK)) {
-                // todo log it
+            int num_events = ioset_wait(m_ioset, &events[0], 8, 0);
+            for (int i = 0; i < num_events; i++) {
+                if (events[i].data.iod == gracht_client_iod(m_client)) {
+                    gracht_client_wait_message(m_client, NULL, messageBuffer, 0);
+                }
+                else {
+                    m_window->DescriptorEvent(events[i].data.iod, events[i].events);
+                }
             }
         }
         
@@ -165,14 +204,22 @@ namespace Asgaard {
         return 0;
     }
 
-    int Application::Shutdown()
+    void Application::AddEventDescriptor(int iod, unsigned int events)
     {
-        if (m_client != nullptr) {
-            gracht_client_shutdown(m_client);
+        if (!m_initialized) {
+            throw new ApplicationException("Initialize() must be called before AddEventDescriptor", -1);
         }
-        return 0;
+
+        int status = ioset_ctrl(m_ioset, IOSET_ADD, iod,
+               &(struct ioset_event) {
+                    .events   = events,
+                    .data.iod = iod
+               });
+        if (status) {
+            throw new ApplicationException("ioset_ctrl failed to add event descriptor", status);
+        }
     }
-    
+
     void Application::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event) {
@@ -254,6 +301,9 @@ extern "C"
         switch (input->type) {
             // Handle new server objects
             case object_type_screen: {
+                Asgaard::APP.ExternalEvent(Asgaard::Object::ObjectEvent::CREATION, input);
+            } break;
+            case object_type_pointer: {
                 Asgaard::APP.ExternalEvent(Asgaard::Object::ObjectEvent::CREATION, input);
             } break;
             
@@ -377,3 +427,5 @@ extern "C"
         object->ExternalEvent(Asgaard::Object::ObjectEvent::KEY_EVENT, event);
     }
 }
+
+#pragma clang diagnostic pop

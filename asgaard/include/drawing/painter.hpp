@@ -36,9 +36,11 @@ namespace Asgaard {
             public:
                 Painter(const std::shared_ptr<MemoryBuffer>& canvas);
                 
+                void SetFillColor(const Color& color);
                 void SetFillColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
                 void SetFillColor(unsigned char r, unsigned char g, unsigned char b);
 
+                void SetOutlineColor(const Color& color);
                 void SetOutlineColor(unsigned char a, unsigned char r, unsigned char g, unsigned char b);
                 void SetOutlineColor(unsigned char r, unsigned char g, unsigned char b);
 

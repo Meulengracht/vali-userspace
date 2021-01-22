@@ -48,7 +48,8 @@ typedef struct vioarr_renderer {
 
 static void opengl_initialize(int width, int height)
 {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    // 0x28575A
+    glClearColor(0.15f, 0.34f, 0.35f, 1.0f);
 }
 
 vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
@@ -76,7 +77,7 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         free(renderer);
         return NULL;
     }
-    
+
     mtx_init(&renderer->context_sync, mtx_plain);
     renderer->screen      = screen;
     renderer->width       = width;
@@ -165,6 +166,7 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     
     mtx_lock(&renderer->context_sync);
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
+    nvgGlobalCompositeBlendFunc(renderer->context, NVG_SRC_ALPHA, NVG_ONE_MINUS_SRC_ALPHA);
     
     vioarr_manager_render_start(&surfaces, &cursors);
     _foreach(i, surfaces) {
