@@ -52,10 +52,11 @@ namespace Asgaard {
             
             bool Initialize(const std::string& path);
             
-            bool      SetPixelSize(int pixelSize);
-            bool      GetCharacterBitmap(unsigned long character, struct CharInfo& bitmap);
+            bool SetPixelSize(int pixelSize);
+            bool GetCharacterBitmap(unsigned long character, struct CharInfo& bitmap);
             
             int       GetFontHeight() const { return m_height; }
+            int       GetFontWidth() const { return m_fixedWidth; }
             Rectangle GetTextMetrics(const std::string& text);
             
         private:
@@ -75,6 +76,7 @@ namespace Asgaard {
             // stored font metrics
             int          m_pixelSize;
             int          m_height;
+            int          m_fixedWidth;
             int          m_ascent;
             int          m_descent;
             int          m_lineSkip;

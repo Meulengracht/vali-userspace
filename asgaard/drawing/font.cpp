@@ -103,6 +103,7 @@ namespace Asgaard {
             , m_current(nullptr)
             , m_pixelSize(pixelSize)
             , m_height(0)
+            , m_fixedWidth(0)
             , m_ascent(0)
             , m_descent(0)
             , m_lineSkip(0)
@@ -175,8 +176,9 @@ namespace Asgaard {
                 FT_Set_Charmap(m_face, cmFound);
             }
             
-            m_valid = SetPixelSize(m_pixelSize);
-            return m_valid;
+            // font is valid
+            m_valid = true;
+            return SetPixelSize(m_pixelSize);
         }
         
         bool Font::SetPixelSize(int pixelSize)
@@ -193,6 +195,7 @@ namespace Asgaard {
                 m_ascent            = FT_CEIL(FT_MulFix(m_face->ascender, scale));
                 m_descent           = FT_CEIL(FT_MulFix(m_face->descender, scale));
                 m_height            = m_ascent - m_descent + /* baseline */ 1;
+                m_fixedWidth        = 0;
                 m_lineSkip          = FT_CEIL(FT_MulFix(m_face->height, scale));
                 m_underlineOffset   = FT_FLOOR(FT_MulFix(m_face->underline_position, scale));
                 m_underlineHeight   = FT_FLOOR(FT_MulFix(m_face->underline_thickness, scale));
@@ -216,6 +219,7 @@ namespace Asgaard {
                 // non-scalable fonts must be determined differently
                 // or sometimes cannot be determined.
                 m_ascent            = m_face->available_sizes[pixelSize].height;
+                m_fixedWidth        = m_face->available_sizes[pixelSize].width;
                 m_descent           = 0;
                 m_height            = m_face->available_sizes[pixelSize].height;
                 m_lineSkip          = FT_CEIL(m_ascent);
@@ -244,7 +248,15 @@ namespace Asgaard {
         
             // x offset = cos(((90.0-12)/360)*2*M_PI), or 12 degree angle
             m_glyphItalics  = 0.207f;
-            m_glyphItalics  *= m_face->height;
+            m_glyphItalics *= m_face->height;
+
+            // Guess the font width by getting 'M' as character
+            if (!m_fixedWidth) {
+                struct CharInfo bitmap;
+                if (GetCharacterBitmap('M', bitmap)) {
+                    m_fixedWidth = bitmap.width;
+                }
+            }
             return true;
         }
         

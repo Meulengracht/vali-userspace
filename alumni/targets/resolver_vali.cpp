@@ -79,7 +79,10 @@ bool ResolverVali::HandleKeyCode(const Asgaard::KeyEvent& key)
             ProcessKill(m_application);
         }
         else {
-            // redirect
+            // redirect to running application
+            // @todo support unicode
+            char data = key.KeyAscii();
+            write(m_stdinDescriptor, &data, sizeof(data));
         }
         return true;
     }
@@ -90,7 +93,7 @@ void ResolverVali::PrintCommandHeader()
 {
     // Dont print the command header if an application is running
     if (m_application == UUID_INVALID) {
-        m_terminal->Print("%s@%s~ ", m_profile.c_str(), m_currentDirectory.c_str());
+        m_terminal->Print("\033[34m%s@%s~\033[39m ", m_profile.c_str(), m_currentDirectory.c_str());
     }
 }
 
@@ -156,15 +159,15 @@ std::vector<std::string> ResolverVali::GetDirectoryContents(const std::string& P
 {
     struct DIR*              dir;
     struct DIRENT            dp;
-    std::vector<std::string> Entries;
+    std::vector<std::string> entries;
 
     if (opendir(Path.c_str(), 0, &dir) != -1) {
         while (readdir(dir, &dp) != -1) {
-            Entries.push_back(std::string(&dp.d_name[0]));
+            entries.push_back(std::string(&dp.d_name[0]));
         }
         closedir(dir);
     }
-    return Entries;
+    return entries;
 }
 
 bool ResolverVali::IsProgramPathValid(const std::string& Path)
@@ -211,18 +214,38 @@ bool ResolverVali::CommandResolver(const std::string& Command, const std::vector
 
 bool ResolverVali::ListDirectory(const std::vector<std::string>& Arguments)
 {
-    std::string Path = m_currentDirectory;
-    std::string Line = "";
+    auto path = m_currentDirectory;
     if (Arguments.size() != 0) {
-        Path = Arguments[0];
+        path = Arguments[0];
     }
 
-    auto DirectoryEntries = GetDirectoryContents(m_currentDirectory);
-    for (auto Entry : DirectoryEntries) {
-        Line += Entry + " ";
+    auto directoryEntries = GetDirectoryContents(path);
+    int  longestEntry = 0;
+    for (const auto& entry : directoryEntries) {
+        if (entry.size() > longestEntry) {
+            longestEntry = entry.size();
+        }
     }
 
-    m_terminal->Print("%s\n", Line.c_str());
+    // account for a space after each entry
+    int entriesPerLine = m_terminal->GetNumberOfCellsPerLine() / (longestEntry + 1);
+    for (int i = 0; i < directoryEntries.size(); i++) {
+        // if all entries fit on one line, we don't pad
+        if (entriesPerLine >= directoryEntries.size()) {
+            m_terminal->Print("%s", longestEntry, directoryEntries[i].c_str());
+        }
+        else {
+            m_terminal->Print("%-*s", longestEntry, directoryEntries[i].c_str());
+        }
+
+        // if we reach the max entries per line or we are the last entry, we newline instead of space
+        if ((i != 0 && i % entriesPerLine == 0) || i == (directoryEntries.size() - 1)) {
+            m_terminal->Print("\n");
+        }
+        else {
+            m_terminal->Print(" ");
+        }
+    }
     return true;
 }
 

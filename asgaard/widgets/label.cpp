@@ -80,8 +80,6 @@ namespace Asgaard {
             bool shouldRedraw = m_redrawReady.exchange(false);
             if (shouldRedraw) {
                 Redraw();
-                MarkDamaged(Dimensions());
-                ApplyChanges();
             }
             else {
                 m_redraw = true;
@@ -92,8 +90,6 @@ namespace Asgaard {
         {
             if (m_redraw) {
                 Redraw();
-                MarkDamaged(Dimensions());
-                ApplyChanges();
                 m_redraw = false;
             }
             else {
@@ -114,6 +110,9 @@ namespace Asgaard {
             paint.SetFont(m_font);
             paint.SetOutlineColor(m_textColor);
             paint.RenderText(x, y, m_text);
+
+            MarkDamaged(Dimensions());
+            ApplyChanges();
         }
 
         int Label::CalculateXCoordinate(const Rectangle& textDimensions)
@@ -190,8 +189,8 @@ namespace Asgaard {
                 {
                     case MemoryBuffer::BufferEvent::CREATED: {
                         SetBuffer(m_buffer);
-                        SetValid(true);
                         RedrawReady();
+                        SetValid(true);
                         Notify(static_cast<int>(LabelEvent::CREATED));
                     } break;
 

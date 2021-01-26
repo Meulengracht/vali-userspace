@@ -32,137 +32,11 @@
 #include <asgaard/object_manager.hpp>
 #include <asgaard/key_event.hpp>
 #include "terminal.hpp"
+#include "terminal_line.hpp"
 #include "terminal_interpreter.hpp"
 #include "targets/resolver_base.hpp"
 
 const int PRINTBUFFER_SIZE = 4096;
-
-Terminal::TerminalLine::TerminalLine(const std::shared_ptr<Asgaard::Drawing::Font>& font, int row, int capacity)
-    : m_font(font)
-    , m_dimensions(ALUMNI_MARGIN_LEFT, (
-                   row * font->GetFontHeight()) + ALUMNI_MARGIN_TOP, 
-                   capacity - (ALUMNI_MARGIN_LEFT + ALUMNI_MARGIN_RIGHT), 
-                   font->GetFontHeight())
-    , m_row(row)
-    , m_capacity(capacity - (ALUMNI_MARGIN_LEFT + ALUMNI_MARGIN_RIGHT))
-{
-    Reset();
-}
-
-void Terminal::TerminalLine::Reset()
-{
-    m_showCursor  = false;
-    m_textLength  = 0;
-    m_inputOffset = 0;
-    m_cursor      = 0;
-    m_dirty       = true;
-    m_text.clear();
-}
-
-bool Terminal::TerminalLine::AddCharacter(int character)
-{
-    struct Asgaard::Drawing::Font::CharInfo bitmap = { 0 };
-    
-    char buf = (char)character & 0xFF;
-    
-    if (!m_font->GetCharacterBitmap(buf, bitmap)) {
-        // ignore character
-        return true;
-    }
-    
-    if (AddInput(character)) {
-        m_inputOffset++;
-        return true;
-    }
-    return false;
-}
-
-bool Terminal::TerminalLine::AddInput(int character)
-{
-    struct Asgaard::Drawing::Font::CharInfo bitmap = { 0 };
-    
-    char buf = (char)character & 0xFF;
-    
-    if (!m_font->GetCharacterBitmap(buf, bitmap)) {
-        // ignore character
-        return true;
-    }
-
-    // Handle \r \t \n?
-    if ((m_textLength + (bitmap.width + bitmap.indentX)) < m_capacity) {
-        if (m_cursor == m_text.length()) {
-            m_text.push_back(character);
-        }
-        else {
-            m_text.insert(m_cursor, &buf, 1);
-        }
-        m_dirty      = true;
-        m_textLength += bitmap.width + bitmap.indentX;
-        m_cursor++;
-        return true;
-    }
-    return false;
-}
-
-bool Terminal::TerminalLine::RemoveInput()
-{
-    int modifiedCursor = m_cursor - m_inputOffset;
-    if (modifiedCursor != 0) {
-        m_text.erase(m_cursor - 1, 1);
-        m_dirty      = true;
-        m_textLength = m_font->GetTextMetrics(m_text).Width();
-        m_cursor--;
-        return true;
-    }
-    return false;
-}
-
-void Terminal::TerminalLine::Redraw(std::shared_ptr<Asgaard::MemoryBuffer>& buffer)
-{
-    if (m_dirty) {
-        Asgaard::Drawing::Painter paint(buffer);
-        
-        paint.SetFillColor(0x7F, 0x0C, 0x35, 0x33);
-        paint.RenderFill(m_dimensions);
-        
-        paint.SetOutlineColor(0xFF, 0xFF, 0xFF);
-        paint.SetFont(m_font);
-        paint.RenderText(m_dimensions.X(), m_dimensions.Y(), m_text);
-        if (m_showCursor) {
-            //paint.SetOutlineColor(255, 255, 255);
-            paint.RenderCharacter(m_textLength, m_dimensions.Y(), '_');
-        }
-        m_dirty = false;
-    }
-}
-
-void Terminal::TerminalLine::SetText(const std::string& text)
-{
-    Reset();
-    m_text       = text;
-    m_textLength = m_font->GetTextMetrics(m_text).Width();
-    m_cursor     = text.length();
-}
-
-std::string Terminal::TerminalLine::GetInput()
-{
-    if ((int)m_text.length() > m_inputOffset) {
-        return m_text.substr(m_inputOffset);
-    }
-    return "";
-}
-
-void Terminal::TerminalLine::HideCursor()
-{
-    m_showCursor = false;
-    m_dirty      = true;
-}
-
-void Terminal::TerminalLine::ShowCursor()
-{
-    m_showCursor = true;
-    m_dirty      = true;
-}
 
 Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std::shared_ptr<Asgaard::Drawing::Font>& font,
     const std::shared_ptr<ResolverBase>& resolver, int stdoutDescriptor, int stderrDescriptor)
@@ -170,6 +44,7 @@ Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std:
     , m_font(font)
     , m_resolver(resolver)
     , m_rows(-1)
+    , m_cellWidth(0)
     , m_historyIndex(0)
     , m_lineIndex(0)
     , m_stdoutDescriptor(stdoutDescriptor)
@@ -179,11 +54,22 @@ Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std:
 {
     // Calculate row count taking into account the margins
     m_rows = ((dimensions.Height() - ALUMNI_MARGIN_TOP) / font->GetFontHeight()) - 1;
-
     m_printBuffer = (char*)std::malloc(PRINTBUFFER_SIZE);
+
+    m_cellWidth = (dimensions.Width() - (ALUMNI_MARGIN_LEFT + ALUMNI_MARGIN_RIGHT)) / font->GetFontWidth();
     for (int i = 0; i < m_rows; i++) {
-        m_lines.push_back(std::make_unique<TerminalLine>(font, i, dimensions.Width()));
+        m_lines.push_back(std::make_unique<TerminalLine>(font, i, m_cellWidth));
     }
+
+    // show cursor
+    m_lines[0]->ShowCursor();
+
+    // initialize text state
+    m_textState.m_fgColor = m_textState.m_defaultFgColor = Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF);
+    m_textState.m_bgColor = m_textState.m_defaultBgColor = Asgaard::Drawing::Color(0x7F, 0x0C, 0x35, 0x33);
+
+    // initialize VT environment
+    InitializeVT();
 }
 
 Terminal::~Terminal()
@@ -295,8 +181,15 @@ void Terminal::Print(const char* format, ...)
         if (m_printBuffer[i] == '\n') {
             FinishCurrentLine();
         }
+        else if (m_printBuffer[i] == '\033') { // 0x1B
+            auto charsConsumed = ParseVTEscapeCode(&m_printBuffer[i]);
+            if (!charsConsumed) {
+                continue;
+            }
+            i += (charsConsumed - 1); // take i++ into account in loop body
+        }
         else {
-            if (!m_lines[m_lineIndex]->AddCharacter(m_printBuffer[i])) {
+            if (!m_lines[m_lineIndex]->AddCharacter(m_printBuffer[i], m_textState.m_fgColor)) {
                 FinishCurrentLine();
                 i--;
             }
@@ -304,6 +197,10 @@ void Terminal::Print(const char* format, ...)
     }
     RequestRedraw();
 }
+
+/**
+ * Window Handling Code
+ */
 
 void Terminal::DescriptorEvent(int iod, unsigned int events)
 {

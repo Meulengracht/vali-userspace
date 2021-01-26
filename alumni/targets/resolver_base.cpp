@@ -46,9 +46,16 @@ bool ResolverBase::Help(const std::vector<std::string>&)
     if (m_terminal == nullptr) {
         return false;
     }
-    
+
+    int longestCommand = 0;
     for (auto& command : GetCommands()) {
-        m_terminal->Print("%s - %s\n", command->GetCommandText().c_str(), command->GetDescription().c_str());
+        if (command->GetCommandText().size() > longestCommand) {
+            longestCommand = command->GetCommandText().size();
+        }
+    }
+
+    for (auto& command : GetCommands()) {
+        m_terminal->Print("%-*s %s\n", longestCommand, command->GetCommandText().c_str(), command->GetDescription().c_str());
     }
     return true;
 }

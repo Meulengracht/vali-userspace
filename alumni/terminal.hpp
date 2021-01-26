@@ -36,45 +36,24 @@
 #include <asgaard/memory_buffer.hpp>
 #include <asgaard/drawing/font.hpp>
 #include <asgaard/drawing/painter.hpp>
+#include <asgaard/drawing/color.hpp>
 
 #define ALUMNI_MARGIN_TOP   40
 #define ALUMNI_MARGIN_LEFT  10
 #define ALUMNI_MARGIN_RIGHT 10
 
 class ResolverBase;
+class TerminalLine;
 
 class Terminal : public Asgaard::WindowBase {
 private:
-    class TerminalLine {
-    public:
-        TerminalLine(const std::shared_ptr<Asgaard::Drawing::Font>&, int row, int capacity);
-        ~TerminalLine() = default;
+    struct TextState {
+        Asgaard::Drawing::Color m_fgColor;
+        Asgaard::Drawing::Color m_bgColor;
 
-        void Reset();
-        bool AddInput(int character);
-        bool RemoveInput();
-        bool AddCharacter(int character);
-        void Redraw(std::shared_ptr<Asgaard::MemoryBuffer>&);
 
-        void SetText(const std::string& text);
-        void HideCursor();
-        void ShowCursor();
-
-        std::string        GetInput();
-        const std::string& GetText() const { return m_text; }
-
-    private:
-        std::shared_ptr<Asgaard::Drawing::Font> m_font;
-        
-        Asgaard::Rectangle m_dimensions;
-        std::string        m_text;
-        int                m_textLength;
-        int                m_row;
-        int                m_capacity;
-        int                m_cursor;
-        int                m_inputOffset;
-        bool               m_showCursor;
-        bool               m_dirty;
+        Asgaard::Drawing::Color m_defaultFgColor;
+        Asgaard::Drawing::Color m_defaultBgColor;
     };
 
 public:
@@ -98,6 +77,9 @@ public:
     void MoveCursorLeft();
     void MoveCursorRight();
 
+    // Stats
+    int GetNumberOfCellsPerLine() const { return m_cellWidth; }
+
 protected:
     void OnCreated(Asgaard::Object*) override;
     void Teardown() override;
@@ -110,6 +92,10 @@ private:
     void FinishCurrentLine();
     void ScrollToLine(bool clearInput);
 
+    void   InitializeVT();
+    size_t ParseVTEscapeCode(const char* buffer);
+    size_t HandleVTEscapeCode(const char* buffer);
+
     // We do not allow override of these
     void DescriptorEvent(int iod, unsigned int events) override;
     void Notification(Publisher*, int = 0, void* = 0) override;
@@ -121,7 +107,9 @@ private:
     std::shared_ptr<Asgaard::Drawing::Font>    m_font;
     std::shared_ptr<ResolverBase>              m_resolver;
     
+    struct TextState                           m_textState;
     int                                        m_rows;
+    int                                        m_cellWidth;
     std::vector<std::string>                   m_history;
     int                                        m_historyIndex;
     std::vector<std::unique_ptr<TerminalLine>> m_lines;

@@ -146,9 +146,9 @@ namespace Asgaard {
                 m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
                     Rectangle(
                         8 + 8 + 24, // start text next to app icon
-                        (int)(halfHeight - (m_appFont->GetFontHeight() / 2.0f)), 
-                        Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8), // let text be as wide as till the 3 buttons
-                        m_appFont->GetFontHeight())); // allow text up to 18
+                        0, 
+                        Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + 24),
+                        Dimensions().Height()));
                 m_appTitle->Subscribe(this);
                 
                 // right corner

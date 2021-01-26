@@ -32,6 +32,8 @@ namespace Asgaard {
                 : m_a(a), m_r(r), m_g(g), m_b(b) { }
             Color(unsigned char r, unsigned char g, unsigned char b)
                 : Color(0xFF, r, g, b) { }
+            Color()
+                : Color(0xFF, 0, 0, 0) { }
 
         unsigned int GetFormatted(PixelFormat format)
         {
@@ -62,7 +64,7 @@ namespace Asgaard {
         unsigned char Blue()  const { return m_b; }
 
         public:
-            Color FromFormatted(unsigned int color, PixelFormat format)
+            static Color FromFormatted(unsigned int color, PixelFormat format)
             {
                 union {
                     struct {
