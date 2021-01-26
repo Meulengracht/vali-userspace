@@ -26,6 +26,7 @@
 #include <gracht/client.h>
 #include <gracht/link/socket.h>
 #include "include/application.hpp"
+#include "include/pointer.hpp"
 #include "include/screen.hpp"
 #include "include/object_manager.hpp"
 #include "include/window_base.hpp"
@@ -233,6 +234,10 @@ namespace Asgaard {
                         auto screen = Asgaard::OM.CreateServerObject<Asgaard::Screen>(event->object_id);
                         screen->Subscribe(this);
                     } break;
+
+                    case object_type_pointer: {
+                        auto pointer = Asgaard::OM.CreateServerObject<Asgaard::Pointer>(event->object_id);
+                    } break;
                     
                     default:
                         break;
@@ -377,9 +382,15 @@ extern "C"
         object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_RESIZE, input);
     }
 
-    void wm_surface_event_focus_callback(struct wm_surface_focus_event*)
+    void wm_surface_event_focus_callback(struct wm_surface_focus_event* input)
     {
-
+        auto object = Asgaard::OM[input->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_FOCUSED, input);
     }
     
     // BUFFER PROTOCOL EVENTS
@@ -397,22 +408,46 @@ extern "C"
     // POINTER PROTOCOL EVENTS
     void wm_pointer_event_enter_callback(struct wm_pointer_enter_event* event)
     {
-
+        auto object = Asgaard::OM[event->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::POINTER_ENTER, event);
     }
 
     void wm_pointer_event_leave_callback(struct wm_pointer_leave_event* event)
     {
-
+        auto object = Asgaard::OM[event->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::POINTER_LEAVE, event);
     }
 
     void wm_pointer_event_move_callback(struct wm_pointer_move_event* event)
     {
-
+        auto object = Asgaard::OM[event->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::POINTER_MOVE, event);
     }
 
     void wm_pointer_event_click_callback(struct wm_pointer_click_event* event)
     {
-
+        auto object = Asgaard::OM[event->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::POINTER_CLICK, event);
     }
 
     // KEYBOARD PROTOCOL EVENTS

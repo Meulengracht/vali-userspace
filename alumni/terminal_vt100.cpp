@@ -28,16 +28,15 @@ static std::map<int, Asgaard::Drawing::Color*> g_colorMap;
 
 void Terminal::InitializeVT()
 {
-    g_colorMap.insert(std::make_pair(0, new Asgaard::Drawing::Color(0xFF, 0, 0, 0)));
-    g_colorMap.insert(std::make_pair(1, new Asgaard::Drawing::Color(0xFF, 0xFF, 0, 0)));
-    g_colorMap.insert(std::make_pair(2, new Asgaard::Drawing::Color(0xFF, 0, 0xFF, 0)));
-    g_colorMap.insert(std::make_pair(3, new Asgaard::Drawing::Color(0xFF, 0, 0xFF, 0)));
-    g_colorMap.insert(std::make_pair(4, new Asgaard::Drawing::Color(0xFF, 0x0C, 0x8F, 0xEE)));
-    g_colorMap.insert(std::make_pair(5, new Asgaard::Drawing::Color(0xFF, 0x0C, 0x8F, 0xEE)));
-    g_colorMap.insert(std::make_pair(6, new Asgaard::Drawing::Color(0xFF, 0x0C, 0x8F, 0xEE)));
-    g_colorMap.insert(std::make_pair(7, new Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF, 0xFF)));
-    g_colorMap.insert(std::make_pair(8, new Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF, 0xFF)));
-    g_colorMap.insert(std::make_pair(9, new Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF, 0xFF)));
+    g_colorMap.insert(std::make_pair(0, new Asgaard::Drawing::Color(0xFF, 0, 0, 0)));          // black
+    g_colorMap.insert(std::make_pair(1, new Asgaard::Drawing::Color(0xFF, 0xFF, 0, 0)));       // red
+    g_colorMap.insert(std::make_pair(2, new Asgaard::Drawing::Color(0xFF, 0, 0xFF, 0)));       // green
+    g_colorMap.insert(std::make_pair(3, new Asgaard::Drawing::Color(0xFF, 0xFE, 0xFE, 0x33))); // yellow
+    g_colorMap.insert(std::make_pair(4, new Asgaard::Drawing::Color(0xFF, 0x0C, 0x8F, 0xEE))); // blue
+    g_colorMap.insert(std::make_pair(5, new Asgaard::Drawing::Color(0xFF, 0xFF, 0x00, 0xFF))); // magenta
+    g_colorMap.insert(std::make_pair(6, new Asgaard::Drawing::Color(0xFF, 0x00, 0xFF, 0xFF))); // cyan
+    g_colorMap.insert(std::make_pair(7, new Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF, 0xFF))); // white
+    g_colorMap.insert(std::make_pair(8, new Asgaard::Drawing::Color(0xFF, 0xFF, 0xFF, 0xFF))); // invalid, white
 }
 
 size_t Terminal::HandleVTEscapeCode(const char* buffer)
@@ -59,9 +58,9 @@ size_t Terminal::HandleVTEscapeCode(const char* buffer)
 
     // Text coloring 30-39
     if (code >= 30 && code < 40) {
-        int  index = (int)code - 30;
-        auto color = g_colorMap[index];
+        int index = (int)code - 30;
         if (code < 39) {
+            auto color = g_colorMap[index];
             m_textState.m_fgColor = *color;
         }
         else {
@@ -71,9 +70,9 @@ size_t Terminal::HandleVTEscapeCode(const char* buffer)
 
     // Background coloring
     if (code >= 40 && code < 50) {
-        int  index = (int)code - 30;
-        auto color = g_colorMap[index];
+        int index = (int)code - 30;
         if (code < 39) {
+            auto color = g_colorMap[index];
             m_textState.m_bgColor = *color;
         }
         else {

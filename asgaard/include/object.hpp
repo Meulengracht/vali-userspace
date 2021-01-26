@@ -40,8 +40,12 @@ namespace Asgaard {
             SURFACE_FRAME,
             SURFACE_FOCUSED,
             SURFACE_UNFOCUSED,
+            BUFFER_RELEASE,
             KEY_EVENT,
-            BUFFER_RELEASE
+            POINTER_ENTER,
+            POINTER_LEAVE,
+            POINTER_MOVE,
+            POINTER_CLICK
         };
         
     public:

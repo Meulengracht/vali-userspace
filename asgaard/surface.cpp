@@ -23,6 +23,7 @@
 
 #include "include/application.hpp"
 #include "include/key_event.hpp"
+#include "include/pointer.hpp"
 #include "include/object_manager.hpp"
 #include "include/memory_buffer.hpp"
 #include "include/surface.hpp"
@@ -31,6 +32,7 @@
 #include "protocols/wm_screen_protocol_client.h"
 #include "protocols/wm_memory_protocol_client.h"
 #include "protocols/wm_surface_protocol_client.h"
+#include "protocols/wm_pointer_protocol_client.h"
 
 static enum Asgaard::Surface::SurfaceEdges GetSurfaceEdges(enum wm_surface_edge edges)
 {
@@ -80,11 +82,10 @@ namespace Asgaard {
             case ObjectEvent::SURFACE_RESIZE: {
                 struct wm_surface_resize_event* event = 
                     (struct wm_surface_resize_event*)data;
-                    
+                
                 // When we get a resize event, the event is sent only to the parent surface
                 // which equals this instance. Now we have to invoke the RESIZE event for all
                 // registered children
-                
                 OnResized(GetSurfaceEdges(event->edges), event->width, event->height);
                 m_dimensions.SetWidth(event->width);
                 m_dimensions.SetHeight(event->height);
@@ -97,7 +98,41 @@ namespace Asgaard {
             case ObjectEvent::KEY_EVENT: {
                 OnKeyEvent(KeyEvent((struct wm_keyboard_key_event*)data));
             } break;
-            
+
+            case ObjectEvent::SURFACE_FOCUSED: {
+                struct wm_surface_focus_event* event = 
+                    (struct wm_surface_focus_event*)data;
+                OnFocus((bool)event->focus);
+            } break;
+
+            case ObjectEvent::POINTER_ENTER: {
+                struct wm_pointer_enter_event* event = 
+                    (struct wm_pointer_enter_event*)data;
+                auto pointer = Asgaard::OM[event->pointer_id];
+                OnMouseEnter(std::dynamic_pointer_cast<Pointer>(pointer), event->surface_x, event->surface_y);
+            } break;
+
+            case ObjectEvent::POINTER_LEAVE: {
+                struct wm_pointer_leave_event* event = 
+                    (struct wm_pointer_leave_event*)data;
+                auto pointer = Asgaard::OM[event->pointer_id];
+                OnMouseLeave(std::dynamic_pointer_cast<Pointer>(pointer));
+            } break;
+
+            case ObjectEvent::POINTER_MOVE: {
+                struct wm_pointer_move_event* event = 
+                    (struct wm_pointer_move_event*)data;
+                auto pointer = Asgaard::OM[event->pointer_id];
+                OnMouseMove(std::dynamic_pointer_cast<Pointer>(pointer), event->surface_x, event->surface_y);
+            } break;
+
+            case ObjectEvent::POINTER_CLICK: {
+                struct wm_pointer_click_event* event = 
+                    (struct wm_pointer_click_event*)data;
+                auto pointer = Asgaard::OM[event->pointer_id];
+                OnMouseClick(std::dynamic_pointer_cast<Pointer>(pointer), event->buttons);
+            } break;
+
             default:
                 break;
         }
@@ -141,8 +176,9 @@ namespace Asgaard {
     void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }
     void Surface::OnFocus(bool focus) { }
     void Surface::OnFrame() { }
-    void Surface::OnMouseMove() { }
-    void Surface::OnMousePressed() { }
-    void Surface::OnMouseReleased() { }
+    void Surface::OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) { }
+    void Surface::OnMouseLeave(const std::shared_ptr<Pointer>&) { }
+    void Surface::OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) { }
+    void Surface::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) { }
     void Surface::OnKeyEvent(const KeyEvent&) { }
 }

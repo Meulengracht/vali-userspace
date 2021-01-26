@@ -171,6 +171,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
         vioarr_region_t* region = vioarr_surface_region(surfaceAfterMove);
         wm_pointer_event_move_single(
             vioarr_surface_client(surfaceAfterMove),
+            vioarr_surface_id(surfaceAfterMove),
             source->id,
             source->state.pointer.x - vioarr_region_x(region),
             source->state.pointer.y - vioarr_region_y(region));
@@ -206,7 +207,10 @@ void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons)
     }
 
     if (vioarr_surface_supports_input(clickedSurface, source->state.pointer.x, source->state.pointer.y)) {
-        wm_pointer_event_click_single(vioarr_surface_client(clickedSurface), source->id, buttons);
+        wm_pointer_event_click_single(
+            vioarr_surface_client(clickedSurface),
+            vioarr_surface_id(clickedSurface), 
+            source->id, buttons);
     }
 }
 

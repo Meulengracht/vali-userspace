@@ -30,6 +30,7 @@ namespace Asgaard {
     class Screen;
     class MemoryBuffer;
     class KeyEvent;
+    class Pointer;
     
     class Surface : public Object {
     public:
@@ -69,9 +70,10 @@ namespace Asgaard {
         virtual void OnResized(enum SurfaceEdges, int width, int height);
         virtual void OnFocus(bool);
         virtual void OnFrame();
-        virtual void OnMouseMove();
-        virtual void OnMousePressed();
-        virtual void OnMouseReleased();
+        virtual void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY);
+        virtual void OnMouseLeave(const std::shared_ptr<Pointer>&);
+        virtual void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY);
+        virtual void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons);
         virtual void OnKeyEvent(const KeyEvent&);
         
     protected:

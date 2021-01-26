@@ -33,6 +33,11 @@
 #include <gracht/server.h>
 #include <errno.h>
 
+#define SPAWN_COORDINATES_COUNT 6
+static int g_spawnCoordinateX[SPAWN_COORDINATES_COUNT] = { 100, 150, 200, 100, 150, 200 };
+static int g_spawnCoordinateY[SPAWN_COORDINATES_COUNT] = { 100, 100, 100, 150, 150, 150 };
+static int g_spawnIndex = 0;
+
 void wm_screen_get_properties_callback(struct gracht_recv_message* message, struct wm_screen_get_properties_args* input)
 {
     vioarr_utils_trace("[wm_screen_get_properties_callback] client %i", message->client);
@@ -102,11 +107,16 @@ void wm_screen_create_surface_callback(struct gracht_recv_message* message, stru
     }
     
     status = vioarr_surface_create(message->client, input->surface_id, screen,
-        100, 100, input->width, input->height, &surface);
+        g_spawnCoordinateX[g_spawnIndex % SPAWN_COORDINATES_COUNT], 
+        g_spawnCoordinateY[g_spawnIndex % SPAWN_COORDINATES_COUNT], 
+        input->width, input->height, &surface);
     if (status) {
         wm_core_event_error_single(message->client, input->screen_id, status, "wm_screen: failed to create surface");
         return;
     }
+
+    // go to next spawn
+    g_spawnIndex++;
 
     // register surface with screen
     vioarr_manager_register_surface(surface);

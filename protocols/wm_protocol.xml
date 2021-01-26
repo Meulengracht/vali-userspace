@@ -293,11 +293,13 @@
                 </event>
                 <event name="move">
                     <param name="pointer_id" type="uint32_t"/>
+                    <param name="surface_id" type="uint32_t"/>
                     <param name="surface_x" type="int"/>
                     <param name="surface_y" type="int"/>
                 </event>
                 <event name="click">
                     <param name="pointer_id" type="uint32_t"/>
+                    <param name="surface_id" type="uint32_t"/>
                     <param name="buttons" type="uint32_t"/>
                 </event>
             </events>
