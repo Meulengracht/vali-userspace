@@ -7,3 +7,9 @@
 [submodule "glm"]
 	path = glm
 	url = https://github.com/Meulengracht/glm.git
+[submodule "asmjit"]
+	path = asmjit
+	url = https://github.com/umbrella-c/asmjit.git
+[submodule "blend2d"]
+	path = blend2d
+	url = https://github.com/umbrella-c/blend2d.git

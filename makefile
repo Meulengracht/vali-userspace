@@ -29,11 +29,10 @@ export LD := $(CROSS)/bin/lld-link
 export LIB := $(CROSS)/bin/llvm-lib
 export AS := nasm
 
-export VALI_INCLUDES = -I$(VALI_SDK_PATH)/include/clang-9.0.0 -I$(VALI_APPLICATION_PATH)/include -I$(VALI_SDK_PATH)/include 
+export VALI_INCLUDES = -I${VALI_APPLICATION_PATH}/include/c++/v1 -I$(VALI_SDK_PATH)/include/clang-9.0.0 -I$(VALI_APPLICATION_PATH)/include -I$(VALI_SDK_PATH)/include 
 export VALI_LIBRARIES = -LIBPATH:$(VALI_SDK_PATH)/lib -LIBPATH:$(VALI_APPLICATION_PATH)/lib
 export VALI_SDK_CLIBS = static_libcrt.lib static_librt.lib c.lib m.lib
 export VALI_SDK_CXXLIBS = $(VALI_SDK_CLIBS) static_c++.lib static_c++abi.lib unwind.lib
-export LIBCXX_BOOTSTRAP := true
 
 # Setup default build rules
 include config/$(VALI_ARCH).mk
@@ -116,7 +115,7 @@ llvm/projects/libunwind:
 
 llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
 	mkdir -p llvm-build
-	cd llvm-build && cmake -G "Unix Makefiles" \
+	cd llvm-build && LIBCXX_BOOTSTRAP=true cmake -G "Unix Makefiles" \
 		-DLLVM_BOOTSTRAP_RUNTIME=ON \
 		-DLLVM_ENABLE_DUMP=ON \
 		-DLIBUNWIND_INSTALL_PREFIX=$(VALI_APPLICATION_PATH)/ \
@@ -149,6 +148,30 @@ build_llvm: llvm-build
 	@-mv llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
 	@-mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
 
+asmjit-build:
+	mkdir -p asmjit-build
+	cd asmjit-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../asmjit
+
+.PHONY: build_asmjit
+build_asmjit: asmjit-build
+	cd asmjit-build && make -j$(CPU_COUNT) && make install
+
+blend2d-build:
+	mkdir -p blend2d-build
+	cd blend2d-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../blend2d
+
+.PHONY: build_blend2d
+build_blend2d: blend2d-build
+	cd blend2d-build && make -j$(CPU_COUNT) && make install
+
 .PHONY: build_mesa
 build_mesa:
 	#$(eval CPU_COUNT = $(shell nproc))
@@ -157,6 +180,14 @@ build_mesa:
 .PHONY: clean_mesa
 clean_mesa:
 	cd mesa && make clean
+
+.PHONY: clean_asmjit
+clean_asmjit:
+	@rm -rf asmjit-build
+
+.PHONY: clean_blend2d
+clean_blend2d:
+	@rm -rf blend2d-build
 
 .PHONY: clean_asgaard
 clean_asgaard:
@@ -204,4 +235,6 @@ clean:
 	@$(MAKE) -s -C vioarr -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf llvm-build
+	@rm -rf asmjit-build
+	@rm -rf blend2d-build
 	@rm -rf $(VALI_APPLICATION_PATH)
