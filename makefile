@@ -63,7 +63,7 @@ build_rt:
 	@$(MAKE) -s -C libcxx -f makefile
 
 .PHONY: build_apps
-build_apps: build_asgaard build_macia build_wintest build_alumni
+build_apps: build_asgaard build_macia build_wintest build_alumni build_doom
 
 .PHONY: build_wm
 build_wm: build_mesa build_glm build_vioarr
@@ -172,6 +172,18 @@ blend2d-build:
 build_blend2d: blend2d-build
 	cd blend2d-build && make -j$(CPU_COUNT) && make install
 
+doom-build:
+	mkdir -p doom-build
+	cd doom-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../doom
+
+.PHONY: build_doom
+build_doom: doom-build
+	cd doom-build && make -j$(CPU_COUNT) && make install
+
 .PHONY: build_mesa
 build_mesa:
 	#$(eval CPU_COUNT = $(shell nproc))
@@ -188,6 +200,10 @@ clean_asmjit:
 .PHONY: clean_blend2d
 clean_blend2d:
 	@rm -rf blend2d-build
+
+.PHONY: clean_doom
+clean_doom:
+	@rm -rf doom-build
 
 .PHONY: clean_asgaard
 clean_asgaard:

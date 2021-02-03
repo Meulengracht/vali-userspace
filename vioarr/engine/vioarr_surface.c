@@ -82,9 +82,10 @@ static int  __initialize_surface_properties(vioarr_surface_properties_t* propert
 static void __cleanup_surface_properties(vioarr_surface_properties_t* properties);
 static void __cleanup_surface_backbuffer(vioarr_screen_t* screen, vioarr_surface_backbuffer_t* backbuffer);
 static void __swap_properties(vioarr_surface_t* surface);
-static void __update_surface(NVGcontext* context, vioarr_surface_t* surface);
-static void __refresh_content(NVGcontext* context, vioarr_surface_t* surface);
-static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface);
+static void __update_surface(vcontext_t* context, vioarr_surface_t* surface);
+static void __refresh_content(vcontext_t* context, vioarr_surface_t* surface);
+static void __render_drop_shadow(vcontext_t* context, vioarr_surface_t* surface);
+static void __render_content(vcontext_t* context, vioarr_surface_t* surface);
 
 int vioarr_surface_create(int client, uint32_t id, vioarr_screen_t* screen, int x, int y,
     int width, int height, vioarr_surface_t** surfaceOut)
@@ -389,12 +390,8 @@ vioarr_region_t* vioarr_surface_region(vioarr_surface_t* surface)
     return surface->dimensions;
 }
 
-void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
+void vioarr_surface_render(vcontext_t* context, vioarr_surface_t* surface)
 {
-    NVGpaint stream_paint;
-    float width = (float)vioarr_region_width(surface->dimensions);
-    float height = (float)vioarr_region_height(surface->dimensions);
-    
     if (!surface) {
         return;
     }
@@ -407,24 +404,20 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
         return;
     }
     
+#ifdef VIOARR_BACKEND_NANOVG
     nvgSave(context);
     nvgTranslate(context, 
         (float)vioarr_region_x(surface->dimensions),
         (float)vioarr_region_y(surface->dimensions)
     );
+#endif
 
     if (ACTIVE_BACKBUFFER(surface).content) {
         //TRACE("[vioarr_surface_render] rendering content");
         if (!vioarr_region_is_zero(ACTIVE_PROPERTIES(surface).drop_shadow)) {
             __render_drop_shadow(context, surface);
         }
-        
-        stream_paint = nvgImagePattern(context, 0.0f, 0.0f, width, height, 0.0f, 
-            ACTIVE_BACKBUFFER(surface).resource_id, 1.0f);
-        nvgBeginPath(context);
-        nvgRect(context, 0.0f, 0.0f, width, height);
-        nvgFillPaint(context, stream_paint);
-        nvgFill(context);
+        __render_content(context, surface);
     }
 
     if (ACTIVE_PROPERTIES(surface).children) {
@@ -435,7 +428,9 @@ void vioarr_surface_render(NVGcontext* context, vioarr_surface_t* surface)
         }
     }
 
+#ifdef VIOARR_BACKEND_NANOVG
     nvgRestore(context);
+#endif
 }
 
 static void __update_surface(NVGcontext* context, vioarr_surface_t* surface)
@@ -467,7 +462,9 @@ static void __refresh_content(NVGcontext* context, vioarr_surface_t* surface)
         vioarr_buffer_t* buffer     = ACTIVE_BACKBUFFER(surface).content;
         int              resourceId = ACTIVE_BACKBUFFER(surface).resource_id;
         if (buffer) {
+#ifdef VIOARR_BACKEND_NANOVG
             nvgUpdateImage(context, resourceId, (const uint8_t*)vioarr_buffer_data(buffer));
+#endif
             wm_buffer_event_release_single(surface->client, vioarr_buffer_id(buffer));
         }
         
@@ -502,10 +499,25 @@ static void __swap_properties(vioarr_surface_t* surface)
     }
 }
 
-static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
+static void __render_content(vcontext_t* context, vioarr_surface_t* surface)
 {
     float    width        = (float)vioarr_region_width(surface->dimensions);
     float    height       = (float)vioarr_region_height(surface->dimensions);
+#ifdef VIOARR_BACKEND_NANOVG
+    NVGpaint stream_paint = nvgImagePattern(context, 0.0f, 0.0f, width, height, 0.0f, 
+        ACTIVE_BACKBUFFER(surface).resource_id, 1.0f);
+    nvgBeginPath(context);
+    nvgRect(context, 0.0f, 0.0f, width, height);
+    nvgFillPaint(context, stream_paint);
+    nvgFill(context);
+#endif
+}
+
+static void __render_drop_shadow(vcontext_t* context, vioarr_surface_t* surface)
+{
+    float    width        = (float)vioarr_region_width(surface->dimensions);
+    float    height       = (float)vioarr_region_height(surface->dimensions);
+#ifdef VIOARR_BACKEND_NANOVG
 	NVGpaint shadow_paint = nvgBoxGradient(context, 0, 0 + 2.0f, width, height, 
 	    ACTIVE_PROPERTIES(surface).corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
 	nvgBeginPath(context);
@@ -519,6 +531,7 @@ static void __render_drop_shadow(NVGcontext* context, vioarr_surface_t* surface)
 	nvgPathWinding(context, NVG_HOLE);
 	nvgFillPaint(context, shadow_paint);
 	nvgFill(context);
+#endif
 }
 
 static int __initialize_surface_properties(vioarr_surface_properties_t* properties)

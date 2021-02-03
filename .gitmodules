@@ -13,3 +13,6 @@
 [submodule "blend2d"]
 	path = blend2d
 	url = https://github.com/umbrella-c/blend2d.git
+[submodule "doom"]
+	path = doom
+	url = https://github.com/umbrella-c/vali-doom.git

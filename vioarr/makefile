@@ -2,7 +2,7 @@
 # Include all the definitions for os
 
 INCLUDES =-I$(VALI_DDK_PATH)/include -I$(VALI_DDK_PATH)/include/wm -Iloader/include
-LFLAGS := -LIBPATH:$(VALI_DDK_PATH)/lib static_libds.lib static_libddk.lib static_libgracht.lib libfreetype.lib gallium-osmesa.lib
+LFLAGS := -LIBPATH:$(VALI_DDK_PATH)/lib static_libds.lib static_libddk.lib static_libgracht.lib libfreetype.lib
 
 ifeq ($(VALI_ARCH),i386)
 	ASFLAGS = -f win32 -Xvc -DVIOARR_REVERSE_FB_BLIT
@@ -10,10 +10,27 @@ else
 	ASFLAGS = -f win64 -Xvc -DVIOARR_REVERSE_FB_BLIT
 endif
 
-APP_SOURCES_ASM := 
-APP_SOURCES_C := loader/src/glad.c \
-				 $(wildcard engine/backend/*.c) \
-				 $(wildcard engine/memory/*.c) \
+# The different types of renderes available
+APP_OSMESA_DEFINES := -D__VIOARR_CONFIG_RENDERER_OSMESA -DVIOARR_REVERSE_FB_BLIT -DGL_GLEXT_PROTOTYPES
+APP_OSMESA_SOURCES_C := loader/src/glad.c engine/screen/vioarr_screen_osmesa.c
+APP_OSMESA_LFLAGS := gallium-osmesa.lib
+
+APP_DIRECT_DEFINES := 
+APP_DIRECT_SOURCES_C :=
+APP_DIRECT_LFLAGS :=
+
+APP_HEADLESS_DEFINES := -D__VIOARR_CONFIG_RENDERER_HEADLESS
+APP_HEADLESS_SOURCES_C := engine/screen/vioarr_screen_headless.c
+APP_HEADLESS_LFLAGS :=
+
+# The different types of backends available
+APP_NANOVG_DEFINES := -DVIOARR_BACKEND_NANOVG -DNANOVG_GL3_IMPLEMENTATION  -DFONS_USE_FREETYPE
+APP_NANOVG_SOURCES_C := $(wildcard engine/backend/nanovg/*.c)
+
+APP_BLEND2D_DEFINES := -DVIOARR_BACKEND_BLEND2D
+
+APP_SOURCES_ASM += engine/screen/vioarr_screen_$(VALI_ARCH).s
+APP_SOURCES_C := $(wildcard engine/memory/*.c) \
 				 $(wildcard engine/*.c) \
 		         $(wildcard *.c)
 		         
@@ -28,21 +45,22 @@ APP_PROTOCOLS_C := protocols/wm_core_protocol_server.c \
 				   protocols/ctt_input_protocol_client.c \
 				   protocols/svc_device_protocol_client.c
 
-APP_DEFINES := -DGL_GLEXT_PROTOTYPES -DNANOVG_GL3_IMPLEMENTATION -DFONS_USE_FREETYPE
+APP_DEFINES := 
 ifdef VALI_HEADLESS
-APP_SOURCES_C += engine/screen/vioarr_screen_headless.c
-APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_HEADLESS
+APP_SOURCES_C += $(APP_HEADLESS_SOURCES_C)
+APP_DEFINES += $(APP_HEADLESS_DEFINES)
+LFLAGS += $(APP_HEADLESS_LFLAGS)
 else
-APP_SOURCES_C += engine/screen/vioarr_screen_osmesa.c
-APP_SOURCES_ASM += engine/screen/vioarr_screen_$(VALI_ARCH).s
-APP_DEFINES += -D__VIOARR_CONFIG_RENDERER_OSMESA -DVIOARR_REVERSE_FB_BLIT
+APP_SOURCES_C := $(APP_OSMESA_SOURCES_C) $(APP_NANOVG_SOURCES_C) $(APP_SOURCES_C)
+APP_DEFINES += $(APP_OSMESA_DEFINES) $(APP_NANOVG_DEFINES)
+LFLAGS += $(APP_OSMESA_LFLAGS)
 endif
 
 APP_CFLAGS = $(VALI_CFLAGS) $(CFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
 APP_CXXFLAGS = $(VALI_CXXFLAGS) $(CXXFLAGS) $(VALI_INCLUDES) $(INCLUDES) $(APP_DEFINES)
 APP_LFLAGS = /entry:__CrtConsoleEntry $(VALI_LFLAGS) $(VALI_SDK_CXXLIBS) $(LFLAGS)
 
-APP_OBJECTS = $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_CXX:.cpp=.o) $(APP_SOURCES_C:.c=.o) $(APP_SOURCES_ASM:.s=.o)
+APP_OBJECTS = $(APP_PROTOCOLS_C:.c=.o) $(APP_SOURCES_C:.c=.o) $(APP_SOURCES_ASM:.s=.o)
 
 .PHONE: all
 all: protocols loader $(VALI_APPLICATION_PATH)/bin/vioarr.app

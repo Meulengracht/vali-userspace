@@ -22,9 +22,10 @@
  */
 #pragma once
 
-#include <gracht/client.h>
 #include "object_manager.hpp"
 #include "window_base.hpp"
+
+typedef struct gracht_client gracht_client_t;
 
 namespace Asgaard {
     class Application final : public Object {
@@ -51,13 +52,20 @@ namespace Asgaard {
         void AddEventDescriptor(int iod, unsigned int events);
 
         /**
+         * PumpMessages
+         * Can be used to handle all currently queued application messages. This emulates a single
+         * loop in Execute - and enables users to run this application "on-demand".
+         */
+        void PumpMessages();
+
+        /**
          * Execute
          * Starts the applications main loop. The application will run untill shutdown has been requested
          * or any fault happens (caught exception).
          * @return Status code of execution
          */
         int Execute();
-        
+
     public:
         template<class WC, typename... Params>
         void CreateWindow(Params... parameters) {
@@ -67,7 +75,8 @@ namespace Asgaard {
             m_window = OM.CreateClientObject<WC, Params...>(parameters...);
         }
         
-        gracht_client_t* GrachtClient() { return m_client; }
+        gracht_client_t*                   GrachtClient() const { return m_client; }
+        const std::shared_ptr<WindowBase>& Window() const { return m_window; }
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
@@ -78,6 +87,7 @@ namespace Asgaard {
         std::shared_ptr<WindowBase> m_window;
         int                         m_ioset;
         bool                        m_initialized;
+        char*                       m_messageBuffer;
     };
     
     extern Application APP;

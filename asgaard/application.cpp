@@ -131,6 +131,7 @@ namespace Asgaard {
         , m_window(nullptr)
         , m_ioset(-1)
         , m_initialized(false)
+        , m_messageBuffer(new char[GRACHT_MAX_MESSAGE_SIZE])
     {
         
     }
@@ -139,6 +140,10 @@ namespace Asgaard {
     {
         if (m_client != nullptr) {
             gracht_client_shutdown(m_client);
+        }
+
+        if (m_messageBuffer != nullptr) {
+            delete[] m_messageBuffer;
         }
     }
 
@@ -179,10 +184,22 @@ namespace Asgaard {
         // kick off a chain reaction by asking for all objects
         wm_core_get_objects(m_client, nullptr);
     }
+
+    void Application::PumpMessages()
+    {
+        int status = 0;
+
+        if (!m_initialized) {
+            Initialize();
+        }
+
+        while (!status) {
+            status = gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
+        }
+    }
     
     int Application::Execute()
     {
-        char*              messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         struct ioset_event events[8];
 
         if (!m_initialized) {
@@ -193,7 +210,7 @@ namespace Asgaard {
             int num_events = ioset_wait(m_ioset, &events[0], 8, 0);
             for (int i = 0; i < num_events; i++) {
                 if (events[i].data.iod == gracht_client_iod(m_client)) {
-                    gracht_client_wait_message(m_client, NULL, messageBuffer, 0);
+                    gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
                 }
                 else {
                     m_window->DescriptorEvent(events[i].data.iod, events[i].events);
@@ -201,7 +218,6 @@ namespace Asgaard {
             }
         }
         
-        delete[] messageBuffer;
         return 0;
     }
 

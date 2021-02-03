@@ -40,13 +40,12 @@ int main(int argc, char* argv[])
 	Parser *parser = NULL;
 
 #ifdef DIAGNOSE
-	printf("macia-lang compiler %s - 2018 oct 12\n", VERSION);
-	printf(" > author: %s\n\n", AUTHOR);
+	printf("macia-lang compiler %s - 2018 oct 12 [%s]\n", VERSION, AUTHOR);
 #endif
 
     // Sanitize input parameters
     if (argc == 1) {
-        printf(" > invalid number of arguments\n");
+        printf("macia: invalid number of arguments\n");
         return -1;
     }
 

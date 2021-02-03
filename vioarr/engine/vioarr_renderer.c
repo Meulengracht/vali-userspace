@@ -22,9 +22,16 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
+#ifdef VIOARR_BACKEND_NANOVG
 #include <glad/glad.h>
-#include "backend/nanovg.h"
-#include "backend/nanovg_gl.h"
+#include "backend/backend.h"
+#include "backend/nanovg/nanovg_gl.h"
+#endif
+
+#ifdef VIOARR_BACKEND_BLEND2D
+#include <blend2d.h>
+#endif
+
 #include <ds/list.h>
 #include "vioarr_buffer.h"
 #include "vioarr_renderer.h"
@@ -36,8 +43,10 @@
 #include <threads.h>
 
 typedef struct vioarr_renderer {
-    NVGcontext*      context;
+#ifdef VIOARR_BACKEND_NANOVG
+    vcontext_t*      context;
     mtx_t            context_sync;
+#endif
     vioarr_screen_t* screen;
     int              width;
     int              height;
@@ -46,11 +55,13 @@ typedef struct vioarr_renderer {
     float            pixel_ratio;
 } vioarr_renderer_t;
 
+#ifdef VIOARR_BACKEND_NANOVG
 static void opengl_initialize(int width, int height)
 {
     // 0x28575A
     glClearColor(0.15f, 0.34f, 0.35f, 1.0f);
 }
+#endif
 
 vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
 {
@@ -63,10 +74,12 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         return NULL;
     }
 
+#ifdef VIOARR_BACKEND_NANOVG
     TRACE("[vioarr_renderer_create] initializing openGL");
     opengl_initialize(width, height);
 
     TRACE("[vioarr_renderer_create] creating nvg context");
+    mtx_init(&renderer->context_sync, mtx_plain);
 #ifdef __VIOARR_CONFIG_RENDERER_MSAA
 	renderer->context = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
@@ -77,8 +90,8 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
         free(renderer);
         return NULL;
     }
+#endif
 
-    mtx_init(&renderer->context_sync, mtx_plain);
     renderer->screen      = screen;
     renderer->width       = width;
     renderer->height      = height;
@@ -125,7 +138,7 @@ int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
 
 int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* buffer)
 {
-    int resourceId;
+    int resourceId = -1;
 
     if (!renderer) {
         return -1;
@@ -135,12 +148,14 @@ int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* b
         return -1;
     }
 
+#ifdef VIOARR_BACKEND_NANOVG
     mtx_lock(&renderer->context_sync);
     resourceId = nvgCreateImageRGBA(renderer->context,
             vioarr_buffer_width(buffer), vioarr_buffer_height(buffer),
             /* NVG_IMAGE_FLIPY */ 0,
             (const uint8_t*)vioarr_buffer_data(buffer));
     mtx_unlock(&renderer->context_sync);
+#endif
     return resourceId;
 }
 
@@ -150,9 +165,11 @@ void vioarr_renderer_destroy_image(vioarr_renderer_t* renderer, int resourceId)
         return;
     }
 
+#ifdef VIOARR_BACKEND_NANOVG
     mtx_lock(&renderer->context_sync);
     nvgDeleteImage(renderer->context, resourceId);
     mtx_unlock(&renderer->context_sync);
+#endif
 }
 
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
@@ -162,12 +179,19 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     list_t*          cursors;
     vioarr_region_t* drawRegion = vioarr_screen_region(renderer->screen);
     
+#ifdef VIOARR_BACKEND_NANOVG
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     mtx_lock(&renderer->context_sync);
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
     nvgGlobalCompositeBlendFunc(renderer->context, NVG_SRC_ALPHA, NVG_ONE_MINUS_SRC_ALPHA);
-    
+#endif
+
+#ifdef VIOARR_BACKEND_BLEND2D
+    BLContextCore context;
+    blContextInitAs(&context, img, NULL);
+#endif
+
     vioarr_manager_render_start(&surfaces, &cursors);
     _foreach(i, surfaces) {
         vioarr_surface_t* surface = i->value;
@@ -184,8 +208,10 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     }
     vioarr_manager_render_end();
     
+#ifdef VIOARR_BACKEND_NANOVG
     nvgEndFrame(renderer->context);
     mtx_unlock(&renderer->context_sync);
-    
+
     glFinish();
+#endif
 }

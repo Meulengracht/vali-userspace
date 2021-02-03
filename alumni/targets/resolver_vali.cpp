@@ -105,6 +105,7 @@ void ResolverVali::HandleDescriptorEvent(int iod, unsigned int events)
         read(iod, &exitCode, sizeof(int));
         m_terminal->Print("process exitted with code %i\n", exitCode);
         m_application = UUID_INVALID;
+        PrintCommandHeader();
     }
 }
 
@@ -167,6 +168,8 @@ std::vector<std::string> ResolverVali::GetDirectoryContents(const std::string& P
         }
         closedir(dir);
     }
+
+    std::sort(entries.begin(), entries.end());
     return entries;
 }
 

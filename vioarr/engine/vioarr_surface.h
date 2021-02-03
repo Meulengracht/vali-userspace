@@ -25,7 +25,7 @@
 #ifndef __VIOARR_SURFACE_H__
 #define __VIOARR_SURFACE_H__
 
-#include "backend/nanovg.h"
+#include "backend/backend.h"
 #include <stdint.h>
 
 typedef struct vioarr_surface vioarr_surface_t;
@@ -53,6 +53,6 @@ vioarr_region_t* vioarr_surface_region(vioarr_surface_t*);
 int  vioarr_surface_add_child(vioarr_surface_t*, vioarr_surface_t*, int, int);
 void vioarr_surface_set_position(vioarr_surface_t*, int, int);
 
-void vioarr_surface_render(NVGcontext*, vioarr_surface_t*);
+void vioarr_surface_render(vcontext_t*, vioarr_surface_t*);
 
 #endif //!__VIOARR_SURFACE_H__

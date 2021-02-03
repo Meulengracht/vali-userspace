@@ -1,0 +1,257 @@
+The target system is: vali-cross -  - 
+The host system is: Linux - 5.4.0-65-generic - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /home/philip/Source/vali-toolchain-build/bin/clang 
+Build flags: ;-U_WIN32;-fms-extensions;-nostdlib;-nostdinc;-static;-DMOLLENOS;-DZLIB_DLL;-Damd64;-D__amd64__;-D__x86_64__;-m64;-fdwarf-exceptions;--target=amd64-pc-win32-itanium-coff;-U_WIN32;-fms-extensions;-nostdlib;-nostdinc;-static;-DMOLLENOS;-DZLIB_DLL;-Damd64;-D__amd64__;-D__x86_64__;-m64;-fdwarf-exceptions;--target=amd64-pc-win32-itanium-coff
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.exe"
+
+The C compiler identification is Clang, found in "/home/philip/Source/vali-userspace/doom-build/CMakeFiles/3.16.3/CompilerIdC/a.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /home/philip/Source/vali-toolchain-build/bin/clang++ 
+Build flags: ;-U_WIN32;-fms-extensions;-nostdlib;-nostdinc;-static;-DMOLLENOS;-DZLIB_DLL;-Damd64;-D__amd64__;-D__x86_64__;-m64;-fdwarf-exceptions;--target=amd64-pc-win32-itanium-coff;-U_WIN32;-fms-extensions;-nostdlib;-nostdinc;-static;-DMOLLENOS;-DZLIB_DLL;-Damd64;-D__amd64__;-D__x86_64__;-m64;-fdwarf-exceptions;--target=amd64-pc-win32-itanium-coff
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.exe"
+
+The CXX compiler identification is Clang, found in "/home/philip/Source/vali-userspace/doom-build/CMakeFiles/3.16.3/CompilerIdCXX/a.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_81f43/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_81f43.dir/build.make CMakeFiles/cmTC_81f43.dir/build
+make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_81f43.dir/testCCompiler.c.obj
+/home/philip/Source/vali-toolchain-build/bin/clang -o CMakeFiles/cmTC_81f43.dir/testCCompiler.c.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff      -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_81f43.app
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_81f43.dir/link.txt --verbose=1
+/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry   /out:cmTC_81f43.app /version:0.0 CMakeFiles/cmTC_81f43.dir/testCCompiler.c.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib c.lib m.lib static_libcrt.lib static_librt.lib 
+make[2]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+make[1]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c1595/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_c1595.dir/build.make CMakeFiles/cmTC_c1595.dir/build
+make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj
+/home/philip/Source/vali-toolchain-build/bin/clang -o CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff    -v   -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /usr/share/cmake-3.16/Modules/CMakeCCompilerABI.c
+clang version 9.0.0 (https://github.com/Meulengracht/clang.git 67f2dcf4d0c2b9034a18a1f728d6b92165ff2292) (https://github.com/Meulengracht/llvm.git 7a53d365bd4c236ff80ef14c8e162c42a0c97524)
+Target: amd64-pc-windows-itanium
+Thread model: posix
+InstalledDir: /home/philip/Source/vali-toolchain-build/bin
+ "/home/philip/Source/vali-toolchain-build/bin/clang-9" -cc1 -triple amd64-pc-windows-itanium -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -static-define -mrelocation-model pic -pic-level 2 -pic-is-pie -mthread-model posix -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -momit-leaf-frame-pointer -v -coverage-notes-file /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.gcno -nostdsysteminc -nobuiltininc -resource-dir /home/philip/Source/vali-toolchain-build/lib/clang/9.0.0 -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -I /home/philip/Source/vali-apps/include/c++/v1 -I /usr/local/vali-sdk/include/clang-9.0.0 -I /home/philip/Source/vali-apps/include -I /usr/local/vali-sdk/include -fdebug-compilation-dir /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fno-use-cxa-atexit -fms-extensions -fobjc-runtime=gcc -fdwarf-exceptions -fdiagnostics-show-option -o CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj -x c /usr/share/cmake-3.16/Modules/CMakeCCompilerABI.c -faddrsig
+clang -cc1 version 9.0.0 based upon LLVM 9.0.0svn default target i386-pc-win32-itanium-coff
+#include "..." search starts here:
+#include <...> search starts here:
+ /home/philip/Source/vali-apps/include/c++/v1
+ /usr/local/vali-sdk/include/clang-9.0.0
+ /home/philip/Source/vali-apps/include
+ /usr/local/vali-sdk/include
+End of search list.
+Linking C executable cmTC_c1595.app
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c1595.dir/link.txt --verbose=1
+/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry  -v /out:cmTC_c1595.app /version:0.0 CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib c.lib m.lib static_libcrt.lib static_librt.lib 
+lld-link: warning: ignoring unknown argument: -v
+make[2]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+make[1]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+
+
+
+Parsed C implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/home/philip/Source/vali-apps/include/c++/v1]
+    add: [/usr/local/vali-sdk/include/clang-9.0.0]
+    add: [/home/philip/Source/vali-apps/include]
+    add: [/usr/local/vali-sdk/include]
+  end of search list found
+  collapse include dir [/home/philip/Source/vali-apps/include/c++/v1] ==> [/home/philip/Source/vali-apps/include/c++/v1]
+  collapse include dir [/usr/local/vali-sdk/include/clang-9.0.0] ==> [/usr/local/vali-sdk/include/clang-9.0.0]
+  collapse include dir [/home/philip/Source/vali-apps/include] ==> [/home/philip/Source/vali-apps/include]
+  collapse include dir [/usr/local/vali-sdk/include] ==> [/usr/local/vali-sdk/include]
+  implicit include dirs: [/home/philip/Source/vali-apps/include/c++/v1;/usr/local/vali-sdk/include/clang-9.0.0;/home/philip/Source/vali-apps/include;/usr/local/vali-sdk/include]
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(lld-link|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_c1595/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_c1595.dir/build.make CMakeFiles/cmTC_c1595.dir/build]
+  ignore line: [make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [/home/philip/Source/vali-toolchain-build/bin/clang -o CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff    -v   -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /usr/share/cmake-3.16/Modules/CMakeCCompilerABI.c]
+  ignore line: [clang version 9.0.0 (https://github.com/Meulengracht/clang.git 67f2dcf4d0c2b9034a18a1f728d6b92165ff2292) (https://github.com/Meulengracht/llvm.git 7a53d365bd4c236ff80ef14c8e162c42a0c97524)]
+  ignore line: [Target: amd64-pc-windows-itanium]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /home/philip/Source/vali-toolchain-build/bin]
+  ignore line: [ "/home/philip/Source/vali-toolchain-build/bin/clang-9" -cc1 -triple amd64-pc-windows-itanium -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -static-define -mrelocation-model pic -pic-level 2 -pic-is-pie -mthread-model posix -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -momit-leaf-frame-pointer -v -coverage-notes-file /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.gcno -nostdsysteminc -nobuiltininc -resource-dir /home/philip/Source/vali-toolchain-build/lib/clang/9.0.0 -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -I /home/philip/Source/vali-apps/include/c++/v1 -I /usr/local/vali-sdk/include/clang-9.0.0 -I /home/philip/Source/vali-apps/include -I /usr/local/vali-sdk/include -fdebug-compilation-dir /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fno-use-cxa-atexit -fms-extensions -fobjc-runtime=gcc -fdwarf-exceptions -fdiagnostics-show-option -o CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj -x c /usr/share/cmake-3.16/Modules/CMakeCCompilerABI.c -faddrsig]
+  ignore line: [clang -cc1 version 9.0.0 based upon LLVM 9.0.0svn default target i386-pc-win32-itanium-coff]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /home/philip/Source/vali-apps/include/c++/v1]
+  ignore line: [ /usr/local/vali-sdk/include/clang-9.0.0]
+  ignore line: [ /home/philip/Source/vali-apps/include]
+  ignore line: [ /usr/local/vali-sdk/include]
+  ignore line: [End of search list.]
+  ignore line: [Linking C executable cmTC_c1595.app]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c1595.dir/link.txt --verbose=1]
+  link line: [/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry  -v /out:cmTC_c1595.app /version:0.0 CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib c.lib m.lib static_libcrt.lib static_librt.lib ]
+    arg [/home/philip/Source/vali-toolchain-build/bin/lld-link] ==> ignore
+    arg [/machine:X64] ==> ignore
+    arg [/nodefaultlib] ==> ignore
+    arg [/subsystem:native] ==> ignore
+    arg [/lldmap] ==> ignore
+    arg [-LIBPATH:/usr/local/vali-sdk/lib] ==> dir [/usr/local/vali-sdk/lib]
+    arg [-LIBPATH:/home/philip/Source/vali-apps/lib] ==> dir [/home/philip/Source/vali-apps/lib]
+    arg [/entry:__CrtConsoleEntry] ==> ignore
+    arg [-v] ==> ignore
+    arg [/out:cmTC_c1595.app] ==> ignore
+    arg [/version:0.0] ==> ignore
+    arg [CMakeFiles/cmTC_c1595.dir/CMakeCCompilerABI.c.obj] ==> ignore
+    arg [-LIBPATH:/usr/local/vali-sdk/lib] ==> dir [/usr/local/vali-sdk/lib]
+    arg [-LIBPATH:/home/philip/Source/vali-apps/lib] ==> dir [/home/philip/Source/vali-apps/lib]
+    arg [c.lib] ==> ignore
+    arg [m.lib] ==> ignore
+    arg [static_libcrt.lib] ==> ignore
+    arg [static_librt.lib] ==> ignore
+  collapse library dir [/usr/local/vali-sdk/lib] ==> [/usr/local/vali-sdk/lib]
+  collapse library dir [/home/philip/Source/vali-apps/lib] ==> [/home/philip/Source/vali-apps/lib]
+  collapse library dir [/usr/local/vali-sdk/lib] ==> [/usr/local/vali-sdk/lib]
+  collapse library dir [/home/philip/Source/vali-apps/lib] ==> [/home/philip/Source/vali-apps/lib]
+  implicit libs: []
+  implicit dirs: [/usr/local/vali-sdk/lib;/home/philip/Source/vali-apps/lib]
+  implicit fwks: []
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a502e/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_a502e.dir/build.make CMakeFiles/cmTC_a502e.dir/build
+make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a502e.dir/testCXXCompiler.cxx.obj
+/home/philip/Source/vali-toolchain-build/bin/clang++ -o CMakeFiles/cmTC_a502e.dir/testCXXCompiler.cxx.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff      -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_a502e.app
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a502e.dir/link.txt --verbose=1
+/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry   /out:cmTC_a502e.app /version:0.0 CMakeFiles/cmTC_a502e.dir/testCXXCompiler.cxx.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib static_c++.lib static_c++abi.lib unwind.lib c.lib m.lib static_libcrt.lib static_librt.lib 
+make[2]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+make[1]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7d5fa/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_7d5fa.dir/build.make CMakeFiles/cmTC_7d5fa.dir/build
+make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj
+/home/philip/Source/vali-toolchain-build/bin/clang++ -o CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff    -v   -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp
+clang version 9.0.0 (https://github.com/Meulengracht/clang.git 67f2dcf4d0c2b9034a18a1f728d6b92165ff2292) (https://github.com/Meulengracht/llvm.git 7a53d365bd4c236ff80ef14c8e162c42a0c97524)
+Target: amd64-pc-windows-itanium
+Thread model: posix
+InstalledDir: /home/philip/Source/vali-toolchain-build/bin
+ "/home/philip/Source/vali-toolchain-build/bin/clang-9" -cc1 -triple amd64-pc-windows-itanium -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -static-define -mrelocation-model pic -pic-level 2 -pic-is-pie -mthread-model posix -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -momit-leaf-frame-pointer -v -coverage-notes-file /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.gcno -nostdsysteminc -nobuiltininc -resource-dir /home/philip/Source/vali-toolchain-build/lib/clang/9.0.0 -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -I /home/philip/Source/vali-apps/include/c++/v1 -I /usr/local/vali-sdk/include/clang-9.0.0 -I /home/philip/Source/vali-apps/include -I /usr/local/vali-sdk/include -fdeprecated-macro -fdebug-compilation-dir /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fno-use-cxa-atexit -fms-extensions -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdwarf-exceptions -fdiagnostics-show-option -o CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp -faddrsig
+clang -cc1 version 9.0.0 based upon LLVM 9.0.0svn default target i386-pc-win32-itanium-coff
+#include "..." search starts here:
+#include <...> search starts here:
+ /home/philip/Source/vali-apps/include/c++/v1
+ /usr/local/vali-sdk/include/clang-9.0.0
+ /home/philip/Source/vali-apps/include
+ /usr/local/vali-sdk/include
+End of search list.
+Linking CXX executable cmTC_7d5fa.app
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7d5fa.dir/link.txt --verbose=1
+/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry  -v /out:cmTC_7d5fa.app /version:0.0 CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib static_c++.lib static_c++abi.lib unwind.lib c.lib m.lib static_libcrt.lib static_librt.lib 
+lld-link: warning: ignoring unknown argument: -v
+make[2]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+make[1]: Leaving directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp'
+
+
+
+Parsed CXX implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/home/philip/Source/vali-apps/include/c++/v1]
+    add: [/usr/local/vali-sdk/include/clang-9.0.0]
+    add: [/home/philip/Source/vali-apps/include]
+    add: [/usr/local/vali-sdk/include]
+  end of search list found
+  collapse include dir [/home/philip/Source/vali-apps/include/c++/v1] ==> [/home/philip/Source/vali-apps/include/c++/v1]
+  collapse include dir [/usr/local/vali-sdk/include/clang-9.0.0] ==> [/usr/local/vali-sdk/include/clang-9.0.0]
+  collapse include dir [/home/philip/Source/vali-apps/include] ==> [/home/philip/Source/vali-apps/include]
+  collapse include dir [/usr/local/vali-sdk/include] ==> [/usr/local/vali-sdk/include]
+  implicit include dirs: [/home/philip/Source/vali-apps/include/c++/v1;/usr/local/vali-sdk/include/clang-9.0.0;/home/philip/Source/vali-apps/include;/usr/local/vali-sdk/include]
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(lld-link|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_7d5fa/fast && make[1]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_7d5fa.dir/build.make CMakeFiles/cmTC_7d5fa.dir/build]
+  ignore line: [make[2]: Entering directory '/home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj]
+  ignore line: [/home/philip/Source/vali-toolchain-build/bin/clang++ -o CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff    -v   -I/home/philip/Source/vali-apps/include/c++/v1 -I/usr/local/vali-sdk/include/clang-9.0.0 -I/home/philip/Source/vali-apps/include -I/usr/local/vali-sdk/include  -c /usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [clang version 9.0.0 (https://github.com/Meulengracht/clang.git 67f2dcf4d0c2b9034a18a1f728d6b92165ff2292) (https://github.com/Meulengracht/llvm.git 7a53d365bd4c236ff80ef14c8e162c42a0c97524)]
+  ignore line: [Target: amd64-pc-windows-itanium]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /home/philip/Source/vali-toolchain-build/bin]
+  ignore line: [ "/home/philip/Source/vali-toolchain-build/bin/clang-9" -cc1 -triple amd64-pc-windows-itanium -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -static-define -mrelocation-model pic -pic-level 2 -pic-is-pie -mthread-model posix -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -momit-leaf-frame-pointer -v -coverage-notes-file /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.gcno -nostdsysteminc -nobuiltininc -resource-dir /home/philip/Source/vali-toolchain-build/lib/clang/9.0.0 -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -U _WIN32 -D MOLLENOS -D ZLIB_DLL -D amd64 -D __amd64__ -D __x86_64__ -I /home/philip/Source/vali-apps/include/c++/v1 -I /usr/local/vali-sdk/include/clang-9.0.0 -I /home/philip/Source/vali-apps/include -I /usr/local/vali-sdk/include -fdeprecated-macro -fdebug-compilation-dir /home/philip/Source/vali-userspace/doom-build/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fno-use-cxa-atexit -fms-extensions -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdwarf-exceptions -fdiagnostics-show-option -o CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp -faddrsig]
+  ignore line: [clang -cc1 version 9.0.0 based upon LLVM 9.0.0svn default target i386-pc-win32-itanium-coff]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /home/philip/Source/vali-apps/include/c++/v1]
+  ignore line: [ /usr/local/vali-sdk/include/clang-9.0.0]
+  ignore line: [ /home/philip/Source/vali-apps/include]
+  ignore line: [ /usr/local/vali-sdk/include]
+  ignore line: [End of search list.]
+  ignore line: [Linking CXX executable cmTC_7d5fa.app]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7d5fa.dir/link.txt --verbose=1]
+  link line: [/home/philip/Source/vali-toolchain-build/bin/lld-link /machine:X64 /nodefaultlib /subsystem:native /lldmap -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib /entry:__CrtConsoleEntry  -v /out:cmTC_7d5fa.app /version:0.0 CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj  -LIBPATH:/usr/local/vali-sdk/lib -LIBPATH:/home/philip/Source/vali-apps/lib static_c++.lib static_c++abi.lib unwind.lib c.lib m.lib static_libcrt.lib static_librt.lib ]
+    arg [/home/philip/Source/vali-toolchain-build/bin/lld-link] ==> ignore
+    arg [/machine:X64] ==> ignore
+    arg [/nodefaultlib] ==> ignore
+    arg [/subsystem:native] ==> ignore
+    arg [/lldmap] ==> ignore
+    arg [-LIBPATH:/usr/local/vali-sdk/lib] ==> dir [/usr/local/vali-sdk/lib]
+    arg [-LIBPATH:/home/philip/Source/vali-apps/lib] ==> dir [/home/philip/Source/vali-apps/lib]
+    arg [/entry:__CrtConsoleEntry] ==> ignore
+    arg [-v] ==> ignore
+    arg [/out:cmTC_7d5fa.app] ==> ignore
+    arg [/version:0.0] ==> ignore
+    arg [CMakeFiles/cmTC_7d5fa.dir/CMakeCXXCompilerABI.cpp.obj] ==> ignore
+    arg [-LIBPATH:/usr/local/vali-sdk/lib] ==> dir [/usr/local/vali-sdk/lib]
+    arg [-LIBPATH:/home/philip/Source/vali-apps/lib] ==> dir [/home/philip/Source/vali-apps/lib]
+    arg [static_c++.lib] ==> ignore
+    arg [static_c++abi.lib] ==> ignore
+    arg [unwind.lib] ==> ignore
+    arg [c.lib] ==> ignore
+    arg [m.lib] ==> ignore
+    arg [static_libcrt.lib] ==> ignore
+    arg [static_librt.lib] ==> ignore
+  collapse library dir [/usr/local/vali-sdk/lib] ==> [/usr/local/vali-sdk/lib]
+  collapse library dir [/home/philip/Source/vali-apps/lib] ==> [/home/philip/Source/vali-apps/lib]
+  collapse library dir [/usr/local/vali-sdk/lib] ==> [/usr/local/vali-sdk/lib]
+  collapse library dir [/home/philip/Source/vali-apps/lib] ==> [/home/philip/Source/vali-apps/lib]
+  implicit libs: []
+  implicit dirs: [/usr/local/vali-sdk/lib;/home/philip/Source/vali-apps/lib]
+  implicit fwks: []
+
+

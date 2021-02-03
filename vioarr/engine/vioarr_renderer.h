@@ -28,7 +28,6 @@
 #include "vioarr_screen.h"
 
 typedef struct vioarr_renderer vioarr_renderer_t;
-typedef struct NVGcontext NVGcontext;
 
 vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t*);
 void               vioarr_renderer_set_scale(vioarr_renderer_t*, int);
