@@ -1,7 +1,0 @@
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/install/strip.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/install/local.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/install.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/list_install_components.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/rebuild_cache.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/edit_cache.dir
-/home/philip/Source/vali-userspace/doom-build/CMakeFiles/doom.dir
