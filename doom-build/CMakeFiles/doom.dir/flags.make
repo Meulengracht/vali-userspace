@@ -7,11 +7,11 @@ C_FLAGS =  -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLI
 
 C_DEFINES = 
 
-C_INCLUDES = 
+C_INCLUDES = -I/usr/local/vali-ddk/include 
 
 CXX_FLAGS =  -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff -O3 -DNDEBUG  
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/usr/local/vali-ddk/include 
 

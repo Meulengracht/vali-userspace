@@ -2062,6 +2062,8 @@ CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /home/philip/Source/va
 CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali.cpp
 CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali_wnd.hpp
 CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /home/philip/Source/vali-userspace/doom/doomgeneric/doomkeys.h
+CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /usr/local/vali-ddk/include/ddk/ddkdefs.h
+CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj: /usr/local/vali-ddk/include/ddk/utils.h
 
 CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali_wnd.cpp.obj: /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali_wnd.cpp
 CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali_wnd.cpp.obj: /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali_wnd.hpp

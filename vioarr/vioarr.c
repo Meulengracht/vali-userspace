@@ -115,6 +115,7 @@ DEFINE_WM_BUFFER_SERVER_PROTOCOL(wm_buffer_callbacks, 1);
 extern void wm_surface_get_formats_callback(struct gracht_recv_message* message, struct wm_surface_get_formats_args*);
 extern void wm_surface_set_buffer_callback(struct gracht_recv_message* message, struct wm_surface_set_buffer_args*);
 extern void wm_surface_invalidate_callback(struct gracht_recv_message* message, struct wm_surface_invalidate_args*);
+extern void wm_surface_set_transparency_callback(struct gracht_recv_message* message, struct wm_surface_set_transparency_args*);
 extern void wm_surface_set_drop_shadow_callback(struct gracht_recv_message* message, struct wm_surface_set_drop_shadow_args*);
 extern void wm_surface_set_input_region_callback(struct gracht_recv_message* message, struct wm_surface_set_input_region_args*);
 extern void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_add_subsurface_args*);
@@ -124,10 +125,11 @@ extern void wm_surface_resize_callback(struct gracht_recv_message* message, stru
 extern void wm_surface_move_callback(struct gracht_recv_message* message, struct wm_surface_move_args*);
 extern void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_surface_destroy_args*);
 
-static gracht_protocol_function_t wm_surface_callbacks[11] = {
+static gracht_protocol_function_t wm_surface_callbacks[12] = {
     { PROTOCOL_WM_SURFACE_GET_FORMATS_ID , wm_surface_get_formats_callback },
     { PROTOCOL_WM_SURFACE_SET_BUFFER_ID , wm_surface_set_buffer_callback },
     { PROTOCOL_WM_SURFACE_INVALIDATE_ID , wm_surface_invalidate_callback },
+    { PROTOCOL_WM_SURFACE_SET_TRANSPARENCY_ID , wm_surface_set_transparency_callback },
     { PROTOCOL_WM_SURFACE_SET_DROP_SHADOW_ID , wm_surface_set_drop_shadow_callback },
     { PROTOCOL_WM_SURFACE_SET_INPUT_REGION_ID , wm_surface_set_input_region_callback },
     { PROTOCOL_WM_SURFACE_ADD_SUBSURFACE_ID , wm_surface_add_subsurface_callback },
@@ -137,7 +139,7 @@ static gracht_protocol_function_t wm_surface_callbacks[11] = {
     { PROTOCOL_WM_SURFACE_MOVE_ID , wm_surface_move_callback },
     { PROTOCOL_WM_SURFACE_DESTROY_ID , wm_surface_destroy_callback },
 };
-DEFINE_WM_SURFACE_SERVER_PROTOCOL(wm_surface_callbacks, 11);
+DEFINE_WM_SURFACE_SERVER_PROTOCOL(wm_surface_callbacks, 12);
 
 static gracht_client_t* valiClient = NULL;
 

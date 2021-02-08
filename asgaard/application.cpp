@@ -184,7 +184,7 @@ namespace Asgaard {
         // kick off a chain reaction by asking for all objects
         wm_core_get_objects(m_client, nullptr);
     }
-
+    
     void Application::PumpMessages()
     {
         int status = 0;

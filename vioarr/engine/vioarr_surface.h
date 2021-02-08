@@ -38,6 +38,7 @@ void             vioarr_surface_destroy(vioarr_surface_t*);
 void             vioarr_surface_set_buffer(vioarr_surface_t*, vioarr_buffer_t*);
 void             vioarr_surface_set_drop_shadow(vioarr_surface_t*, int x, int y, int width, int height);
 void             vioarr_surface_set_input_region(vioarr_surface_t*, int x, int y, int width, int height);
+void             vioarr_surface_set_transparency(vioarr_surface_t*, int);
 int              vioarr_surface_supports_input(vioarr_surface_t*, int x, int y);
 int              vioarr_surface_contains(vioarr_surface_t*, int x, int y);
 void             vioarr_surface_invalidate(vioarr_surface_t*, int x, int y, int width, int height);

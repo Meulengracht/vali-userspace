@@ -57,6 +57,7 @@ namespace Asgaard {
         void MarkDamaged(const Rectangle&);
         void MarkInputRegion(const Rectangle&);
         void SetDropShadow(const Rectangle&);
+        void SetTransparency(bool enable);
         void ApplyChanges();
         
         void RequestFrame();

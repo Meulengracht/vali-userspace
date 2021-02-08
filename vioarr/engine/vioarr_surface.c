@@ -41,6 +41,7 @@ typedef struct vioarr_surface_properties {
     int corner_radius;
     int border_width;
     int border_color;
+    int transparent;
     
     vioarr_region_t*       input_region;
     vioarr_region_t*       drop_shadow;
@@ -275,6 +276,17 @@ void vioarr_surface_set_input_region(vioarr_surface_t* surface, int x, int y, in
     mtx_unlock(&surface->sync_object);
 }
 
+void vioarr_surface_set_transparency(vioarr_surface_t* surface, int enable)
+{
+    if (!surface) {
+        return;
+    }
+
+    mtx_lock(&surface->sync_object);
+    PENDING_PROPERTIES(surface).transparent = enable;
+    mtx_unlock(&surface->sync_object);
+}
+
 int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
 {
     if (!surface) {
@@ -410,6 +422,14 @@ void vioarr_surface_render(vcontext_t* context, vioarr_surface_t* surface)
         (float)vioarr_region_x(surface->dimensions),
         (float)vioarr_region_y(surface->dimensions)
     );
+
+    // handle transparency of the surface
+    if (ACTIVE_PROPERTIES(surface).transparent) {
+        nvgGlobalCompositeBlendFunc(context, NVG_SRC_ALPHA, NVG_ONE_MINUS_SRC_ALPHA);
+    }
+    else {
+        nvgGlobalCompositeOperation(context, NVG_COPY);
+    }
 #endif
 
     if (ACTIVE_BACKBUFFER(surface).content) {
@@ -480,6 +500,7 @@ static void __swap_properties(vioarr_surface_t* surface)
     ACTIVE_PROPERTIES(surface).border_width  = PENDING_PROPERTIES(surface).border_width;
     ACTIVE_PROPERTIES(surface).border_color  = PENDING_PROPERTIES(surface).border_color;
     ACTIVE_PROPERTIES(surface).corner_radius = PENDING_PROPERTIES(surface).corner_radius;
+    ACTIVE_PROPERTIES(surface).transparent   = PENDING_PROPERTIES(surface).transparent;
     vioarr_region_copy(ACTIVE_PROPERTIES(surface).drop_shadow,  PENDING_PROPERTIES(surface).drop_shadow);
     vioarr_region_copy(ACTIVE_PROPERTIES(surface).input_region, PENDING_PROPERTIES(surface).input_region);
     
@@ -518,6 +539,11 @@ static void __render_drop_shadow(vcontext_t* context, vioarr_surface_t* surface)
     float    width        = (float)vioarr_region_width(surface->dimensions);
     float    height       = (float)vioarr_region_height(surface->dimensions);
 #ifdef VIOARR_BACKEND_NANOVG
+    if (!ACTIVE_PROPERTIES(surface).transparent) {
+        nvgSave(context);
+        nvgGlobalCompositeBlendFunc(context, NVG_SRC_ALPHA, NVG_ONE_MINUS_SRC_ALPHA);
+    }
+
 	NVGpaint shadow_paint = nvgBoxGradient(context, 0, 0 + 2.0f, width, height, 
 	    ACTIVE_PROPERTIES(surface).corner_radius * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
 	nvgBeginPath(context);
@@ -531,6 +557,10 @@ static void __render_drop_shadow(vcontext_t* context, vioarr_surface_t* surface)
 	nvgPathWinding(context, NVG_HOLE);
 	nvgFillPaint(context, shadow_paint);
 	nvgFill(context);
+
+    if (!ACTIVE_PROPERTIES(surface).transparent) {
+        nvgRestore(context);
+    }
 #endif
 }
 

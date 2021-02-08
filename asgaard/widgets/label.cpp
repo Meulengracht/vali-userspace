@@ -189,6 +189,7 @@ namespace Asgaard {
                 {
                     case MemoryBuffer::BufferEvent::CREATED: {
                         SetBuffer(m_buffer);
+                        SetTransparency(true);
                         RedrawReady();
                         SetValid(true);
                         Notify(static_cast<int>(LabelEvent::CREATED));

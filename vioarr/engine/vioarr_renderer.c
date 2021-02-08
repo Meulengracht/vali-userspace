@@ -184,7 +184,6 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     
     mtx_lock(&renderer->context_sync);
     nvgBeginFrame(renderer->context, renderer->width, renderer->height, renderer->pixel_ratio);
-    nvgGlobalCompositeBlendFunc(renderer->context, NVG_SRC_ALPHA, NVG_ONE_MINUS_SRC_ALPHA);
 #endif
 
 #ifdef VIOARR_BACKEND_BLEND2D

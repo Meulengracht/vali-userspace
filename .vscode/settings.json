@@ -109,6 +109,7 @@
         "strstream": "cpp",
         "typeindex": "cpp",
         "*.ipp": "cpp",
-        "cuchar": "cpp"
+        "cuchar": "cpp",
+        "wm_surface_protocol_server.h": "c"
     }
 }

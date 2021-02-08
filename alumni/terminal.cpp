@@ -275,6 +275,7 @@ void Terminal::OnCreated(Asgaard::Object* createdObject)
         PrepareBuffer();
         SetBuffer(m_buffer);
         SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
+        SetTransparency(true);
         m_resolver->PrintCommandHeader();
     }
 }

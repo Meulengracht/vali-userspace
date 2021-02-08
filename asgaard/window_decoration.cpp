@@ -205,6 +205,7 @@ namespace Asgaard {
             switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
                 case MemoryBuffer::BufferEvent::CREATED: {
                     SetBuffer(m_buffer);
+                    SetTransparency(true);
                     RedrawReady();
                 } break;
                 

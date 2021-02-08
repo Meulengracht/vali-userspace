@@ -17,6 +17,8 @@ doomgeneric.h
 /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric.h
 doomgeneric_vali_wnd.hpp
 /home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali_wnd.hpp
+ddk/utils.h
+-
 stdio.h
 -
 threads.h
@@ -47,4 +49,12 @@ os/keycodes.h
 -
 
 /home/philip/Source/vali-userspace/doom/doomgeneric/doomkeys.h
+
+/usr/local/vali-ddk/include/ddk/ddkdefs.h
+os/osdefs.h
+-
+
+/usr/local/vali-ddk/include/ddk/utils.h
+ddk/ddkdefs.h
+-
 

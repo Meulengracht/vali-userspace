@@ -1,2 +1,2 @@
 /home/philip/Source/vali-apps/bin/doom.app
-/home/philip/Source/vali-apps/share/DOOM1.WAD
+/home/philip/Source/vali-apps/share/doom/DOOM1.WAD

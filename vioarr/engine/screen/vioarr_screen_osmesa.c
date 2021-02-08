@@ -96,7 +96,7 @@ static int get_screen_format(VideoDescriptor_t* video)
                 video->GreenPosition    == supportedFormats[i].color_positions[1] &&
                 video->BluePosition     == supportedFormats[i].color_positions[2] &&
                 video->ReservedPosition == supportedFormats[i].color_positions[3]) {
-                TRACE("[get_screen_format] found supported format %s", supportedFormats[i].text);
+                WARNING("[get_screen_format] found supported format %s", supportedFormats[i].text);
                 return supportedFormats[i].osmesa_format;
             }
         }

@@ -79,6 +79,7 @@ namespace Asgaard {
         switch (event)
         {
             case ObjectEvent::CREATION: {
+                SetValid(true);
                 Notify(static_cast<int>(BufferEvent::CREATED));
             } break;
             

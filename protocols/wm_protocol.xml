@@ -177,6 +177,12 @@
                         <param name="height" type="int"/>
                     </request>
                 </function>
+                <function name="set_transparency">
+                    <request>
+                        <param name="surface_id" type="uint32_t"/>
+                        <param name="enable" type="int"/>
+                    </request>
+                </function>
                 <function name="set_drop_shadow">
                     <request>
                         <param name="surface_id" type="uint32_t"/>

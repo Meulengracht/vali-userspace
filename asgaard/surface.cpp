@@ -162,6 +162,11 @@ namespace Asgaard {
         wm_surface_set_drop_shadow(APP.GrachtClient(), nullptr, Id(),
             dimensions.X(), dimensions.Y(), dimensions.Width(), dimensions.Height());
     }
+
+    void Surface::SetTransparency(bool enable)
+    {
+        wm_surface_set_transparency(APP.GrachtClient(), nullptr, Id(), (int)enable);
+    }
     
     void Surface::ApplyChanges()
     {

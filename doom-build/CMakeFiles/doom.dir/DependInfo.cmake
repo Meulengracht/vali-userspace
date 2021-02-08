@@ -91,6 +91,7 @@ set(CMAKE_C_COMPILER_ID "Clang")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
+  "/usr/local/vali-ddk/include"
   )
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/philip/Source/vali-userspace/doom/doomgeneric/doomgeneric_vali.cpp" "/home/philip/Source/vali-userspace/doom-build/CMakeFiles/doom.dir/doomgeneric/doomgeneric_vali.cpp.obj"
@@ -100,6 +101,7 @@ set(CMAKE_CXX_COMPILER_ID "Clang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "/usr/local/vali-ddk/include"
   )
 
 # Targets to which this target links.

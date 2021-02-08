@@ -193,6 +193,7 @@ namespace Asgaard {
                             stbi_image_free(buffer);
 
                             if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
+                                SetTransparency(true);
                                 SetState(IconState::NORMAL);
                             }
                         }
