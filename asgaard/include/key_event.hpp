@@ -33,6 +33,7 @@ namespace Asgaard {
         unsigned int  KeyUnicode() const;
         unsigned char KeyCode() const;
         bool          Pressed() const;
+        bool          IsRepeat() const;
 
         bool LeftControl() const;
         bool RightControl() const;

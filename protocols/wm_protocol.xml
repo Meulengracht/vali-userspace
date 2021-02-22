@@ -315,8 +315,8 @@
             <events>
                 <event name="key">
                     <param name="surface_id" type="uint32_t"/>
-                    <param name="keycode" type="uint32_t"/>
-                    <param name="flags" type="uint32_t"/>
+                    <param name="keycode" type="uint8_t"/>
+                    <param name="flags" type="uint16_t"/>
                 </event>
             </events>
         </protocol>

@@ -34,8 +34,8 @@
 #include <errno.h>
 
 #define SPAWN_COORDINATES_COUNT 6
-static int g_spawnCoordinateX[SPAWN_COORDINATES_COUNT] = { 100, 150, 200, 100, 150, 200 };
-static int g_spawnCoordinateY[SPAWN_COORDINATES_COUNT] = { 100, 100, 100, 150, 150, 150 };
+static int g_spawnCoordinateX[SPAWN_COORDINATES_COUNT] = { 100, 200, 300, 100, 200, 300 };
+static int g_spawnCoordinateY[SPAWN_COORDINATES_COUNT] = { 100, 100, 100, 200, 200, 200 };
 static int g_spawnIndex = 0;
 
 void wm_screen_get_properties_callback(struct gracht_recv_message* message, struct wm_screen_get_properties_args* input)

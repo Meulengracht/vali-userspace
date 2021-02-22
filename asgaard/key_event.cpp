@@ -29,7 +29,7 @@ namespace Asgaard {
     KeyEvent::KeyEvent(struct wm_keyboard_key_event* event)
         : m_modifiers(event->flags)
         , m_keyUnicode(0)
-        , m_keyAscii(TranslateKeyCode((KeyCode_t)event->keycode, (KeyModifiers_t)event->flags))
+        , m_keyAscii(TranslateKeyCode(event->keycode, event->flags))
         , m_keyCode((unsigned char)event->keycode)
     {
         
@@ -53,6 +53,12 @@ namespace Asgaard {
     bool KeyEvent::Pressed() const
     {
         return (m_modifiers & VK_MODIFIER_RELEASED) == 0;
+    }
+
+
+    bool KeyEvent::IsRepeat() const
+    {
+        return (m_modifiers & VK_MODIFIER_REPEATED) != 1;
     }
 
     bool KeyEvent::LeftControl() const
