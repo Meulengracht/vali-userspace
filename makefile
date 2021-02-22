@@ -253,4 +253,5 @@ clean:
 	@rm -rf llvm-build
 	@rm -rf asmjit-build
 	@rm -rf blend2d-build
+	@rm -rf doom-build
 	@rm -rf $(VALI_APPLICATION_PATH)
