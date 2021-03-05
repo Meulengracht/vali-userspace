@@ -110,6 +110,9 @@
         "typeindex": "cpp",
         "*.ipp": "cpp",
         "cuchar": "cpp",
-        "wm_surface_protocol_server.h": "c"
+        "wm_surface_protocol_server.h": "c",
+        "dlfcn.h": "c",
+        "sdl_vali.h": "c",
+        "osmesa.h": "c"
     }
 }

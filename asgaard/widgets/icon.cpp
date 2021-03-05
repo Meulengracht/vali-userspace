@@ -121,11 +121,11 @@ namespace Asgaard {
             {
                 case ObjectEvent::CREATION: {
                     SetValid(true);
-                    Notify(static_cast<int>(IconEvent::CREATED));
+                    Notify(static_cast<int>(Notification::CREATED));
                 } break;
                 
                 case ObjectEvent::ERROR: {
-                    Notify(static_cast<int>(IconEvent::ERROR));
+                    Notify(static_cast<int>(Notification::ERROR));
                 } break;
     
                 default:
@@ -141,9 +141,9 @@ namespace Asgaard {
             auto memoryObject = dynamic_cast<MemoryPool*>(source);
             if (memoryObject != nullptr)
             {
-                switch (static_cast<MemoryPool::MemoryEvent>(event))
+                switch (static_cast<MemoryPool::Notification>(event))
                 {
-                    case MemoryPool::MemoryEvent::CREATED: {
+                    case MemoryPool::Notification::CREATED: {
                         auto bufferSize = m_originalWidth * m_originalHeight * 4;
                         for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
                             m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
@@ -151,8 +151,8 @@ namespace Asgaard {
                         }
                     } break;
                     
-                    case MemoryPool::MemoryEvent::ERROR: {
-                        Notify(static_cast<int>(IconEvent::ERROR));
+                    case MemoryPool::Notification::ERROR: {
+                        Notify(static_cast<int>(Notification::ERROR));
                     } break;
                 }
                 return;
@@ -161,9 +161,9 @@ namespace Asgaard {
             auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
             if (bufferObject != nullptr)
             {
-                switch (static_cast<MemoryBuffer::BufferEvent>(event))
+                switch (static_cast<MemoryBuffer::Notification>(event))
                 {
-                    case MemoryBuffer::BufferEvent::CREATED: {
+                    case MemoryBuffer::Notification::CREATED: {
                         auto bufferSize = m_originalWidth * m_originalHeight * 4;
                         int loadedWidth, loadedHeight, loadedComponents;
                         std::string extension = "";
@@ -185,7 +185,7 @@ namespace Asgaard {
                         auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
                         if (buffer != nullptr) {
                             if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
-                                Notify(static_cast<int>(IconEvent::ERROR) /*, error text*/);
+                                Notify(static_cast<int>(Notification::ERROR) /*, error text*/);
                                 break;
                             }
                             

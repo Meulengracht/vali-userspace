@@ -46,8 +46,8 @@ namespace Asgaard {
     
     class WindowDecoration : public Surface {
     public:
-        enum class Event {
-            CREATED,
+        enum class Notification : int {
+            CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
             ERROR
         };
     public:

@@ -42,8 +42,8 @@ namespace Asgaard {
             RIGHT  = 0x8
         };
         
-        enum class SurfaceEvent : int {
-            CREATED
+        enum class Notification : int {
+            CREATED = static_cast<int>(Object::Notification::CUSTOM_START)
         };
     public:
         Surface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
@@ -63,6 +63,7 @@ namespace Asgaard {
         void RequestFrame();
         
         const Rectangle& Dimensions() const { return m_dimensions; }
+        const std::shared_ptr<Screen>& GetScreen() const { return m_screen; }
         
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;

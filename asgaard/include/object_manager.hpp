@@ -26,14 +26,13 @@
 #include <map>
 #include <memory>
 
+#include "object.hpp"
+
 namespace Asgaard {
     
-    class Object;
-    
-    class ObjectManager {
+    class ObjectManager final : Utils::Subscriber {
     public:
         ObjectManager();
-        ~ObjectManager();
         
         template<class T>
         std::shared_ptr<T> CreateClientObject()
@@ -42,7 +41,14 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            std::shared_ptr<T> object = std::shared_ptr<T>(new T(CreateObjectId()));
+            auto object = std::shared_ptr<T>(new T(CreateObjectId()));
+            if (object == nullptr) {
+                return nullptr;
+            }
+
+            // subscribe to events so we can react on destroy invokes
+            object->Subscribe(this);
+
             m_objects[object->Id()] = object;
             return object;
         }
@@ -56,6 +62,13 @@ namespace Asgaard {
             
             std::shared_ptr<T> object = std::shared_ptr<T>(
                 new T(CreateObjectId(), std::forward<Params>(parameters)...));
+            if (object == nullptr) {
+                return nullptr;
+            }
+
+            // subscribe to events so we can react on destroy invokes
+            object->Subscribe(this);
+
             m_objects[object->Id()] = object;
             return object;
         }
@@ -84,7 +97,7 @@ namespace Asgaard {
             m_objects[object->Id()] = object;
             return object;
         }
-        
+
         std::shared_ptr<Object> operator[](uint32_t);
 
     public:
@@ -92,6 +105,28 @@ namespace Asgaard {
         static void *operator new[] (size_t)   = delete;
         static void  operator delete(void*)    = delete;
         static void  operator delete[] (void*) = delete;
+
+    private:
+        void Notification(Utils::Publisher* source, int event, void* data) override
+        {
+            auto object = dynamic_cast<Object*>(source);
+            if (object == nullptr) {
+                return;
+            }
+            
+            if (event == static_cast<int>(Object::Notification::DESTROY)) {
+                DestroyObject(object->Id());
+            }
+        }
+
+        void DestroyObject(uint32_t id)
+        {
+            auto element = m_objects[id];
+            if (element == nullptr) {
+                return;
+            }
+            m_objects.erase(id);
+        }
         
     private:
         uint32_t CreateObjectId();

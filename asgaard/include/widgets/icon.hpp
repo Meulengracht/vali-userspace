@@ -42,8 +42,8 @@ namespace Asgaard {
                 COUNT
             };
             
-            enum class IconEvent {
-                CREATED,
+            enum class Notification : int {
+                CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
                 ERROR
             };
         public:

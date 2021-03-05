@@ -28,6 +28,8 @@
 #include "object.hpp"
 
 namespace Asgaard {
+    class WindowBase;
+
     class Screen : public Object {
     public:
         enum ScreenTransform {
@@ -37,8 +39,8 @@ namespace Asgaard {
             ROTATE_270,
         };
         
-        enum class ScreenEvent {
-            ERROR,
+        enum class Notification : int {
+            ERROR = static_cast<int>(Object::Notification::CUSTOM_START),
             CREATED
         };
         
@@ -75,12 +77,34 @@ namespace Asgaard {
         int GetCurrentWidth() const;
         int GetCurrentHeight() const;
         int GetCurrentRefreshRate() const;
+
+        const std::list<std::unique_ptr<ScreenMode>>& GetModes() const;
         
     public:
+        template<class WC, typename... Params>
+        std::shared_ptr<WC> CreateWindow(Params... parameters) {
+            if (!std::is_base_of<WindowBase, WC>::value) {
+                return nullptr;
+            }
+
+            auto window = OM.CreateClientObject<WC, Params...>(parameters...);
+            if (window == nullptr) {
+                return nullptr;
+            }
+
+            // subscribe to the window events so we can listen for destroy
+            window->Subscribe(this);
+            window->BindToScreen(std::dynamic_pointer_cast<Screen>(OM[Id()]));
+            
+            m_windows.push_back(window);
+            return window;
+        }
+
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         
     private:
         std::list<std::unique_ptr<ScreenMode>> m_modes;
+        std::list<std::shared_ptr<WindowBase>> m_windows;
         
         int             m_positionX;
         int             m_positionY;

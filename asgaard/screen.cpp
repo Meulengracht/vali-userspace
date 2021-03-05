@@ -23,6 +23,7 @@
 
 #include "include/application.hpp"
 #include "include/screen.hpp"
+#include "include/window_base.hpp"
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_screen_protocol_client.h"
 
@@ -99,6 +100,11 @@ namespace Asgaard {
         }
         return -1;
     }
+
+    const std::list<std::unique_ptr<Screen::ScreenMode>>& Screen::GetModes() const
+    {
+        return m_modes;
+    }
     
     void Screen::ExternalEvent(enum ObjectEvent event, void* data)
     {
@@ -108,11 +114,11 @@ namespace Asgaard {
                     (struct wm_core_error_event*)data;
                 
                 // In case of fatal events:
-                Notify(static_cast<int>(ScreenEvent::ERROR));
+                Notify(static_cast<int>(Notification::ERROR));
             } break;
             
             case Object::ObjectEvent::SYNC: {
-                Notify(static_cast<int>(ScreenEvent::CREATED));
+                Notify(static_cast<int>(Notification::CREATED));
             } break;
             
             case Object::ObjectEvent::SCREEN_PROPERTIES: {

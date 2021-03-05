@@ -217,9 +217,6 @@ void Terminal::DescriptorEvent(int iod, unsigned int events)
             bytesRead = read(iod, &inputBuffer[0], sizeof(inputBuffer) - 1);
         }
     }
-    else {
-        m_resolver->HandleDescriptorEvent(iod, events);
-    }
 }
 
 void Terminal::RequestRedraw()
@@ -288,13 +285,13 @@ void Terminal::Notification(Publisher* source, int event, void* data)
     }
     
     if (m_decoration != nullptr && object->Id() == m_decoration->Id()) {
-        switch (static_cast<Asgaard::WindowDecoration::Event>(event)) {
-            case Asgaard::WindowDecoration::Event::CREATED: {
+        switch (event) {
+            case static_cast<int>(Asgaard::WindowDecoration::Notification::CREATED): {
                 m_decoration->SetTitle("Alumni Terminal v1.0-dev");
                 m_decoration->RequestRedraw();
             } break;
             
-            case Asgaard::WindowDecoration::Event::ERROR: {
+            case static_cast<int>(Asgaard::WindowDecoration::Notification::ERROR): {
                 // @todo 
             } break;
         }

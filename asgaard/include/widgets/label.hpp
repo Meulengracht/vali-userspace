@@ -40,8 +40,8 @@ namespace Asgaard {
     namespace Widgets {
         class Label : public Surface {
         public:
-            enum class LabelEvent {
-                CREATED,
+            enum class Notification : int {
+                CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
                 ERROR
             };
             enum class Anchors {

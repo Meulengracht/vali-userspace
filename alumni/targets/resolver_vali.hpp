@@ -22,11 +22,12 @@
  */
 #pragma once
 
+#include <asgaard/utils/descriptor_listener.hpp>
 #include <os/osdefs.h>
 #include "resolver_base.hpp"
 #include <thread>
 
-class ResolverVali : public ResolverBase {
+class ResolverVali : public ResolverBase, public Asgaard::Utils::DescriptorListener {
 public:
     ResolverVali(int stdoutDescriptor, int stderrDescriptor);
     ~ResolverVali();
@@ -34,7 +35,7 @@ public:
 public:
     bool HandleKeyCode(const Asgaard::KeyEvent&) override;
     void PrintCommandHeader() override;
-    void HandleDescriptorEvent(int iod, unsigned int events) override;
+    void DescriptorEvent(int iod, unsigned int events) override;
 
 protected:
     bool CommandResolver(const std::string&, const std::vector<std::string>&) override;

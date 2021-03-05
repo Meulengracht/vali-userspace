@@ -86,12 +86,12 @@ namespace Asgaard {
     {
         auto memoryObject = dynamic_cast<MemoryPool*>(source);
         if (memoryObject != nullptr) {
-            switch (static_cast<MemoryPool::MemoryEvent>(event)) {
-                case MemoryPool::MemoryEvent::CREATED: {
+            switch (static_cast<MemoryPool::Notification>(event)) {
+                case MemoryPool::Notification::CREATED: {
                     OnCreated(memoryObject);
                 } break;
                 
-                case MemoryPool::MemoryEvent::ERROR: {
+                case MemoryPool::Notification::ERROR: {
                     
                 } break;
             }
@@ -100,11 +100,11 @@ namespace Asgaard {
         
         auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
         if (bufferObject != nullptr) {
-            switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
-                case MemoryBuffer::BufferEvent::CREATED: {
+            switch (static_cast<MemoryBuffer::Notification>(event)) {
+                case MemoryBuffer::Notification::CREATED: {
                     OnCreated(bufferObject);
                 } break;
-                case MemoryBuffer::BufferEvent::REFRESHED: {
+                case MemoryBuffer::Notification::REFRESHED: {
                     OnRefreshed(bufferObject);
                 } break;
             }

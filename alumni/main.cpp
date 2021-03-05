@@ -43,9 +43,10 @@ int main(int argc, char **argv)
     ioctl(stderrPipe, FIONBIO, &opt);
     
     // initialize application
-    Asgaard::APP.CreateWindow<Terminal>(initialSize, font, resolver, stdoutPipe, stderrPipe);
     Asgaard::APP.Initialize();
-    Asgaard::APP.AddEventDescriptor(stdoutPipe, IOSETIN | IOSETLVT);
-    Asgaard::APP.AddEventDescriptor(stderrPipe, IOSETIN | IOSETLVT);
+
+    auto window = Asgaard::APP.GetScreen()->CreateWindow<Terminal>(initialSize, font, resolver, stdoutPipe, stderrPipe);
+    Asgaard::APP.AddEventDescriptor(stdoutPipe, IOSETIN | IOSETLVT, window);
+    Asgaard::APP.AddEventDescriptor(stderrPipe, IOSETIN | IOSETLVT, window);
     return Asgaard::APP.Execute();
 }

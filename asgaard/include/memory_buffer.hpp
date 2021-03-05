@@ -31,8 +31,8 @@ namespace Asgaard {
     
     class MemoryBuffer final : public Object {
     public:
-        enum class BufferEvent : int {
-            CREATED,
+        enum class Notification : int {
+            CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
             REFRESHED
         };
         

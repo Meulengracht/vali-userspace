@@ -121,7 +121,7 @@ namespace Asgaard {
             m_appTitle  && m_appTitle->Valid())
         {
             SetValid(true);
-            Notify(static_cast<int>(Event::CREATED));
+            Notify(static_cast<int>(Notification::CREATED));
         }
     }
     
@@ -168,7 +168,7 @@ namespace Asgaard {
             } break;
             
             case ObjectEvent::ERROR: {
-                Notify(static_cast<int>(Event::ERROR));
+                Notify(static_cast<int>(Notification::ERROR));
             } break;
             
             default:
@@ -187,14 +187,14 @@ namespace Asgaard {
         }
         
         if (m_memory != nullptr && object->Id() == m_memory->Id()) {
-            switch (static_cast<MemoryPool::MemoryEvent>(event)) {
-                case MemoryPool::MemoryEvent::CREATED: {
+            switch (static_cast<MemoryPool::Notification>(event)) {
+                case MemoryPool::Notification::CREATED: {
                     m_buffer = MemoryBuffer::Create(this, m_memory, 0,
                         Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
                 } break;
                 
-                case MemoryPool::MemoryEvent::ERROR: {
-                    Notify(static_cast<int>(Event::ERROR));
+                case MemoryPool::Notification::ERROR: {
+                    Notify(static_cast<int>(Notification::ERROR));
                 } break;
             }
             
@@ -202,8 +202,8 @@ namespace Asgaard {
         }
         
         if (m_buffer != nullptr && object->Id() == m_buffer->Id()) {
-            switch (static_cast<MemoryBuffer::BufferEvent>(event)) {
-                case MemoryBuffer::BufferEvent::CREATED: {
+            switch (static_cast<MemoryBuffer::Notification>(event)) {
+                case MemoryBuffer::Notification::CREATED: {
                     SetBuffer(m_buffer);
                     SetTransparency(true);
                     RedrawReady();

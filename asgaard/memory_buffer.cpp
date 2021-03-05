@@ -27,6 +27,7 @@
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_memory_pool_protocol_client.h"
+#include "protocols/wm_buffer_protocol_client.h"
 
 
 static int CalculateStride(int width, enum Asgaard::PixelFormat format)
@@ -63,7 +64,7 @@ namespace Asgaard {
     
     MemoryBuffer::~MemoryBuffer()
     {
-        
+        wm_buffer_destroy(APP.GrachtClient(), nullptr, Id());
     }
     
     void* MemoryBuffer::Buffer(int x, int y) {
@@ -80,11 +81,11 @@ namespace Asgaard {
         {
             case ObjectEvent::CREATION: {
                 SetValid(true);
-                Notify(static_cast<int>(BufferEvent::CREATED));
+                Notify(static_cast<int>(Notification::CREATED));
             } break;
             
             case ObjectEvent::BUFFER_RELEASE: {
-                Notify(static_cast<int>(BufferEvent::REFRESHED));
+                Notify(static_cast<int>(Notification::REFRESHED));
             } break;
             
             default:

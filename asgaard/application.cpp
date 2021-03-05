@@ -31,6 +31,7 @@
 #include "include/object_manager.hpp"
 #include "include/window_base.hpp"
 #include "include/exceptions/application_exception.h"
+#include "include/utils/descriptor_listener.hpp"
 #include <inet/socket.h>
 #include <inet/local.h>
 #include <ioset.h>
@@ -128,7 +129,6 @@ namespace Asgaard {
     Application::Application() 
         : Object(0)
         , m_client(nullptr)
-        , m_window(nullptr)
         , m_ioset(-1)
         , m_initialized(false)
         , m_messageBuffer(new char[GRACHT_MAX_MESSAGE_SIZE])
@@ -175,14 +175,22 @@ namespace Asgaard {
             throw new ApplicationException("failed to initialize the ioset descriptor", errno);
         }
         
-        // mark us initialized before calling AddEventDescriptor
-        m_initialized = true;
-
         // add the client as a target
-        AddEventDescriptor(gracht_client_iod(m_client), IOSETIN | IOSETCTL | IOSETLVT);
+        m_initialized = true;
+        AddEventDescriptor(
+            gracht_client_iod(m_client), 
+            IOSETIN | IOSETCTL | IOSETLVT,
+            std::shared_ptr<Utils::DescriptorListener>(nullptr));
+        m_initialized = false;
 
         // kick off a chain reaction by asking for all objects
         wm_core_get_objects(m_client, nullptr);
+        wm_core_sync(m_client, nullptr, 0);
+
+        // wait for initialization to complete
+        while (!m_initialized) {
+            (void)gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
+        }
     }
     
     void Application::PumpMessages()
@@ -213,15 +221,18 @@ namespace Asgaard {
                     gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
                 }
                 else {
-                    m_window->DescriptorEvent(events[i].data.iod, events[i].events);
+                    auto listener = m_listeners.find(events[i].data.iod);
+                    if (listener != m_listeners.end()) {
+                        listener->second->DescriptorEvent(events[i].data.iod, events[i].events);
+                    }
                 }
             }
         }
         
         return 0;
     }
-
-    void Application::AddEventDescriptor(int iod, unsigned int events)
+    
+    void Application::AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>& listener)
     {
         if (!m_initialized) {
             throw new ApplicationException("Initialize() must be called before AddEventDescriptor", -1);
@@ -235,6 +246,8 @@ namespace Asgaard {
         if (status) {
             throw new ApplicationException("ioset_ctrl failed to add event descriptor", status);
         }
+
+        m_listeners[iod] = listener;
     }
 
     void Application::ExternalEvent(enum ObjectEvent event, void* data)
@@ -249,6 +262,7 @@ namespace Asgaard {
                     case object_type_screen: {
                         auto screen = Asgaard::OM.CreateServerObject<Asgaard::Screen>(event->object_id);
                         screen->Subscribe(this);
+                        m_screens.push_back(screen);
                     } break;
 
                     case object_type_pointer: {
@@ -263,28 +277,26 @@ namespace Asgaard {
             case ObjectEvent::ERROR: {
                 // todo app error for those who listen
             } break;
+            case ObjectEvent::SYNC: {
+                // we are initalized
+                m_initialized = true;
+            } break;
             
             default:
                 break;
         }
     }
-    
+
     void Application::Notification(Publisher* source, int event, void* data)
     {
-        auto screenObject = dynamic_cast<Screen*>(source);
-        if (screenObject) {
-            switch (static_cast<Screen::ScreenEvent>(event)) {
-                case Screen::ScreenEvent::CREATED: {
-                    if (m_window != nullptr) {
-                        auto screenPtr = std::static_pointer_cast<Screen>(OM[screenObject->Id()]);
-                        m_window->BindToScreen(screenPtr);
-                    }
-                } break;
-                
-                case Screen::ScreenEvent::ERROR: {
-                    
-                } break;
-            }
+        auto screen = dynamic_cast<Screen*>(source);
+        if (screen == nullptr) {
+            return;
+        }
+
+        if (event == static_cast<int>(Object::Notification::DESTROY)) {
+            std::remove_if(m_screens.begin(), m_screens.end(), 
+                [screen](const std::shared_ptr<Screen>& i) { return i->Id() == screen->Id(); });
         }
     }
 }
@@ -295,13 +307,18 @@ extern "C"
     // CORE PROTOCOL EVENTS
     void wm_core_event_sync_callback(struct wm_core_sync_event* input)
     {
-        auto object = Asgaard::OM[input->serial];
-        if (!object) {
-            return;
+        if (input->serial != 0) {
+            auto object = Asgaard::OM[input->serial];
+            if (!object) {
+                return;
+            }
+            
+            // publish to object
+            object->ExternalEvent(Asgaard::Object::ObjectEvent::SYNC);
         }
-        
-        // publish to object
-        object->ExternalEvent(Asgaard::Object::ObjectEvent::SYNC);
+        else {
+            Asgaard::APP.ExternalEvent(Asgaard::Object::ObjectEvent::SYNC);
+        }
     }
 
     void wm_core_event_error_callback(struct wm_core_error_event* input)

@@ -97,7 +97,7 @@ void ResolverVali::PrintCommandHeader()
     }
 }
 
-void ResolverVali::HandleDescriptorEvent(int iod, unsigned int events)
+void ResolverVali::DescriptorEvent(int iod, unsigned int events)
 {
     if (iod == m_processEvent) {
         int exitCode;
@@ -146,7 +146,7 @@ bool ResolverVali::ExecuteProgram(const std::string& Program, const std::vector<
         // before adding descriptors
         if (m_processEvent == -1) {
             m_processEvent = eventd(0, EVT_RESET_EVENT);
-            Asgaard::APP.AddEventDescriptor(m_processEvent, IOSETSYN);
+            Asgaard::APP.AddEventDescriptor(m_processEvent, IOSETSYN, std::shared_ptr<ResolverVali>(this));
         }
 
         std::thread spawn(std::bind(&ResolverVali::WaitForProcess, this));

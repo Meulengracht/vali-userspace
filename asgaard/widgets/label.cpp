@@ -153,7 +153,7 @@ namespace Asgaard {
                 } break;
                 
                 case ObjectEvent::ERROR: {
-                    Notify(static_cast<int>(LabelEvent::ERROR));
+                    Notify(static_cast<int>(Notification::ERROR));
                 } break;
     
                 default:
@@ -169,15 +169,15 @@ namespace Asgaard {
             auto memoryObject = dynamic_cast<MemoryPool*>(source);
             if (memoryObject != nullptr) {
                 // OK notification from the memory pool
-                switch (static_cast<MemoryPool::MemoryEvent>(event))
+                switch (static_cast<MemoryPool::Notification>(event))
                 {
-                    case MemoryPool::MemoryEvent::CREATED: {
+                    case MemoryPool::Notification::CREATED: {
                         m_buffer = MemoryBuffer::Create(this, m_memory, 0,
                             Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
                     } break;
                     
-                    case MemoryPool::MemoryEvent::ERROR: {
-                        Notify(static_cast<int>(LabelEvent::ERROR));
+                    case MemoryPool::Notification::ERROR: {
+                        Notify(static_cast<int>(Notification::ERROR));
                     } break;
                 }
             }
@@ -185,17 +185,17 @@ namespace Asgaard {
             auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
             if (bufferObject != nullptr)
             {
-                switch (static_cast<MemoryBuffer::BufferEvent>(event))
+                switch (static_cast<MemoryBuffer::Notification>(event))
                 {
-                    case MemoryBuffer::BufferEvent::CREATED: {
+                    case MemoryBuffer::Notification::CREATED: {
                         SetBuffer(m_buffer);
                         SetTransparency(true);
                         RedrawReady();
                         SetValid(true);
-                        Notify(static_cast<int>(LabelEvent::CREATED));
+                        Notify(static_cast<int>(Notification::CREATED));
                     } break;
 
-                    case MemoryBuffer::BufferEvent::REFRESHED: {
+                    case MemoryBuffer::Notification::REFRESHED: {
                         RedrawReady();
                     } break;
                     

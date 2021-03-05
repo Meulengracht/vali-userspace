@@ -45,7 +45,7 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ##### BUILD TARGETS           #####
 ###################################
 .PHONY: build
-build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_libfreetype build_llvm build_apps build_wm
+build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_lua build_libfreetype build_llvm build_apps build_wm
 	
 .PHONY: package
 package: build
@@ -184,6 +184,30 @@ doom-build:
 build_doom: doom-build
 	cd doom-build && make -j$(CPU_COUNT) && make install
 
+lua-build:
+	mkdir -p lua-build
+	cd lua-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../lua
+
+.PHONY: build_lua
+build_lua: lua-build
+	cd lua-build && make -j$(CPU_COUNT) && make install
+
+sdl-build:
+	mkdir -p sdl-build
+	cd sdl-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../SDL
+
+.PHONY: build_sdl
+build_sdl: sdl-build
+	#cd sdl-build && make -j$(CPU_COUNT) && make install
+
 .PHONY: build_mesa
 build_mesa:
 	#$(eval CPU_COUNT = $(shell nproc))
@@ -204,6 +228,14 @@ clean_blend2d:
 .PHONY: clean_doom
 clean_doom:
 	@rm -rf doom-build
+
+.PHONY: clean_lua
+clean_lua:
+	@rm -rf lua-build
+
+.PHONY: clean_sdl
+clean_sdl:
+	@rm -rf sdl-build
 
 .PHONY: clean_asgaard
 clean_asgaard:
@@ -254,4 +286,6 @@ clean:
 	@rm -rf asmjit-build
 	@rm -rf blend2d-build
 	@rm -rf doom-build
+	@rm -rf lua-build
+	@rm -rf sdl-build
 	@rm -rf $(VALI_APPLICATION_PATH)

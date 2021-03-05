@@ -41,7 +41,6 @@ public:
 public:
     virtual bool HandleKeyCode(const Asgaard::KeyEvent&) = 0;
     virtual void PrintCommandHeader() = 0;
-    virtual void HandleDescriptorEvent(int iod, unsigned int events) = 0;
 
 public:
     bool Alive() const { return m_alive; }

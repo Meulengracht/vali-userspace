@@ -51,17 +51,17 @@ namespace Asgaard {
                 
                 status = dma_attach(event->system_handle, &m_attachment);
                 if (status != OsSuccess) {
-                    Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
+                    Notify(static_cast<int>(Notification::ERROR) /* string text todo */);
                     return;
                 }
                 
                 status = dma_attachment_map(&m_attachment, DMA_ACCESS_WRITE);
                 if (status != OsSuccess) {
-                    Notify(static_cast<int>(MemoryEvent::ERROR) /* string text todo */);
+                    Notify(static_cast<int>(Notification::ERROR) /* string text todo */);
                     return;
                 }
                 
-                Notify(static_cast<int>(MemoryEvent::CREATED));
+                Notify(static_cast<int>(Notification::CREATED));
             } break;
             
             default:

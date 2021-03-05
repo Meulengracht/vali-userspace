@@ -58,7 +58,7 @@ namespace Asgaard {
 
     Surface::~Surface()
     {
-        
+        wm_surface_destroy(APP.GrachtClient(), nullptr, Id());
     }
     
     void Surface::BindToScreen(const std::shared_ptr<Screen>& screen)

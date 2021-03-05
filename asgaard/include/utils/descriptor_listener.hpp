@@ -20,29 +20,13 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
-
-#include "include/object_manager.hpp"
-#include "include/object.hpp"
-#include <gracht/client.h>
-#include <type_traits>
+#pragma once
 
 namespace Asgaard {
-    ObjectManager OM;
-    
-    ObjectManager::ObjectManager() :
-        m_idIndex(0x100) { }
-    
-    std::shared_ptr<Object> ObjectManager::operator[](uint32_t index)
-    {
-        std::map<uint32_t, std::shared_ptr<Object>>::iterator it = m_objects.find(index);
-        if (it != m_objects.end()) {
-            return it->second;
-        }
-        return nullptr;
-    }
-    
-    uint32_t ObjectManager::CreateObjectId()
-    {
-        return m_idIndex++;
+    namespace Utils {
+        class DescriptorListener {
+        public:
+            virtual void DescriptorEvent(int iod, unsigned int events) = 0;
+        };
     }
 }

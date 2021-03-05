@@ -28,6 +28,10 @@
 typedef struct gracht_client gracht_client_t;
 
 namespace Asgaard {
+    namespace Utils {
+        class DescriptorListener;
+    }
+    
     class Application final : public Object {
     public:
         Application();
@@ -49,7 +53,7 @@ namespace Asgaard {
          * @param events The events to listen for, defined in <ioset.h>
          * @throw ApplicationException
          */
-        void AddEventDescriptor(int iod, unsigned int events);
+        void AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>&);
 
         /**
          * PumpMessages
@@ -67,27 +71,20 @@ namespace Asgaard {
         int Execute();
 
     public:
-        template<class WC, typename... Params>
-        void CreateWindow(Params... parameters) {
-            if (!std::is_base_of<WindowBase, WC>::value) {
-                return;
-            }
-            m_window = OM.CreateClientObject<WC, Params...>(parameters...);
-        }
-        
-        gracht_client_t*                   GrachtClient() const { return m_client; }
-        const std::shared_ptr<WindowBase>& Window() const { return m_window; }
+        gracht_client_t* GrachtClient() const { return m_client; }
+        const std::shared_ptr<Screen>& GetScreen() const { return m_screens.front(); }
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        gracht_client_t*            m_client;
-        std::shared_ptr<WindowBase> m_window;
-        int                         m_ioset;
-        bool                        m_initialized;
-        char*                       m_messageBuffer;
+        std::map<int, std::shared_ptr<Utils::DescriptorListener>> m_listeners;
+        std::list<std::shared_ptr<Screen>>                        m_screens;
+        gracht_client_t*                                          m_client;
+        int                                                       m_ioset;
+        volatile bool                                             m_initialized;
+        char*                                                     m_messageBuffer;
     };
     
     extern Application APP;

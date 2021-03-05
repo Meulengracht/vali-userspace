@@ -47,15 +47,25 @@ namespace Asgaard {
             POINTER_MOVE,
             POINTER_CLICK
         };
+
+        enum class Notification : int {
+            DESTROY = 0,
+
+            CUSTOM_START
+        };
         
     public:
         Object(uint32_t id) : m_id(id), m_valid(false) { }
         virtual ~Object() { }
 
     public:
-        uint32_t     Id() const { return m_id; }
-        bool         Valid() const { return m_valid; }
+        uint32_t Id() const { return m_id; }
+        bool     Valid() const { return m_valid; }
         
+        virtual void Destroy() {
+            Notify(static_cast<int>(Notification::DESTROY));
+        };
+
         virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
         
     protected:

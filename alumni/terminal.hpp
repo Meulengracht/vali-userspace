@@ -37,6 +37,7 @@
 #include <asgaard/drawing/font.hpp>
 #include <asgaard/drawing/painter.hpp>
 #include <asgaard/drawing/color.hpp>
+#include <asgaard/utils/descriptor_listener.hpp>
 
 #define ALUMNI_MARGIN_TOP   40
 #define ALUMNI_MARGIN_LEFT  10
@@ -45,7 +46,7 @@
 class ResolverBase;
 class TerminalLine;
 
-class Terminal : public Asgaard::WindowBase {
+class Terminal : public Asgaard::WindowBase, public Asgaard::Utils::DescriptorListener {
 private:
     struct TextState {
         Asgaard::Drawing::Color m_fgColor;
