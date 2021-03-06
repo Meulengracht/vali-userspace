@@ -22,39 +22,16 @@
  */
 #pragma once
 
-#include <string>
-#include <vector>
-#include "pixel_format.hpp"
-#include "rectangle.hpp"
 #include "surface.hpp"
-#include "screen.hpp"
 
 namespace Asgaard {
-    class MemoryPool;
-    class MemoryBuffer;
+    class Screen;
     
-    class WindowBase : public Surface {
+    class SubSurface : public Surface {
     public:
-        WindowBase(uint32_t, const Rectangle&);
-        ~WindowBase();
+        SubSurface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
         
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
-
-    // Window events that can/should be reacted on.
-    protected:
-        virtual void OnCreated(Object*) = 0;
-        virtual void OnRefreshed(MemoryBuffer*) = 0;
-        virtual void Teardown() = 0;
-
-    // Window functions that can be called to configure this window 
-    protected:
-        void InitiateResize(const std::shared_ptr<Pointer>&, enum SurfaceEdges);
-        void InitiateMove(const std::shared_ptr<Pointer>&);
-
-        // Protected function, allow override
-        void Notification(Publisher*, int = 0, void* = 0) override;
-
-    private:
-        std::vector<enum PixelFormat> m_supportedFormats;
+        void Resize(int width, int height);
+        void Move(int parentX, int parentY);
     };
 }

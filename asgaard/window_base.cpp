@@ -113,7 +113,7 @@ namespace Asgaard {
         }
     }
     
-    void WindowBase::InititateResize(const std::shared_ptr<Pointer>& pointer, enum SurfaceEdges edges)
+    void WindowBase::InitiateResize(const std::shared_ptr<Pointer>& pointer, enum SurfaceEdges edges)
     {
         wm_surface_resize(APP.GrachtClient(), nullptr, Id(), pointer->Id(), ToWindowEdges(edges));
     }

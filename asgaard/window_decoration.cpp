@@ -44,7 +44,7 @@ namespace Asgaard {
         uint32_t parentId,
         const Rectangle& dimensions,
         const std::shared_ptr<Drawing::Font>& font) 
-        : Surface(id, screen, parentId, dimensions)
+        : SubSurface(id, screen, parentId, dimensions)
         , m_memory(nullptr)
         , m_buffer(nullptr)
         , m_appFont(font)

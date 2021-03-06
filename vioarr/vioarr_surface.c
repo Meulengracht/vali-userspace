@@ -172,6 +172,33 @@ void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, str
     }
 }
 
+void wm_surface_resize_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_resize_subsurface_args* input)
+{
+    TRACE("[wm_surface_resize_subsurface_callback] client %i, surface %u", message->client, input->surface_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    vioarr_region_t*  region;
+
+    if (!surface) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    region = vioarr_surface_region(surface);
+    vioarr_region_set_size(region, input->width, input->height);
+}
+
+void wm_surface_move_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_move_subsurface_args* input)
+{
+    TRACE("[wm_surface_move_subsurface_callback] client %i, surface %u", message->client, input->surface_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    vioarr_surface_move_absolute(surface, input->x_in_parent, input->y_in_parent);
+}
+
 void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_surface_commit_args* input)
 {
     TRACE("[wm_surface_commit_callback] client %i, surface %u", message->client, input->surface_id);

@@ -25,12 +25,11 @@
 #include <atomic>
 #include <memory>
 #include "../utils/bitset_enum.hpp"
-#include "../surface.hpp"
+#include "../subsurface.hpp"
 #include "../drawing/color.hpp"
 #include <string>
 
 namespace Asgaard {
-    class Surface;
     class MemoryPool;
     class MemoryBuffer;
     namespace Drawing {
@@ -38,7 +37,7 @@ namespace Asgaard {
     }
 
     namespace Widgets {
-        class Label : public Surface {
+        class Label : public SubSurface {
         public:
             enum class Notification : int {
                 CREATED = static_cast<int>(Object::Notification::CUSTOM_START),

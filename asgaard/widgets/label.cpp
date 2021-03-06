@@ -31,7 +31,7 @@
 namespace Asgaard {
     namespace Widgets {
         Label::Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
-            : Surface(id, screen, parentId, dimensions)
+            : SubSurface(id, screen, parentId, dimensions)
             , m_memory(nullptr)
             , m_buffer(nullptr)
             , m_font(nullptr)

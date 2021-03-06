@@ -23,7 +23,7 @@
 #pragma once
 
 #include <memory>
-#include "../surface.hpp"
+#include "../subsurface.hpp"
 #include <string>
 
 namespace Asgaard {
@@ -31,7 +31,7 @@ namespace Asgaard {
     class MemoryBuffer;
     
     namespace Widgets {
-        class Icon : public Surface {
+        class Icon : public SubSurface {
         public:
             enum class IconState {
                 NORMAL = 0,

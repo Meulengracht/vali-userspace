@@ -219,6 +219,20 @@
                         <param name="y" type="int"/>
                     </request>
                 </function>
+                <function name="resize_subsurface">
+                    <request>
+                        <param name="surface_id" type="uint32_t" />
+                        <param name="width" type="int" />
+                        <param name="height" type="int" />
+                    </request>
+                </function>
+                <function name="move_subsurface">
+                    <request>
+                        <param name="surface_id" type="uint32_t" />
+                        <param name="x_in_parent" type="int" />
+                        <param name="y_in_parent" type="int" />
+                    </request>
+                </function>
                 <function name="request_fullscreen_mode">
                     <request>
                         <param name="surface_id" type="uint32_t"/>
