@@ -72,12 +72,14 @@ extern "C" {
     static void wm_surface_event_format_callback(struct wm_surface_format_event*);
     static void wm_surface_event_frame_callback(struct wm_surface_frame_event*);
     static void wm_surface_event_resize_callback(struct wm_surface_resize_event*);
+    static void wm_surface_event_resize_end_callback(struct wm_surface_resize_end_event*);
     static void wm_surface_event_focus_callback(struct wm_surface_focus_event*);
 
     static gracht_protocol_function_t wm_surface_callbacks[4] = {
         { PROTOCOL_WM_SURFACE_EVENT_FORMAT_ID , (void*)wm_surface_event_format_callback },
         { PROTOCOL_WM_SURFACE_EVENT_FRAME_ID ,  (void*)wm_surface_event_frame_callback },
         { PROTOCOL_WM_SURFACE_EVENT_RESIZE_ID , (void*)wm_surface_event_resize_callback },
+        { PROTOCOL_WM_SURFACE_EVENT_RESIZE_END_ID, (void*)wm_surface_event_resize_end_callback }
         { PROTOCOL_WM_SURFACE_EVENT_FOCUS_ID , (void*)wm_surface_event_focus_callback },
     };
     DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 4);
@@ -413,6 +415,17 @@ extern "C"
         }
         
         object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_RESIZE, input);
+    }
+
+    void wm_surface_event_resize_end_callback(struct wm_surface_resize_end_event* input)
+    {
+        auto object = Asgaard::OM[input->surface_id];
+        if (!object) {
+            // log
+            return;
+        }
+        
+        object->ExternalEvent(Asgaard::Object::ObjectEvent::SURFACE_RESIZE_END, input);
     }
 
     void wm_surface_event_focus_callback(struct wm_surface_focus_event* input)

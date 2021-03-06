@@ -44,6 +44,7 @@ int              vioarr_surface_contains(vioarr_surface_t*, int x, int y);
 void             vioarr_surface_invalidate(vioarr_surface_t*, int x, int y, int width, int height);
 void             vioarr_surface_move(vioarr_surface_t*, int, int);
 void             vioarr_surface_move_absolute(vioarr_surface_t*, int, int);
+void             vioarr_surface_set_size(vioarr_surface_t*, vioarr_region_t*);
 void             vioarr_surface_commit(vioarr_surface_t*);
 void             vioarr_surface_focus(vioarr_surface_t*, int focus);
 uint32_t         vioarr_surface_id(vioarr_surface_t*);

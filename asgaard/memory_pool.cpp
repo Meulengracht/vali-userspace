@@ -25,19 +25,25 @@
 #include "include/memory_pool.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
+#include "protocols/wm_memory_pool_protocol_client.h"
 #include "protocols/wm_memory_protocol_client.h"
 
 namespace Asgaard {
     MemoryPool::MemoryPool(uint32_t id, int size)
         : Object(id)
         , m_size(size)
+        , m_attachment({ 0 })
     {
         wm_memory_create_pool(APP.GrachtClient(), nullptr, 0 /* memory_system_id */, id, size);
     }
     
     MemoryPool::~MemoryPool()
     {
-        
+        if (m_attachment.buffer) {
+            dma_attachment_unmap(&m_attachment);
+            dma_detach(&m_attachment);
+        }
+        wm_memory_pool_destroy(APP.GrachtClient(), nullptr, Id());
     }
     
     void MemoryPool::ExternalEvent(enum ObjectEvent event, void* data)

@@ -24,6 +24,7 @@
 
 #include "protocols/wm_surface_protocol_server.h"
 #include "protocols/wm_core_protocol_server.h"
+#include "engine/vioarr_input.h"
 #include "engine/vioarr_surface.h"
 #include "engine/vioarr_screen.h"
 #include "engine/vioarr_objects.h"
@@ -71,6 +72,30 @@ void wm_surface_set_input_region_callback(struct gracht_recv_message* message, s
     }
     
     vioarr_surface_set_input_region(surface, input->x, input->y, input->width, input->height);
+}
+
+void wm_surface_request_fullscreen_mode(struct gracht_recv_message* message, struct wm_surface_request_fullscreen_mode_args* input)
+{
+    TRACE("[wm_surface_request_fullscreen_mode] client %i, surface %u", message->client, input->surface_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    ERROR("[wm_surface_request_fullscreen_mode] FIXME: STUB FUNCTION");
+}
+
+void wm_surface_request_on_top(struct gracht_recv_message* message, struct wm_surface_request_on_top_args* input)
+{
+    TRACE("[wm_surface_request_on_top] client %i, surface %u", message->client, input->surface_id);
+    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    if (!surface) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
+        return;
+    }
+    
+    ERROR("[wm_surface_request_on_top] FIXME: STUB FUNCTION");
 }
 
 void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args* input)
@@ -161,26 +186,38 @@ void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_s
 
 void wm_surface_resize_callback(struct gracht_recv_message* message, struct wm_surface_resize_args* input)
 {
-    TRACE("[wm_surface_resize_callback] client %i, surface %u", message->client, input->surface_id);
-    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    TRACE("[wm_surface_resize_callback] client %i, pointer %u, surface %u", message->client, input->pointer_id, input->surface_id);
+    vioarr_surface_t*      surface = vioarr_objects_get_object(message->client, input->surface_id);
+    vioarr_input_source_t* pointer = vioarr_objects_get_object(message->client, input->pointer_id);
+    
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
+    if (!pointer) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_pointer: object does not exist");
+        return;
+    }
     
-    ERROR("[wm_surface_resize_callback] FIXME: STUB FUNCTION");
+    vioarr_input_request_resize(pointer, surface, input->edges);
 }
 
 void wm_surface_move_callback(struct gracht_recv_message* message, struct wm_surface_move_args* input)
 {
-    TRACE("[wm_surface_move_callback] client %i, surface %u", message->client, input->surface_id);
-    vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
+    TRACE("[wm_surface_move_callback] client %i, pointer %u, surface %u", message->client, input->pointer_id, input->surface_id);
+    vioarr_surface_t*      surface = vioarr_objects_get_object(message->client, input->surface_id);
+    vioarr_input_source_t* pointer = vioarr_objects_get_object(message->client, input->pointer_id);
+    
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
+    if (!pointer) {
+        wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_pointer: object does not exist");
+        return;
+    }
     
-    ERROR("[wm_surface_move_callback] FIXME: STUB FUNCTION");
+    vioarr_input_request_move(pointer, surface);
 }
 
 void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_surface_destroy_args* input)
@@ -192,6 +229,7 @@ void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_
         return;
     }
 
+    vioarr_input_on_surface_destroy(surface);
     vioarr_manager_unregister_surface(surface);
     vioarr_surface_destroy(surface);
 }

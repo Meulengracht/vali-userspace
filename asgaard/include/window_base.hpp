@@ -48,8 +48,8 @@ namespace Asgaard {
 
     // Window functions that can be called to configure this window 
     protected:
-        void InititateResize(enum SurfaceEdges);
-        void InitiateMove();
+        void InititateResize(const std::shared_ptr<Pointer>&, enum SurfaceEdges);
+        void InitiateMove(const std::shared_ptr<Pointer>&);
 
         // Protected function, allow override
         void Notification(Publisher*, int = 0, void* = 0) override;

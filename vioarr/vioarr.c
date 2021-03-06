@@ -43,6 +43,7 @@
 #include "protocols/wm_memory_pool_protocol_server.h"
 #include "protocols/wm_buffer_protocol_server.h"
 #include "protocols/wm_surface_protocol_server.h"
+#include "protocols/wm_pointer_protocol_server.h"
 
 #include "engine/vioarr_engine.h"
 #include "engine/vioarr_utils.h"
@@ -99,11 +100,13 @@ static gracht_protocol_function_t wm_memory_callbacks[1] = {
 DEFINE_WM_MEMORY_SERVER_PROTOCOL(wm_memory_callbacks, 1);
 
 extern void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, struct wm_memory_pool_create_buffer_args*);
+extern void wm_memory_pool_destroy_callback(struct gracht_recv_message* message, struct wm_memory_pool_destroy_args*);
 
-static gracht_protocol_function_t wm_memory_pool_callbacks[1] = {
+static gracht_protocol_function_t wm_memory_pool_callbacks[2] = {
     { PROTOCOL_WM_MEMORY_POOL_CREATE_BUFFER_ID , wm_memory_pool_create_buffer_callback },
+    { PROTOCOL_WM_MEMORY_POOL_DESTROY_ID ,       wm_memory_pool_destroy_callback }
 };
-DEFINE_WM_MEMORY_POOL_SERVER_PROTOCOL(wm_memory_pool_callbacks, 1);
+DEFINE_WM_MEMORY_POOL_SERVER_PROTOCOL(wm_memory_pool_callbacks, 2);
 
 extern void wm_buffer_destroy_callback(struct gracht_recv_message* message, struct wm_buffer_destroy_args*);
 
@@ -119,13 +122,15 @@ extern void wm_surface_set_transparency_callback(struct gracht_recv_message* mes
 extern void wm_surface_set_drop_shadow_callback(struct gracht_recv_message* message, struct wm_surface_set_drop_shadow_args*);
 extern void wm_surface_set_input_region_callback(struct gracht_recv_message* message, struct wm_surface_set_input_region_args*);
 extern void wm_surface_add_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_add_subsurface_args*);
+extern void wm_surface_request_fullscreen_mode(struct gracht_recv_message* message, struct wm_surface_request_fullscreen_mode_args*);
+extern void wm_surface_request_on_top(struct gracht_recv_message* message, struct wm_surface_request_on_top_args*);
 extern void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args*);
 extern void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_surface_commit_args*);
 extern void wm_surface_resize_callback(struct gracht_recv_message* message, struct wm_surface_resize_args*);
 extern void wm_surface_move_callback(struct gracht_recv_message* message, struct wm_surface_move_args*);
 extern void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_surface_destroy_args*);
 
-static gracht_protocol_function_t wm_surface_callbacks[12] = {
+static gracht_protocol_function_t wm_surface_callbacks[14] = {
     { PROTOCOL_WM_SURFACE_GET_FORMATS_ID , wm_surface_get_formats_callback },
     { PROTOCOL_WM_SURFACE_SET_BUFFER_ID , wm_surface_set_buffer_callback },
     { PROTOCOL_WM_SURFACE_INVALIDATE_ID , wm_surface_invalidate_callback },
@@ -133,13 +138,26 @@ static gracht_protocol_function_t wm_surface_callbacks[12] = {
     { PROTOCOL_WM_SURFACE_SET_DROP_SHADOW_ID , wm_surface_set_drop_shadow_callback },
     { PROTOCOL_WM_SURFACE_SET_INPUT_REGION_ID , wm_surface_set_input_region_callback },
     { PROTOCOL_WM_SURFACE_ADD_SUBSURFACE_ID , wm_surface_add_subsurface_callback },
+    { PROTOCOL_WM_SURFACE_REQUEST_FULLSCREEN_MODE_ID, wm_surface_request_fullscreen_mode },
+    { PROTOCOL_WM_SURFACE_REQUEST_ON_TOP_ID, wm_surface_request_on_top },
     { PROTOCOL_WM_SURFACE_REQUEST_FRAME_ID , wm_surface_request_frame_callback },
     { PROTOCOL_WM_SURFACE_COMMIT_ID , wm_surface_commit_callback },
     { PROTOCOL_WM_SURFACE_RESIZE_ID , wm_surface_resize_callback },
     { PROTOCOL_WM_SURFACE_MOVE_ID , wm_surface_move_callback },
     { PROTOCOL_WM_SURFACE_DESTROY_ID , wm_surface_destroy_callback },
 };
-DEFINE_WM_SURFACE_SERVER_PROTOCOL(wm_surface_callbacks, 12);
+DEFINE_WM_SURFACE_SERVER_PROTOCOL(wm_surface_callbacks, 14);
+
+extern void wm_pointer_set_surface_callback(struct gracht_recv_message* message, struct wm_pointer_set_surface_args*);
+extern void wm_pointer_grab_callback(struct gracht_recv_message* message, struct wm_pointer_grab_args*);
+extern void wm_pointer_ungrab_callback(struct gracht_recv_message* message, struct wm_pointer_ungrab_args*);
+
+static gracht_protocol_function_t wm_pointer_callbacks[3] = {
+    { PROTOCOL_WM_POINTER_SET_SURFACE_ID , wm_pointer_set_surface_callback },
+    { PROTOCOL_WM_POINTER_GRAB_ID , wm_pointer_grab_callback },
+    { PROTOCOL_WM_POINTER_UNGRAB_ID , wm_pointer_ungrab_callback },
+};
+DEFINE_WM_POINTER_SERVER_PROTOCOL(wm_pointer_callbacks, 3);
 
 static gracht_client_t* valiClient = NULL;
 
@@ -294,6 +312,7 @@ int main(int argc, char **argv)
     gracht_server_register_protocol(&wm_memory_pool_server_protocol);
     gracht_server_register_protocol(&wm_buffer_server_protocol);
     gracht_server_register_protocol(&wm_surface_server_protocol);
+    gracht_server_register_protocol(&wm_pointer_server_protocol);
 
     return server_run(eventIod);
 }

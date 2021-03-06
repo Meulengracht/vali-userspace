@@ -72,6 +72,19 @@ void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, 
     wm_core_event_object_single(message->client, input->buffer_id, UUID_INVALID, object_type_buffer);
 }
 
+void wm_memory_pool_destroy_callback(struct gracht_recv_message* message, struct wm_memory_pool_destroy_args* input)
+{
+    vioarr_utils_trace("[wm_memory_pool_destroy_callback] client %i", message->client);
+    vioarr_memory_pool_t* pool = vioarr_objects_get_object(message->client, input->pool_id);
+    int                   status;
+    if (!pool) {
+        wm_core_event_error_single(message->client, input->pool_id, ENOENT, "wm_memory: object does not exist");
+        return;
+    }
+    
+    vioarr_memory_destroy_pool(pool);
+}
+
 void wm_buffer_destroy_callback(struct gracht_recv_message* message, struct wm_buffer_destroy_args* input)
 {
     vioarr_utils_trace("[wm_buffer_destroy_callback] client %i", message->client);

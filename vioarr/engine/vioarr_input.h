@@ -30,10 +30,21 @@
 #define VIOARR_INPUT_POINTER  0
 #define VIOARR_INPUT_KEYBOARD 1
 
+typedef struct vioarr_surface      vioarr_surface_t;
+typedef struct vioarr_input_source vioarr_input_source_t;
+enum wm_surface_edge;
+
 void vioarr_input_register(UUId_t deviceId, int);
 void vioarr_input_unregister(UUId_t deviceId);
+void vioarr_input_on_surface_destroy(vioarr_surface_t* surface);
 void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z);
 void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons);
 void vioarr_input_keyboard_click(UUId_t deviceId, uint32_t keycode, uint32_t modifiers);
+
+void vioarr_input_request_resize(vioarr_input_source_t* input, vioarr_surface_t* surface, enum wm_surface_edge);
+void vioarr_input_request_move(vioarr_input_source_t* input, vioarr_surface_t* surface);
+void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* surface, int xOffset, int yOffset);
+void vioarr_input_grab(vioarr_input_source_t* input, vioarr_surface_t* surface);
+void vioarr_input_ungrab(vioarr_input_source_t* input, vioarr_surface_t* surface);
 
 #endif //!__VIOARR_INPUT_H__

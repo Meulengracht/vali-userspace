@@ -300,7 +300,9 @@ int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
         // check children if they support input
         vioarr_surface_t* itr = ACTIVE_PROPERTIES(surface).children;
         while (itr) {
-            if (vioarr_surface_supports_input(itr, x, y)) {
+            if (vioarr_surface_supports_input(itr, 
+                    x - vioarr_region_x(surface->dimensions), 
+                    y - vioarr_region_y(surface->dimensions))) {
                 return 1;
             }
             itr = itr->link;

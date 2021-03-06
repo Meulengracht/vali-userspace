@@ -90,6 +90,10 @@ namespace Asgaard {
                 m_dimensions.SetWidth(event->width);
                 m_dimensions.SetHeight(event->height);
             } break;
+
+            case ObjectEvent::SURFACE_RESIZE_END: {
+                OnResizedEnd();
+            } break;
             
             case ObjectEvent::SURFACE_FRAME: {
                 OnFrame();
@@ -177,8 +181,29 @@ namespace Asgaard {
     {
         wm_surface_request_frame(APP.GrachtClient(), nullptr, Id());
     }
+
+    void Surface::RequestOverlay(int mode)
+    {
+        wm_surface_request_on_top(APP.GrachtClient(), nullptr, Id(), mode);
+    }
+
+    void Surface::RequestFullscreenMode(enum FullscreenMode mode)
+    {
+        wm_surface_request_fullscreen_mode(APP.GrachtClient(), nullptr, Id(), static_cast<wm_surface_fullscreen_mode>(mode));
+    }
+
+    void Surface::GrabPointer(const std::shared_ptr<Pointer>& pointer)
+    {
+        wm_pointer_grab(APP.GrachtClient(), nullptr, pointer->Id(), Id());
+    }
+
+    void Surface::UngrabPointer(const std::shared_ptr<Pointer>& pointer)
+    {
+        wm_pointer_ungrab(APP.GrachtClient(), nullptr, pointer->Id(), Id());
+    }
     
     void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }
+    void Surface::OnResizedEnd() { }
     void Surface::OnFocus(bool focus) { }
     void Surface::OnFrame() { }
     void Surface::OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) { }

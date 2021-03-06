@@ -41,6 +41,12 @@ namespace Asgaard {
             LEFT   = 0x4,
             RIGHT  = 0x8
         };
+
+        enum class FullscreenMode : int {
+            EXIT,
+            NORMAL,
+            FULL
+        };
         
         enum class Notification : int {
             CREATED = static_cast<int>(Object::Notification::CUSTOM_START)
@@ -61,6 +67,11 @@ namespace Asgaard {
         void ApplyChanges();
         
         void RequestFrame();
+        void RequestOverlay(int mode);
+        void RequestFullscreenMode(enum FullscreenMode);
+
+        void GrabPointer(const std::shared_ptr<Pointer>&);
+        void UngrabPointer(const std::shared_ptr<Pointer>&);
         
         const Rectangle& Dimensions() const { return m_dimensions; }
         const std::shared_ptr<Screen>& GetScreen() const { return m_screen; }
@@ -70,6 +81,7 @@ namespace Asgaard {
         
     protected:
         virtual void OnResized(enum SurfaceEdges, int width, int height);
+        virtual void OnResizedEnd();
         virtual void OnFocus(bool);
         virtual void OnFrame();
         virtual void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY);

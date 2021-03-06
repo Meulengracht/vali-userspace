@@ -80,6 +80,16 @@ void vioarr_region_set_position(vioarr_region_t* region, int x, int y)
     region->y = y;
 }
 
+void vioarr_region_set_size(vioarr_region_t* region, int width, int height)
+{
+    if (!region) {
+        return;
+    }
+
+    region->width  = width;
+    region->height = height;
+}
+
 void vioarr_region_add(vioarr_region_t* region, int x, int y, int width, int height)
 {
     if (!region) {

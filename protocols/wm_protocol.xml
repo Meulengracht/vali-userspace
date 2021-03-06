@@ -142,6 +142,11 @@
                         <param name="format" type="pixel_format"/>
                     </request>
                 </function>
+                <function name="destroy">
+                    <request>
+                        <param name="pool_id" type="uint32_t"/>
+                    </request>
+                </function>
             </functions>
         </protocol>
         
@@ -153,6 +158,11 @@
                     <value name="top_right" value="0x2" />
                     <value name="bottom_left" value="0x4" />
                     <value name="bottom_right" value="0x8" />
+                </enum>
+                <enum name="fullscreen_mode">
+                    <value name="exit" value="0" />
+                    <value name="normal" value="1" />
+                    <value name="full" value="2" />
                 </enum>
             </enums>
             
@@ -209,30 +219,44 @@
                         <param name="y" type="int"/>
                     </request>
                 </function>
-                <function name="request_frame">
+                <function name="request_fullscreen_mode">
                     <request>
                         <param name="surface_id" type="uint32_t"/>
+                        <param name="mode" type="fullscreen_mode"/>
+                    </request>
+                </function>
+                <function name="request_on_top">
+                    <request>
+                        <param name="surface_id" type="uint32_t"/>
+                        <param name="ontop_mode" type="int" />
+                    </request>
+                </function>
+                <function name="request_frame">
+                    <request>
+                        <param name="surface_id" type="uint32_t" />
                     </request>
                 </function>
                 <function name="commit">
                     <request>
-                        <param name="surface_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t" />
                     </request>
                 </function>
                 <function name="resize">
                     <request>
-                        <param name="surface_id" type="uint32_t"/>
-                        <param name="edges" type="edge"/>
+                        <param name="surface_id" type="uint32_t" />
+                        <param name="pointer_id" type="uint32_t" />
+                        <param name="edges" type="edge" />
                     </request>
                 </function>
                 <function name="move">
                     <request>
-                        <param name="surface_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t" />
+                        <param name="pointer_id" type="uint32_t" />
                     </request>
                 </function>
                 <function name="destroy">
                     <request>
-                        <param name="surface_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t" />
                     </request>
                 </function>
             </functions>
@@ -250,6 +274,9 @@
                     <param name="width" type="int"/>
                     <param name="height" type="int"/>
                     <param name="edges" type="edge"/>
+                </event>
+                <event name="resize_end">
+                    <param name="surface_id" type="uint32_t"/>
                 </event>
                 <event name="focus">
                     <param name="surface_id" type="uint32_t"/>
@@ -282,6 +309,18 @@
                         <param name="surface_id" type="uint32_t"/>
                         <param name="x_offset" type="int"/>
                         <param name="y_offset" type="int"/>
+                    </request>
+                </function>
+                <function name="grab">
+                    <request>
+                        <param name="pointer_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t"/>
+                    </request>
+                </function>
+                <function name="ungrab">
+                    <request>
+                        <param name="pointer_id" type="uint32_t"/>
+                        <param name="surface_id" type="uint32_t"/>
                     </request>
                 </function>
             </functions>

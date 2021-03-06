@@ -26,6 +26,7 @@
 #include "include/object_manager.hpp"
 #include "include/memory_pool.hpp"
 #include "include/memory_buffer.hpp"
+#include "include/pointer.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_screen_protocol_client.h"
@@ -112,13 +113,13 @@ namespace Asgaard {
         }
     }
     
-    void WindowBase::InititateResize(enum SurfaceEdges edges)
+    void WindowBase::InititateResize(const std::shared_ptr<Pointer>& pointer, enum SurfaceEdges edges)
     {
-        wm_surface_resize(APP.GrachtClient(), nullptr, Id(), ToWindowEdges(edges));
+        wm_surface_resize(APP.GrachtClient(), nullptr, Id(), pointer->Id(), ToWindowEdges(edges));
     }
     
-    void WindowBase::InitiateMove()
+    void WindowBase::InitiateMove(const std::shared_ptr<Pointer>& pointer)
     {
-        wm_surface_move(APP.GrachtClient(), nullptr, Id());
+        wm_surface_move(APP.GrachtClient(), nullptr, Id(), pointer->Id());
     }
 }
