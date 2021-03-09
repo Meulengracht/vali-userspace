@@ -16,3 +16,9 @@
 [submodule "doom"]
 	path = doom
 	url = https://github.com/umbrella-c/vali-doom.git
+[submodule "SDL"]
+	path = SDL
+	url = https://github.com/umbrella-c/SDL
+[submodule "lua"]
+	path = lua
+	url = https://github.com/umbrella-c/lua
