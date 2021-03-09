@@ -83,19 +83,35 @@ void wm_surface_request_fullscreen_mode(struct gracht_recv_message* message, str
         return;
     }
     
-    ERROR("[wm_surface_request_fullscreen_mode] FIXME: STUB FUNCTION");
+    switch (input->mode) {
+        case fs_mode_exit: {
+            vioarr_manager_change_level(surface, 1);
+            vioarr_surface_restore_size(surface);
+        } break;
+
+        case fs_mode_normal: {
+            vioarr_surface_maximize(surface);
+        } break;
+
+        case fs_mode_full: {
+            vioarr_manager_change_level(surface, 2);
+            vioarr_surface_maximize(surface);
+        } break;
+
+        default: break;
+    }
 }
 
-void wm_surface_request_on_top(struct gracht_recv_message* message, struct wm_surface_request_on_top_args* input)
+void wm_surface_request_level(struct gracht_recv_message* message, struct wm_surface_request_level_args* input)
 {
-    TRACE("[wm_surface_request_on_top] client %i, surface %u", message->client, input->surface_id);
+    TRACE("[wm_surface_request_level] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
-    ERROR("[wm_surface_request_on_top] FIXME: STUB FUNCTION");
+    vioarr_manager_change_level(surface, input->level);
 }
 
 void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args* input)
@@ -107,7 +123,7 @@ void wm_surface_request_frame_callback(struct gracht_recv_message* message, stru
         return;
     }
     
-    ERROR("[wm_surface_request_frame_callback] FIXME: STUB FUNCTION");
+    vioarr_surface_request_frame(surface);
 }
 
 void wm_surface_invalidate_callback(struct gracht_recv_message* message, struct wm_surface_invalidate_args* input)
@@ -176,15 +192,12 @@ void wm_surface_resize_subsurface_callback(struct gracht_recv_message* message, 
 {
     TRACE("[wm_surface_resize_subsurface_callback] client %i, surface %u", message->client, input->surface_id);
     vioarr_surface_t* surface = vioarr_objects_get_object(message->client, input->surface_id);
-    vioarr_region_t*  region;
-
     if (!surface) {
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
     
-    region = vioarr_surface_region(surface);
-    vioarr_region_set_size(region, input->width, input->height);
+    vioarr_surface_resize(surface, input->width, input->height, no_edges);
 }
 
 void wm_surface_move_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_move_subsurface_args* input)

@@ -160,9 +160,9 @@
                     <value name="bottom_right" value="0x8" />
                 </enum>
                 <enum name="fullscreen_mode">
-                    <value name="exit" value="0" />
-                    <value name="normal" value="1" />
-                    <value name="full" value="2" />
+                    <value name="fs_mode_exit" value="0" />
+                    <value name="fs_mode_normal" value="1" />
+                    <value name="fs_mode_full" value="2" />
                 </enum>
             </enums>
             
@@ -239,10 +239,10 @@
                         <param name="mode" type="fullscreen_mode"/>
                     </request>
                 </function>
-                <function name="request_on_top">
+                <function name="request_level">
                     <request>
                         <param name="surface_id" type="uint32_t"/>
-                        <param name="ontop_mode" type="int" />
+                        <param name="level" type="int" />
                     </request>
                 </function>
                 <function name="request_frame">

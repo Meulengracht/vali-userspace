@@ -182,9 +182,9 @@ namespace Asgaard {
         wm_surface_request_frame(APP.GrachtClient(), nullptr, Id());
     }
 
-    void Surface::RequestOverlay(int mode)
+    void Surface::RequestPriorityLevel(enum PriorityLevel level)
     {
-        wm_surface_request_on_top(APP.GrachtClient(), nullptr, Id(), mode);
+        wm_surface_request_level(APP.GrachtClient(), nullptr, Id(), static_cast<int>(level));
     }
 
     void Surface::RequestFullscreenMode(enum FullscreenMode mode)

@@ -135,7 +135,8 @@ void vioarr_input_request_resize(vioarr_input_source_t* input, vioarr_surface_t*
         return;
     }
 
-    if (!vioarr_surface_contains(surface, input->state.pointer.x, input->state.pointer.y)) {
+    if (vioarr_surface_maximized(surface) || 
+        !vioarr_surface_contains(surface, input->state.pointer.x, input->state.pointer.y)) {
         return;
     }
 
@@ -154,7 +155,8 @@ void vioarr_input_request_move(vioarr_input_source_t* input, vioarr_surface_t* s
         return;
     }
 
-    if (!vioarr_surface_contains(surface, input->state.pointer.x, input->state.pointer.y)) {
+    if (vioarr_surface_maximized(surface) || 
+        !vioarr_surface_contains(surface, input->state.pointer.x, input->state.pointer.y)) {
         return;
     }
 
@@ -281,15 +283,9 @@ static void __resize_mode_motion(vioarr_input_source_t* source, int clampedX, in
         return;
     }
 
-    vioarr_region_set_size(region,
+    vioarr_surface_resize(currentSurface,
         vioarr_region_width(region) + clampedX,
-        vioarr_region_height(region) + clampedY);
-
-    wm_surface_event_resize_single(
-        vioarr_surface_client(currentSurface),
-        vioarr_surface_id(currentSurface),
-        vioarr_region_width(region),
-        vioarr_region_height(region),
+        vioarr_region_height(region) + clampedY,
         source->state.pointer.edge);
 
     source->state.pointer.x += clampedX;

@@ -125,7 +125,7 @@ extern void wm_surface_add_subsurface_callback(struct gracht_recv_message* messa
 extern void wm_surface_resize_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_resize_subsurface_args*);
 extern void wm_surface_move_subsurface_callback(struct gracht_recv_message* message, struct wm_surface_move_subsurface_args*);
 extern void wm_surface_request_fullscreen_mode(struct gracht_recv_message* message, struct wm_surface_request_fullscreen_mode_args*);
-extern void wm_surface_request_on_top(struct gracht_recv_message* message, struct wm_surface_request_on_top_args*);
+extern void wm_surface_request_level(struct gracht_recv_message* message, struct wm_surface_request_level_args*);
 extern void wm_surface_request_frame_callback(struct gracht_recv_message* message, struct wm_surface_request_frame_args*);
 extern void wm_surface_commit_callback(struct gracht_recv_message* message, struct wm_surface_commit_args*);
 extern void wm_surface_resize_callback(struct gracht_recv_message* message, struct wm_surface_resize_args*);
@@ -143,7 +143,7 @@ static gracht_protocol_function_t wm_surface_callbacks[16] = {
     { PROTOCOL_WM_SURFACE_RESIZE_SUBSURFACE_ID , wm_surface_resize_subsurface_callback },
     { PROTOCOL_WM_SURFACE_MOVE_SUBSURFACE_ID , wm_surface_move_subsurface_callback },
     { PROTOCOL_WM_SURFACE_REQUEST_FULLSCREEN_MODE_ID, wm_surface_request_fullscreen_mode },
-    { PROTOCOL_WM_SURFACE_REQUEST_ON_TOP_ID, wm_surface_request_on_top },
+    { PROTOCOL_WM_SURFACE_REQUEST_LEVEL_ID, wm_surface_request_level },
     { PROTOCOL_WM_SURFACE_REQUEST_FRAME_ID , wm_surface_request_frame_callback },
     { PROTOCOL_WM_SURFACE_COMMIT_ID , wm_surface_commit_callback },
     { PROTOCOL_WM_SURFACE_RESIZE_ID , wm_surface_resize_callback },

@@ -30,11 +30,18 @@
 typedef struct list list_t;
 typedef struct vioarr_surface vioarr_surface_t;
 
+/**
+ * The number of surface 'levels' they can be drawn at. There is the bottom level,
+ * default level, top level and cursor level.
+ */
+#define SURFACE_LEVELS 4
+
 void              vioarr_manager_register_surface(vioarr_surface_t* surface);
 void              vioarr_manager_unregister_surface(vioarr_surface_t* surface);
 void              vioarr_manager_promote_cursor(vioarr_surface_t* surface);
 void              vioarr_manager_demote_cursor(vioarr_surface_t* surface);
-void              vioarr_manager_render_start(list_t** surfaces, list_t** cursors);
+void              vioarr_manager_change_level(vioarr_surface_t* surface, int level);
+void              vioarr_manager_render_start(list_t** surfaceLevels);
 void              vioarr_manager_render_end(void);
 vioarr_surface_t* vioarr_manager_front_surface(void);
 vioarr_surface_t* vioarr_manager_surface_at(int x, int y);

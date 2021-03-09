@@ -176,8 +176,8 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
     element_t*       i;
     list_t*          surfaces;
-    list_t*          cursors;
     vioarr_region_t* drawRegion = vioarr_screen_region(renderer->screen);
+    int              level;
     
 #ifdef VIOARR_BACKEND_NANOVG
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -191,18 +191,13 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
     blContextInitAs(&context, img, NULL);
 #endif
 
-    vioarr_manager_render_start(&surfaces, &cursors);
-    _foreach(i, surfaces) {
-        vioarr_surface_t* surface = i->value;
-        if (vioarr_region_intersects(drawRegion, vioarr_surface_region(surface))) {
-            vioarr_surface_render(renderer->context, surface);
-        }
-    }
-    
-    _foreach(i, cursors) {
-        vioarr_surface_t* surface = i->value;
-        if (vioarr_region_intersects(drawRegion, vioarr_surface_region(surface))) {
-            vioarr_surface_render(renderer->context, surface);
+    vioarr_manager_render_start(&surfaces);
+    for (level = 0; level < SURFACE_LEVELS; level++) {
+        _foreach(i, &surfaces[level]) {
+            vioarr_surface_t* surface = i->value;
+            if (vioarr_region_intersects(drawRegion, vioarr_surface_region(surface))) {
+                vioarr_surface_render(renderer->context, surface);
+            }
         }
     }
     vioarr_manager_render_end();

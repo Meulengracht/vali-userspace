@@ -47,6 +47,12 @@ namespace Asgaard {
             NORMAL,
             FULL
         };
+
+        enum class PriorityLevel : int {
+            BOTTOM,
+            DEFAULT,
+            TOP
+        };
         
         enum class Notification : int {
             CREATED = static_cast<int>(Object::Notification::CUSTOM_START)
@@ -67,7 +73,7 @@ namespace Asgaard {
         void ApplyChanges();
         
         void RequestFrame();
-        void RequestOverlay(int mode);
+        void RequestPriorityLevel(enum PriorityLevel);
         void RequestFullscreenMode(enum FullscreenMode);
 
         void GrabPointer(const std::shared_ptr<Pointer>&);
