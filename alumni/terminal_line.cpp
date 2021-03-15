@@ -189,6 +189,16 @@ void TerminalLine::SetText(const std::string& text)
     }
 }
 
+void TerminalLine::SetText(const std::vector<TerminalCell>& cells)
+{
+    int i = 0;
+    for (const auto& srcCell : cells) {
+        auto& dstCell = m_cells[i++];
+        dstCell.m_character = srcCell.m_character;
+        dstCell.m_color = srcCell.m_color;
+    }
+}
+
 std::string TerminalLine::GetInput()
 {
     if ((int)m_text.length() > m_inputOffset) {

@@ -22,7 +22,9 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
+#include "protocols/wm_core_protocol_server.h"
 #include "protocols/wm_pointer_protocol_server.h"
+#include "engine/vioarr_objects.h"
 #include "engine/vioarr_input.h"
 #include "engine/vioarr_surface.h"
 #include "engine/vioarr_utils.h"

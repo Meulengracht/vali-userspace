@@ -68,7 +68,20 @@ namespace Asgaard {
 
     Screen::~Screen()
     {
-        
+        Destroy();
+    }
+
+    void Screen::Destroy()
+    {
+        for (const auto& window : m_windows) {
+            window->Unsubscribe(this);
+        }
+
+        m_modes.clear();
+        m_windows.clear();
+
+        // call base destroy as well
+        Object::Destroy();
     }
     
     int Screen::GetCurrentWidth() const
@@ -149,6 +162,19 @@ namespace Asgaard {
             
             default:
                 break;
+        }
+    }
+
+    void Screen::Notification(Publisher* source, int event, void* data)
+    {
+        auto window = dynamic_cast<WindowBase*>(source);
+        if (window == nullptr) {
+            return;
+        }
+
+        if (event == static_cast<int>(Object::Notification::DESTROY)) {
+            std::remove_if(m_windows.begin(), m_windows.end(), 
+                [window](const std::shared_ptr<WindowBase>& i) { return i->Id() == window->Id(); });
         }
     }
 }

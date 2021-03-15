@@ -144,7 +144,12 @@ namespace Asgaard {
     
     void Surface::SetBuffer(const std::shared_ptr<MemoryBuffer>& buffer)
     {
-        wm_surface_set_buffer(APP.GrachtClient(), nullptr, Id(), buffer->Id());
+        uint32_t id = 0;
+        if (buffer) { 
+            id = buffer->Id();
+        }
+
+        wm_surface_set_buffer(APP.GrachtClient(), nullptr, Id(), id);
     }
     
     void Surface::MarkDamaged(const Rectangle& dimensions)

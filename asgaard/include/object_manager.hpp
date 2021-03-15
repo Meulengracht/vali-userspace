@@ -33,6 +33,13 @@ namespace Asgaard {
     class ObjectManager final : Utils::Subscriber {
     public:
         ObjectManager();
+
+        /**
+         * Destroy
+         * Handles application cleanup. This should not be invoked manually, will automatically be called
+         * upon exit of the application
+         */
+        void Destroy();
         
         template<class T>
         std::shared_ptr<T> CreateClientObject()
@@ -41,7 +48,7 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            auto object = std::shared_ptr<T>(new T(CreateObjectId()));
+            auto object = std::make_shared<T>(CreateObjectId());
             if (object == nullptr) {
                 return nullptr;
             }
@@ -60,8 +67,8 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            std::shared_ptr<T> object = std::shared_ptr<T>(
-                new T(CreateObjectId(), std::forward<Params>(parameters)...));
+            std::shared_ptr<T> object = std::make_shared<T>(
+                CreateObjectId(), std::forward<Params>(parameters)...);
             if (object == nullptr) {
                 return nullptr;
             }
@@ -80,7 +87,7 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            std::shared_ptr<T> object = std::shared_ptr<T>(new T(id));
+            std::shared_ptr<T> object = std::make_shared<T>(id);
             m_objects[object->Id()] = object;
             return object;
         }
@@ -92,8 +99,8 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            std::shared_ptr<T> object = std::shared_ptr<T>(
-                new T(id, std::forward<Params>(parameters)...));
+            std::shared_ptr<T> object = std::make_shared<T>(
+                id, std::forward<Params>(parameters)...);
             m_objects[object->Id()] = object;
             return object;
         }

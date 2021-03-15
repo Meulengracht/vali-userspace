@@ -414,7 +414,8 @@ void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons)
         __resize_mode_click(source);
     }
     else {
-        __clear_state(source);
+        __normal_mode_click(source);
+        __clear_state(source); // todo only clear on release of lmb?!
     }
 }
 

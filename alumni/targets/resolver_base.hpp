@@ -42,9 +42,6 @@ public:
     virtual bool HandleKeyCode(const Asgaard::KeyEvent&) = 0;
     virtual void PrintCommandHeader() = 0;
 
-public:
-    bool Alive() const { return m_alive; }
-
 protected:
     virtual bool ListDirectory(const std::vector<std::string>&) = 0;
     virtual bool ChangeDirectory(const std::vector<std::string>&) = 0;
@@ -53,5 +50,4 @@ protected:
 
 protected:
     std::shared_ptr<Terminal> m_terminal;
-    bool                      m_alive;
 };

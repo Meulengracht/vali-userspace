@@ -35,7 +35,6 @@ namespace Asgaard {
     class Application final : public Object {
     public:
         Application();
-        ~Application();
         
         /**
          * Initialize
@@ -44,6 +43,13 @@ namespace Asgaard {
          * @throw ApplicationException
          */
         void Initialize();
+
+        /**
+         * Destroy
+         * Handles application cleanup. This should not be invoked manually, will automatically be called
+         * upon exit of the application
+         */
+        void Destroy() override;
 
         /**
          * AddEventDescriptor

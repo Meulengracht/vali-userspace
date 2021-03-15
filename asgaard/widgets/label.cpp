@@ -47,7 +47,16 @@ namespace Asgaard {
         
         Label::~Label()
         {
-            
+            Destroy();
+        }
+
+        void Label::Destroy()
+        {
+            if (m_memory) { m_memory->Unsubscribe(this); }
+            if (m_buffer) { m_buffer->Unsubscribe(this); }
+
+            // invoke base destroy
+            SubSurface::Destroy();
         }
             
         void Label::SetBackgroundColor(const Drawing::Color& color)

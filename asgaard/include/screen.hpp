@@ -73,6 +73,8 @@ namespace Asgaard {
     public:
         Screen(uint32_t id);
         ~Screen();
+
+        void Destroy() override;
         
         int GetCurrentWidth() const;
         int GetCurrentHeight() const;
@@ -101,6 +103,7 @@ namespace Asgaard {
         }
 
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
+        void Notification(Publisher*, int = 0, void* = 0) override;
         
     private:
         std::list<std::unique_ptr<ScreenMode>> m_modes;

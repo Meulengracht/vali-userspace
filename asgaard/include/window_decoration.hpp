@@ -48,7 +48,10 @@ namespace Asgaard {
     public:
         enum class Notification : int {
             CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
-            ERROR
+            ERROR,
+            MINIMIZE,
+            MAXIMIZE,
+            INITIATE_DRAG
         };
     public:
         WindowDecoration(uint32_t id, 
@@ -67,6 +70,7 @@ namespace Asgaard {
         void SetTitle(const std::string& title);
         void SetIcon(const std::string& iconPath);
         void RequestRedraw();
+        void Destroy() override;
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
@@ -75,6 +79,8 @@ namespace Asgaard {
         void Redraw();
         void RedrawReady();
         void Notification(Publisher*, int = 0, void* = 0) override;
+        void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) override;
+        void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override;
         void CheckCreation();
 
     private:
@@ -92,6 +98,8 @@ namespace Asgaard {
         std::shared_ptr<Widgets::Icon>  m_maxIcon;
         std::shared_ptr<Widgets::Icon>  m_closeIcon;
 
+        bool              m_lmbHold;
+        bool              m_dragInOperation;
         bool              m_redraw;
         std::atomic<bool> m_redrawReady;
     };

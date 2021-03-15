@@ -50,11 +50,13 @@ public:
     bool AddCharacter(int character, const Asgaard::Drawing::Color& color);
 
     void SetText(const std::string& text);
+    void SetText(const std::vector<TerminalCell>& cells);
     void HideCursor();
     void ShowCursor();
 
-    std::string        GetInput();
-    const std::string& GetText() const { return m_text; }
+    std::string                      GetInput();
+    const std::string&               GetText() const { return m_text; }
+    const std::vector<TerminalCell>& GetCells() const { return m_cells; }
 
 private:
     void ShiftCellsRight(int index);

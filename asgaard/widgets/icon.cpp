@@ -76,11 +76,28 @@ namespace Asgaard {
             , m_originalWidth(0)
             , m_originalHeight(0)
         {
-    
+            for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
+                m_stateAvailabilityMap[i] = false;
+            }
         }
     
         Icon::~Icon()
         {
+            Destroy();
+        }
+
+        void Icon::Destroy()
+        {
+            for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
+                if (m_stateAvailabilityMap[i]) {
+                    m_buffers[i]->Unsubscribe(this);
+                }
+            }
+
+            if (m_memory) { m_memory->Unsubscribe(this); }
+
+            // invoke base destroy as well
+            SubSurface::Destroy();
         }
     
         bool Icon::LoadIcon(const std::string& path)
@@ -106,7 +123,8 @@ namespace Asgaard {
     
         void Icon::SetState(IconState state)
         {
-            if (!m_buffers[static_cast<int>(state)]) {
+            if (!m_buffers[static_cast<int>(state)] || 
+                !m_stateAvailabilityMap[static_cast<int>(state)]) {
                 return;
             }
     
@@ -166,33 +184,33 @@ namespace Asgaard {
                     case MemoryBuffer::Notification::CREATED: {
                         auto bufferSize = m_originalWidth * m_originalHeight * 4;
                         int loadedWidth, loadedHeight, loadedComponents;
-                        std::string extension = "";
+                        auto state = IconState::NORMAL;
 
-                        if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
-                            extension = iconStateExtensions[static_cast<int>(IconState::NORMAL)];
-                        }
-                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
-                            extension = iconStateExtensions[static_cast<int>(IconState::HOVERING)];
+                        if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
+                            state = IconState::HOVERING;
                         }
                         else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::ACTIVE)]->Id()) {
-                            extension = iconStateExtensions[static_cast<int>(IconState::ACTIVE)];
+                            state = IconState::ACTIVE;
                         }
                         else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
-                            extension = iconStateExtensions[static_cast<int>(IconState::DISABLED)];
+                            state = IconState::DISABLED;
                         }
 
-                        auto path   = ExtendFilename(m_originalPath, extension);
-                        auto buffer = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
+                        auto extension = iconStateExtensions[static_cast<int>(state)];
+                        auto path      = ExtendFilename(m_originalPath, extension);
+                        auto buffer    = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
                         if (buffer != nullptr) {
                             if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
                                 Notify(static_cast<int>(Notification::ERROR) /*, error text*/);
                                 break;
                             }
                             
+                            m_stateAvailabilityMap[static_cast<int>(state)] = true;
                             memcpy(bufferObject->Buffer(), buffer, bufferSize);
                             stbi_image_free(buffer);
 
-                            if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::NORMAL)]->Id()) {
+                            if (state == IconState::NORMAL) {
+                                MarkInputRegion(Rectangle(0, 0, loadedWidth, loadedHeight));
                                 SetTransparency(true);
                                 SetState(IconState::NORMAL);
                             }
@@ -202,6 +220,28 @@ namespace Asgaard {
                     default:
                         break;
                 }
+            }
+        }
+
+        void Icon::OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY)
+        {
+            SetState(IconState::HOVERING);
+        }
+
+        void Icon::OnMouseLeave(const std::shared_ptr<Pointer>&)
+        {
+            SetState(IconState::NORMAL);
+        }
+
+        void Icon::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons)
+        {
+            // LMB
+            if (buttons & 0x1) {
+                SetState(IconState::ACTIVE);
+                Notify(static_cast<int>(Notification::CLICKED));
+            }
+            else {
+                SetState(IconState::NORMAL);
             }
         }
     }

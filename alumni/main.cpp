@@ -41,12 +41,20 @@ int main(int argc, char **argv)
     int opt = 1;
     ioctl(stdoutPipe, FIONBIO, &opt);
     ioctl(stderrPipe, FIONBIO, &opt);
-    
+
     // initialize application
     Asgaard::APP.Initialize();
 
-    auto window = Asgaard::APP.GetScreen()->CreateWindow<Terminal>(initialSize, font, resolver, stdoutPipe, stderrPipe);
+    // set the resolver's event descriptor
+    resolver->Setup(resolver);
+    
+    auto window = Asgaard::APP.GetScreen()->CreateWindow<Terminal>(initialSize, 
+        std::move(font), std::move(resolver), stdoutPipe, stderrPipe);
     Asgaard::APP.AddEventDescriptor(stdoutPipe, IOSETIN | IOSETLVT, window);
     Asgaard::APP.AddEventDescriptor(stderrPipe, IOSETIN | IOSETLVT, window);
+
+    // We only call exit() to get out, so release ownership of window
+    window.reset();
+
     return Asgaard::APP.Execute();
 }

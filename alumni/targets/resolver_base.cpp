@@ -27,7 +27,6 @@
 
 ResolverBase::ResolverBase()
     : m_terminal(nullptr)
-    , m_alive(true)
 {
     // Register inbuilt commands
     RegisterCommand("cd", "Change the working directory", std::bind(&ResolverBase::ChangeDirectory, this, std::placeholders::_1));
@@ -62,6 +61,6 @@ bool ResolverBase::Help(const std::vector<std::string>&)
 
 bool ResolverBase::Exit(const std::vector<std::string>&)
 {
-    m_alive = false;
+    exit(EXIT_SUCCESS);
     return true;
 }

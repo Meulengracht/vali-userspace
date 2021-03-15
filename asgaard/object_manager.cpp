@@ -31,6 +31,18 @@ namespace Asgaard {
     
     ObjectManager::ObjectManager() :
         m_idIndex(0x100) { }
+
+    void ObjectManager::Destroy()
+    {
+        // unsubscribe to all objects
+        for (const auto& object : m_objects) {
+            if (object.first < 0x80000000) {
+                object.second->Unsubscribe(this);
+            }
+        }
+
+        m_objects.clear();
+    }
     
     std::shared_ptr<Object> ObjectManager::operator[](uint32_t index)
     {

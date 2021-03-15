@@ -53,6 +53,8 @@ namespace Asgaard {
         , m_minIcon(nullptr)
         , m_maxIcon(nullptr)
         , m_closeIcon(nullptr)
+        , m_lmbHold(false)
+        , m_dragInOperation(false)
         , m_redraw(false)
         , m_redrawReady(false)
     {
@@ -61,7 +63,21 @@ namespace Asgaard {
     
     WindowDecoration::~WindowDecoration()
     {
-        
+        Destroy();
+    }
+
+    void WindowDecoration::Destroy()
+    {
+        if (m_memory)    { m_memory->Unsubscribe(this); }
+        if (m_buffer)    { m_buffer->Unsubscribe(this); }
+        if (m_appTitle)  { m_appTitle->Unsubscribe(this); }
+        if (m_appIcon)   { m_appIcon->Unsubscribe(this); }
+        if (m_minIcon)   { m_minIcon->Unsubscribe(this); }
+        if (m_maxIcon)   { m_maxIcon->Unsubscribe(this); }
+        if (m_closeIcon) { m_closeIcon->Unsubscribe(this); }
+
+        // invoke base destroy
+        SubSurface::Destroy();
     }
     
     void WindowDecoration::SetTitle(const std::string& title)
@@ -122,6 +138,25 @@ namespace Asgaard {
         {
             SetValid(true);
             Notify(static_cast<int>(Notification::CREATED));
+        }
+    }
+
+    void WindowDecoration::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons)
+    {
+        if (buttons & 0x1) {
+            m_lmbHold = true;
+        }
+        else {
+            m_lmbHold = false;
+            m_dragInOperation = false;
+        }
+    }
+
+    void WindowDecoration::OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY)
+    {
+        if (m_lmbHold && !m_dragInOperation) {
+            m_dragInOperation = true;
+            Notify(static_cast<int>(Notification::INITIATE_DRAG));
         }
     }
     
@@ -226,27 +261,44 @@ namespace Asgaard {
         }
         
         if (m_appIcon && object->Id() == m_appIcon->Id()) {
-            // load app icon from current package './appIcon.png'
-            m_appIcon->LoadIcon("$sys/themes/default/app.png");
-            CheckCreation();
-            return;
+            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
+                // load app icon from current package './appIcon.png'
+                m_appIcon->LoadIcon("$sys/themes/default/app.png");
+                CheckCreation();
+                return;
+            }
         }
         
         if (m_minIcon && object->Id() == m_minIcon->Id()) {
-            m_minIcon->LoadIcon("$sys/themes/default/minimize.png");
-            CheckCreation();
+            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
+                m_minIcon->LoadIcon("$sys/themes/default/minimize.png");
+                CheckCreation();
+            }
+            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+                Notify(static_cast<int>(Notification::MINIMIZE));
+            }
             return;
         }
         
         if (m_maxIcon && object->Id() == m_maxIcon->Id()) {
-            m_maxIcon->LoadIcon("$sys/themes/default/maximize.png");
-            CheckCreation();
+            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
+                m_maxIcon->LoadIcon("$sys/themes/default/maximize.png");
+                CheckCreation();
+            }
+            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+                Notify(static_cast<int>(Notification::MAXIMIZE));
+            }
             return;
         }
         
         if (m_closeIcon && object->Id() == m_closeIcon->Id()) {
-            m_closeIcon->LoadIcon("$sys/themes/default/close.png");
-            CheckCreation();
+            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
+                m_closeIcon->LoadIcon("$sys/themes/default/close.png");
+                CheckCreation();
+            }
+            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+                exit(EXIT_SUCCESS);
+            }
             return;
         }
     }

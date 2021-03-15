@@ -75,14 +75,14 @@ extern "C" {
     static void wm_surface_event_resize_end_callback(struct wm_surface_resize_end_event*);
     static void wm_surface_event_focus_callback(struct wm_surface_focus_event*);
 
-    static gracht_protocol_function_t wm_surface_callbacks[4] = {
+    static gracht_protocol_function_t wm_surface_callbacks[5] = {
         { PROTOCOL_WM_SURFACE_EVENT_FORMAT_ID , (void*)wm_surface_event_format_callback },
         { PROTOCOL_WM_SURFACE_EVENT_FRAME_ID ,  (void*)wm_surface_event_frame_callback },
         { PROTOCOL_WM_SURFACE_EVENT_RESIZE_ID , (void*)wm_surface_event_resize_callback },
-        { PROTOCOL_WM_SURFACE_EVENT_RESIZE_END_ID, (void*)wm_surface_event_resize_end_callback }
+        { PROTOCOL_WM_SURFACE_EVENT_RESIZE_END_ID, (void*)wm_surface_event_resize_end_callback },
         { PROTOCOL_WM_SURFACE_EVENT_FOCUS_ID , (void*)wm_surface_event_focus_callback },
     };
-    DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 4);
+    DEFINE_WM_SURFACE_CLIENT_PROTOCOL(wm_surface_callbacks, 5);
 
     static void wm_buffer_event_release_callback(struct wm_buffer_release_event*);
 
@@ -125,6 +125,14 @@ int gracht_os_get_server_client_address(struct sockaddr_storage* address, int* a
     return 0;
 }
 
+namespace {
+    void application_cleanup()
+    {
+        Asgaard::OM.Destroy();
+        Asgaard::APP.Destroy();
+    }
+}
+
 namespace Asgaard {
     Application APP;
     
@@ -133,20 +141,9 @@ namespace Asgaard {
         , m_client(nullptr)
         , m_ioset(-1)
         , m_initialized(false)
-        , m_messageBuffer(new char[GRACHT_MAX_MESSAGE_SIZE])
+        , m_messageBuffer(nullptr)
     {
         
-    }
-    
-    Application::~Application()
-    {
-        if (m_client != nullptr) {
-            gracht_client_shutdown(m_client);
-        }
-
-        if (m_messageBuffer != nullptr) {
-            delete[] m_messageBuffer;
-        }
     }
 
     void Application::Initialize()
@@ -154,6 +151,14 @@ namespace Asgaard {
         struct socket_client_configuration linkConfiguration;
         struct gracht_client_configuration clientConfiguration;
         int                                status;
+
+        if (m_initialized) {
+            throw ApplicationException("Initialize has been called twice", -1);
+        }
+
+        // register at-exit functions
+        atexit(application_cleanup);
+        at_quick_exit(application_cleanup);
         
         linkConfiguration.type = gracht_link_stream_based;
         gracht_os_get_server_client_address(&linkConfiguration.address, &linkConfiguration.address_length);
@@ -161,7 +166,7 @@ namespace Asgaard {
         gracht_link_socket_client_create(&clientConfiguration.link, &linkConfiguration);
         status = gracht_client_create(&clientConfiguration, &m_client);
         if (status) {
-            throw new ApplicationException("failed to initialize gracht client library", status);
+            throw ApplicationException("failed to initialize gracht client library", status);
         }
         
         gracht_client_register_protocol(m_client, &wm_core_client_protocol);
@@ -176,6 +181,9 @@ namespace Asgaard {
         if (m_ioset <= 0) {
             throw new ApplicationException("failed to initialize the ioset descriptor", errno);
         }
+
+        // allocate the message buffer
+        m_messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
         // add the client as a target
         m_initialized = true;
@@ -192,6 +200,25 @@ namespace Asgaard {
         // wait for initialization to complete
         while (!m_initialized) {
             (void)gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
+        }
+    }
+
+    void Application::Destroy()
+    {
+        // unsubscribe from screens
+        for (const auto& screen : m_screens) {
+            screen->Unsubscribe(this);
+        }
+
+        m_listeners.clear();
+        m_screens.clear();
+        
+        if (m_client != nullptr) {
+            gracht_client_shutdown(m_client);
+        }
+
+        if (m_messageBuffer != nullptr) {
+            delete[] m_messageBuffer;
         }
     }
     

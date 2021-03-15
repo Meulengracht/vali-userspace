@@ -58,6 +58,16 @@ ResolverVali::~ResolverVali()
     close(m_stdinDescriptor);
 }
 
+void ResolverVali::Setup(const std::shared_ptr<ResolverVali>& selfReference)
+{
+    m_processEvent = eventd(0, EVT_RESET_EVENT);
+    if (m_processEvent < 0) {
+        // throw
+    }
+
+    Asgaard::APP.AddEventDescriptor(m_processEvent, IOSETSYN, selfReference);
+}
+
 void ResolverVali::UpdateWorkingDirectory()
 {
     char* CurrentPath = (char*)std::malloc(_MAXPATH);
@@ -142,13 +152,6 @@ bool ResolverVali::ExecuteProgram(const std::string& Program, const std::vector<
     
     ProcessSpawnEx(Program.c_str(), line.c_str(), &configuration, &m_application);
     if (m_application != UUID_INVALID) {
-        // Create the sync descriptor on demand as we need the application environment to be initialized
-        // before adding descriptors
-        if (m_processEvent == -1) {
-            m_processEvent = eventd(0, EVT_RESET_EVENT);
-            Asgaard::APP.AddEventDescriptor(m_processEvent, IOSETSYN, std::shared_ptr<ResolverVali>(this));
-        }
-
         std::thread spawn(std::bind(&ResolverVali::WaitForProcess, this));
         spawn.detach();
         return true;
