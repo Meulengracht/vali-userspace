@@ -35,6 +35,7 @@ namespace Asgaard {
     class Application final : public Object {
     public:
         Application();
+        ~Application();
         
         /**
          * Initialize

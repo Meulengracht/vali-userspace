@@ -56,8 +56,8 @@ namespace Asgaard {
         };
         
     public:
-        Object(uint32_t id) : m_id(id), m_valid(false) { }
-        virtual ~Object() { }
+        Object(uint32_t id);
+        virtual ~Object();
 
     public:
         uint32_t Id() const { return m_id; }

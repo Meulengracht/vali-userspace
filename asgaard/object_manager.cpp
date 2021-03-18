@@ -32,11 +32,16 @@ namespace Asgaard {
     ObjectManager::ObjectManager() :
         m_idIndex(0x100) { }
 
+    ObjectManager::~ObjectManager()
+    {
+        Destroy();
+    }
+
     void ObjectManager::Destroy()
     {
         // unsubscribe to all objects
         for (const auto& object : m_objects) {
-            if (object.first < 0x80000000) {
+            if (object.first > 256 && object.first < 0x80000000) {
                 object.second->Unsubscribe(this);
             }
         }
@@ -51,6 +56,18 @@ namespace Asgaard {
             return it->second;
         }
         return nullptr;
+    }
+
+    void ObjectManager::Notification(Utils::Publisher* source, int event, void* data)
+    {
+        auto object = dynamic_cast<Object*>(source);
+        if (object == nullptr) {
+            return;
+        }
+
+        if (event == static_cast<int>(Object::Notification::DESTROY)) {
+            m_objects.erase(object->Id());
+        }
     }
     
     uint32_t ObjectManager::CreateObjectId()

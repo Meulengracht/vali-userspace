@@ -125,14 +125,6 @@ int gracht_os_get_server_client_address(struct sockaddr_storage* address, int* a
     return 0;
 }
 
-namespace {
-    void application_cleanup()
-    {
-        Asgaard::OM.Destroy();
-        Asgaard::APP.Destroy();
-    }
-}
-
 namespace Asgaard {
     Application APP;
     
@@ -146,6 +138,11 @@ namespace Asgaard {
         
     }
 
+    Application::~Application()
+    {
+        Destroy();
+    }
+
     void Application::Initialize()
     {
         struct socket_client_configuration linkConfiguration;
@@ -155,10 +152,6 @@ namespace Asgaard {
         if (m_initialized) {
             throw ApplicationException("Initialize has been called twice", -1);
         }
-
-        // register at-exit functions
-        atexit(application_cleanup);
-        at_quick_exit(application_cleanup);
         
         linkConfiguration.type = gracht_link_stream_based;
         gracht_os_get_server_client_address(&linkConfiguration.address, &linkConfiguration.address_length);

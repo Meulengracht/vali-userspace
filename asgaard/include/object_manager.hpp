@@ -33,6 +33,7 @@ namespace Asgaard {
     class ObjectManager final : Utils::Subscriber {
     public:
         ObjectManager();
+        ~ObjectManager();
 
         /**
          * Destroy
@@ -55,8 +56,7 @@ namespace Asgaard {
 
             // subscribe to events so we can react on destroy invokes
             object->Subscribe(this);
-
-            m_objects[object->Id()] = object;
+            m_objects.emplace(object->Id(), object);
             return object;
         }
         
@@ -75,8 +75,7 @@ namespace Asgaard {
 
             // subscribe to events so we can react on destroy invokes
             object->Subscribe(this);
-
-            m_objects[object->Id()] = object;
+            m_objects.emplace(object->Id(), object);
             return object;
         }
         
@@ -88,7 +87,7 @@ namespace Asgaard {
             }
             
             std::shared_ptr<T> object = std::make_shared<T>(id);
-            m_objects[object->Id()] = object;
+            m_objects.emplace(id, object);
             return object;
         }
         
@@ -101,7 +100,7 @@ namespace Asgaard {
             
             std::shared_ptr<T> object = std::make_shared<T>(
                 id, std::forward<Params>(parameters)...);
-            m_objects[object->Id()] = object;
+            m_objects.emplace(id, object);
             return object;
         }
 
@@ -114,33 +113,12 @@ namespace Asgaard {
         static void  operator delete[] (void*) = delete;
 
     private:
-        void Notification(Utils::Publisher* source, int event, void* data) override
-        {
-            auto object = dynamic_cast<Object*>(source);
-            if (object == nullptr) {
-                return;
-            }
-            
-            if (event == static_cast<int>(Object::Notification::DESTROY)) {
-                DestroyObject(object->Id());
-            }
-        }
-
-        void DestroyObject(uint32_t id)
-        {
-            auto element = m_objects[id];
-            if (element == nullptr) {
-                return;
-            }
-            m_objects.erase(id);
-        }
-        
-    private:
+        void     Notification(Utils::Publisher* source, int event, void* data) override;
         uint32_t CreateObjectId();
 
     private:
         std::map<uint32_t, std::shared_ptr<Object>> m_objects;
-        uint32_t m_idIndex;
+        uint32_t                                    m_idIndex;
     };
     
     extern ObjectManager OM;

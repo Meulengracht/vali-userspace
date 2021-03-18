@@ -46,6 +46,7 @@
 #include "protocols/wm_pointer_protocol_server.h"
 
 #include "engine/vioarr_engine.h"
+#include "engine/vioarr_objects.h"
 #include "engine/vioarr_utils.h"
 
 extern void ctt_input_event_properties_callback(struct ctt_input_properties_event*);
@@ -165,6 +166,11 @@ DEFINE_WM_POINTER_SERVER_PROTOCOL(wm_pointer_callbacks, 3);
 
 static gracht_client_t* valiClient = NULL;
 
+static void __gracht_handle_disconnect(int client)
+{
+    vioarr_objects_remove_by_client(client);
+}
+
 int client_initialize(void)
 {
     struct gracht_client_configuration clientConfiguration;
@@ -185,7 +191,7 @@ int client_initialize(void)
 int server_initialize(int* eventIodOut)
 {
     struct socket_server_configuration linkConfiguration;
-    struct gracht_server_configuration serverConfiguration;
+    struct gracht_server_configuration serverConfiguration = { 0 };
     int                                status;
     
     gracht_os_get_server_client_address(&linkConfiguration.server_address, &linkConfiguration.server_address_length);
@@ -199,6 +205,9 @@ int server_initialize(int* eventIodOut)
         ERROR("error creating event descriptor %i", errno);
         return -1;
     }
+
+    // Listen to client disconnects so we can remove resources
+    serverConfiguration.callbacks.clientDisconnected = __gracht_handle_disconnect;
     
     status = gracht_server_initialize(&serverConfiguration);
     if (status) {

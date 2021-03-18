@@ -22,7 +22,10 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
+#include "vioarr_buffer.h"
+#include "vioarr_memory.h"
 #include "vioarr_objects.h"
+#include "vioarr_surface.h"
 #include "vioarr_utils.h"
 #include "../protocols/wm_core_protocol_server.h"
 #include <ds/list.h>
@@ -124,6 +127,30 @@ int vioarr_objects_remove_object(int client, uint32_t id)
     }
     free(object);
     return 0;
+}
+
+void vioarr_objects_remove_by_client(int client)
+{
+    foreach_nolink(i, &objects) {
+        vioarr_object_t* object = i->value;
+        if (object->client == client) {
+            element_t* next = i->next;
+            if (object->type == object_type_surface) {
+                vioarr_surface_destroy(object->object);
+            }
+            else if (object->type == object_type_memory_pool) {
+                vioarr_memory_destroy_pool(object->object);
+            }
+            else if (object->type == object_type_buffer) {
+                vioarr_buffer_destroy(object->object);
+            }
+            list_remove(&objects, i);
+            i = next;
+        }
+        else {
+            i = i->next;
+        }
+    }
 }
 
 // publishes all server objects
