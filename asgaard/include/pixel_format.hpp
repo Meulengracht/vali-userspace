@@ -28,7 +28,8 @@ namespace Asgaard {
         A8B8G8R8,
         X8R8G8B8,
         R8G8B8A8,
-        B8G8R8A8
+        B8G8R8A8,
+        X8B8G8R8,
     };
     
     static int GetBytesPerPixel(enum PixelFormat format) {
@@ -39,6 +40,7 @@ namespace Asgaard {
             case Asgaard::PixelFormat::X8R8G8B8:
             case Asgaard::PixelFormat::R8G8B8A8:
             case Asgaard::PixelFormat::B8G8R8A8:
+            case Asgaard::PixelFormat::X8B8G8R8:
                 byteCount = 4;
                 break;
         }

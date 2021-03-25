@@ -25,6 +25,7 @@
 #include "include/memory_pool.hpp"
 #include "include/memory_buffer.hpp"
 #include "include/rectangle.hpp"
+#include "include/pointer.hpp"
 #include "include/window_decoration.hpp"
 #include "include/drawing/painter.hpp"
 #include "include/drawing/font_manager.hpp"
@@ -94,6 +95,13 @@ namespace Asgaard {
             m_appIcon->LoadIcon(iconPath);
         }
     }
+
+    void WindowDecoration::UpdateIcon(int width, int height, PixelFormat format, const void* data)
+    {
+        if (m_appIcon && m_appIcon->Valid()) {
+            // missing imp
+        }
+    }
     
     void WindowDecoration::Redraw()
     {
@@ -152,11 +160,12 @@ namespace Asgaard {
         }
     }
 
-    void WindowDecoration::OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY)
+    void WindowDecoration::OnMouseMove(const std::shared_ptr<Pointer>& pointer, int localX, int localY)
     {
         if (m_lmbHold && !m_dragInOperation) {
             m_dragInOperation = true;
-            Notify(static_cast<int>(Notification::INITIATE_DRAG));
+            Notify(static_cast<int>(Notification::INITIATE_DRAG), 
+                reinterpret_cast<void*>(static_cast<intptr_t>(pointer->Id())));
         }
     }
     

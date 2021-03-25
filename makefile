@@ -202,11 +202,24 @@ sdl-build:
 		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		-DSDL_SHARED_ENABLED_BY_DEFAULT=ON \
 		../SDL
 
 .PHONY: build_sdl
 build_sdl: sdl-build
-	#cd sdl-build && make -j$(CPU_COUNT) && make install
+	cd sdl-build && make -j$(CPU_COUNT) && make install
+
+lite-build:
+	mkdir -p lite-build
+	cd lite-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../lite
+
+.PHONY: build_lite
+build_lite: lite-build
+	cd lite-build && make -j$(CPU_COUNT) && make install
 
 .PHONY: build_mesa
 build_mesa:
@@ -236,6 +249,10 @@ clean_lua:
 .PHONY: clean_sdl
 clean_sdl:
 	@rm -rf sdl-build
+
+.PHONY: clean_lite
+clean_lite:
+	@rm -rf lite-build
 
 .PHONY: clean_asgaard
 clean_asgaard:
@@ -288,4 +305,5 @@ clean:
 	@rm -rf doom-build
 	@rm -rf lua-build
 	@rm -rf sdl-build
+	@rm -rf lite-build
 	@rm -rf $(VALI_APPLICATION_PATH)

@@ -22,3 +22,6 @@
 [submodule "lua"]
 	path = lua
 	url = https://github.com/umbrella-c/lua
+[submodule "lite"]
+	path = lite
+	url = https://github.com/umbrella-c/lite

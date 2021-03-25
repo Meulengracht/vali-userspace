@@ -54,6 +54,9 @@ namespace Asgaard {
                 case PixelFormat::B8G8R8A8:
                     color = ((unsigned int)m_b << 24) | ((unsigned int)m_g << 16) | ((unsigned int)m_r << 8) | m_a;
                     break;
+                case PixelFormat::X8B8G8R8:
+                    color = 0xFF000000 | ((unsigned int)m_b << 16) | ((unsigned int)m_g << 8) | m_r;
+                    break;
             }
             return color;
         }
@@ -84,6 +87,7 @@ namespace Asgaard {
                     case PixelFormat::X8R8G8B8: return Color(colorData.components.c2, colorData.components.c1, colorData.components.c0);
                     case PixelFormat::R8G8B8A8: return Color(colorData.components.c0, colorData.components.c3, colorData.components.c2, colorData.components.c1);
                     case PixelFormat::B8G8R8A8: return Color(colorData.components.c0, colorData.components.c1, colorData.components.c2, colorData.components.c3);
+                    case PixelFormat::X8B8G8R8: return Color(colorData.components.c0, colorData.components.c1, colorData.components.c2);
                 }
                 return Color(0, 0, 0);
             }

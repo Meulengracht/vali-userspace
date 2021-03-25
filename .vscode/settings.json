@@ -113,6 +113,7 @@
         "wm_surface_protocol_server.h": "c",
         "dlfcn.h": "c",
         "sdl_vali.h": "c",
-        "osmesa.h": "c"
+        "osmesa.h": "c",
+        "api.h": "c"
     }
 }

@@ -69,6 +69,7 @@ namespace Asgaard {
         
         void SetTitle(const std::string& title);
         void SetIcon(const std::string& iconPath);
+        void UpdateIcon(int width, int height, PixelFormat format, const void* data);
         void RequestRedraw();
         void Destroy() override;
 
