@@ -30,6 +30,7 @@
 #include "include/drawing/painter.hpp"
 #include "include/drawing/font_manager.hpp"
 #include "include/drawing/font.hpp"
+#include "include/drawing/image.hpp"
 
 #include "include/widgets/icon.hpp"
 #include "include/widgets/label.hpp"
@@ -46,20 +47,20 @@ namespace Asgaard {
         const Rectangle& dimensions,
         const std::shared_ptr<Drawing::Font>& font) 
         : SubSurface(id, screen, parentId, dimensions)
-        , m_memory(nullptr)
-        , m_buffer(nullptr)
         , m_appFont(font)
-        , m_appTitle(nullptr)
-        , m_appIcon(nullptr)
-        , m_minIcon(nullptr)
-        , m_maxIcon(nullptr)
-        , m_closeIcon(nullptr)
         , m_lmbHold(false)
         , m_dragInOperation(false)
         , m_redraw(false)
         , m_redrawReady(false)
     {
+        // create memory resources
+        auto poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
+        m_memory = MemoryPool::Create(this, poolSize);
         
+        m_buffer = MemoryBuffer::Create(this, m_memory, 0,
+            Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+
+        Initialize();
     }
     
     WindowDecoration::~WindowDecoration()
@@ -80,26 +81,68 @@ namespace Asgaard {
         // invoke base destroy
         SubSurface::Destroy();
     }
+
+    void WindowDecoration::Initialize()
+    {
+        float halfHeight = (float)Dimensions().Height() / 2.0f;
+        int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
+
+        // left corner
+        m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+            Rectangle(8, (int)(halfHeight - (12.0f)), 24, 24));
+        m_appIcon->Subscribe(this);
+
+        // middle
+        m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
+            Rectangle(
+                8 + 8 + 24, // start text next to app icon
+                0, 
+                Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + 24),
+                Dimensions().Height()));
+        m_appTitle->Subscribe(this);
+        
+        // right corner
+        m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+            Rectangle(Dimensions().Width() - (3 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
+        m_minIcon->Subscribe(this);
+
+        // right corner
+        m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+            Rectangle(Dimensions().Width() - (2 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
+        m_maxIcon->Subscribe(this);
+
+        // right corner
+        m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+            Rectangle(Dimensions().Width() - (8 + ICON_SIZE), 8.0f, ICON_SIZE, ICON_SIZE));
+        m_closeIcon->Subscribe(this);
+
+    }
     
     void WindowDecoration::SetTitle(const std::string& title)
     {
-        if (m_appTitle && m_appTitle->Valid()) {
+        if (m_appTitle) {
             m_appTitle->SetText(title);
             m_appTitle->RequestRedraw();
         }
     }
     
-    void WindowDecoration::SetIcon(const std::string& iconPath)
+    void WindowDecoration::SetImage(const std::shared_ptr<Drawing::Image>& image)
     {
-        if (m_appIcon && m_appIcon->Valid()) {
-            m_appIcon->LoadIcon(iconPath);
+        if (m_appIcon) {
+            m_appIcon->SetImage(*image.get());
         }
     }
 
-    void WindowDecoration::UpdateIcon(int width, int height, PixelFormat format, const void* data)
+    void WindowDecoration::SetVisible(bool visible)
     {
-        if (m_appIcon && m_appIcon->Valid()) {
-            // missing imp
+        if (visible) {
+            SetBuffer(m_buffer);
+            RequestRedraw();
+        }
+        else {
+            auto nullp = std::shared_ptr<MemoryBuffer>(nullptr);
+            SetBuffer(nullp);
+            RequestRedraw();
         }
     }
     
@@ -135,19 +178,6 @@ namespace Asgaard {
             m_redrawReady.store(true);
         }
     }
-    
-    void WindowDecoration::CheckCreation()
-    {
-        if (m_closeIcon && m_closeIcon->Valid() && 
-            m_minIcon   && m_minIcon->Valid()   && 
-            m_maxIcon   && m_maxIcon->Valid()   && 
-            m_appIcon   && m_appIcon->Valid()   &&
-            m_appTitle  && m_appTitle->Valid())
-        {
-            SetValid(true);
-            Notify(static_cast<int>(Notification::CREATED));
-        }
-    }
 
     void WindowDecoration::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons)
     {
@@ -174,45 +204,11 @@ namespace Asgaard {
         switch (event)
         {
             case ObjectEvent::CREATION: {
-                float halfHeight = (float)Dimensions().Height() / 2.0f;
-                int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
-
-                // create memory resources
-                auto poolSize = (Dimensions().Width() * Dimensions().Height() * 4);
-                m_memory = MemoryPool::Create(this, poolSize);
-                
-                // left corner
-                m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(8, (int)(halfHeight - (12.0f)), 24, 24));
-                m_appIcon->Subscribe(this);
-
-                // middle
-                m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
-                    Rectangle(
-                        8 + 8 + 24, // start text next to app icon
-                        0, 
-                        Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + 24),
-                        Dimensions().Height()));
-                m_appTitle->Subscribe(this);
-                
-                // right corner
-                m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (3 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
-                m_minIcon->Subscribe(this);
-
-                // right corner
-                m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (2 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
-                m_maxIcon->Subscribe(this);
-
-                // right corner
-                m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-                    Rectangle(Dimensions().Width() - (8 + ICON_SIZE), 8.0f, ICON_SIZE, ICON_SIZE));
-                m_closeIcon->Subscribe(this);
+                Notify(static_cast<int>(Object::Notification::CREATED));
             } break;
             
             case ObjectEvent::ERROR: {
-                Notify(static_cast<int>(Notification::ERROR));
+                Notify(static_cast<int>(Object::Notification::ERROR));
             } break;
             
             default:
@@ -220,7 +216,7 @@ namespace Asgaard {
         }
         
         // Run the base class events as well
-        Surface::ExternalEvent(event, data);
+        SubSurface::ExternalEvent(event, data);
     }
     
     void WindowDecoration::Notification(Publisher* source, int event, void* data)
@@ -230,24 +226,21 @@ namespace Asgaard {
             return;
         }
         
-        if (m_memory != nullptr && object->Id() == m_memory->Id()) {
-            switch (static_cast<MemoryPool::Notification>(event)) {
-                case MemoryPool::Notification::CREATED: {
-                    m_buffer = MemoryBuffer::Create(this, m_memory, 0,
-                        Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+        if (object->Id() == m_memory->Id()) {
+            switch (event) {
+                case static_cast<int>(Object::Notification::ERROR): {
+                    Notify(static_cast<int>(Object::Notification::ERROR));
                 } break;
-                
-                case MemoryPool::Notification::ERROR: {
-                    Notify(static_cast<int>(Notification::ERROR));
-                } break;
+
+                default: break;
             }
             
             return;
         }
         
-        if (m_buffer != nullptr && object->Id() == m_buffer->Id()) {
-            switch (static_cast<MemoryBuffer::Notification>(event)) {
-                case MemoryBuffer::Notification::CREATED: {
+        if (object->Id() == m_buffer->Id()) {
+            switch (event) {
+                case static_cast<int>(Object::Notification::CREATED): {
                     SetBuffer(m_buffer);
                     SetTransparency(true);
                     RedrawReady();
@@ -260,28 +253,27 @@ namespace Asgaard {
             return;
         }
         
-        if (m_appTitle && object->Id() == m_appTitle->Id()) {
+        if (object->Id() == m_appTitle->Id()) {
             m_appTitle->SetFont(m_appFont);
             m_appTitle->SetAnchors(Widgets::Label::Anchors::CENTER);
             m_appTitle->SetBackgroundColor(DECORATION_FILL_COLOR);
             m_appTitle->SetTextColor(DECORATION_TEXT_COLOR);
-            CheckCreation();
             return;
         }
         
-        if (m_appIcon && object->Id() == m_appIcon->Id()) {
-            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
+        if (object->Id() == m_appIcon->Id()) {
+            if (event == static_cast<int>(Object::Notification::CREATED)) {
                 // load app icon from current package './appIcon.png'
-                m_appIcon->LoadIcon("$sys/themes/default/app.png");
-                CheckCreation();
+                Drawing::Image image("$sys/themes/default/app.png");
+                m_appIcon->SetImage(image);
                 return;
             }
         }
         
-        if (m_minIcon && object->Id() == m_minIcon->Id()) {
-            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
-                m_minIcon->LoadIcon("$sys/themes/default/minimize.png");
-                CheckCreation();
+        if (object->Id() == m_minIcon->Id()) {
+            if (event == static_cast<int>(Object::Notification::CREATED)) {
+                Drawing::Image image("$sys/themes/default/minimize.png");
+                m_minIcon->SetImage(image);
             }
             else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
                 Notify(static_cast<int>(Notification::MINIMIZE));
@@ -289,10 +281,10 @@ namespace Asgaard {
             return;
         }
         
-        if (m_maxIcon && object->Id() == m_maxIcon->Id()) {
-            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
-                m_maxIcon->LoadIcon("$sys/themes/default/maximize.png");
-                CheckCreation();
+        if (object->Id() == m_maxIcon->Id()) {
+            if (event == static_cast<int>(Object::Notification::CREATED)) {
+                Drawing::Image image("$sys/themes/default/maximize.png");
+                m_maxIcon->SetImage(image);
             }
             else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
                 Notify(static_cast<int>(Notification::MAXIMIZE));
@@ -300,10 +292,10 @@ namespace Asgaard {
             return;
         }
         
-        if (m_closeIcon && object->Id() == m_closeIcon->Id()) {
-            if (event == static_cast<int>(Widgets::Icon::Notification::CREATED)) {
-                m_closeIcon->LoadIcon("$sys/themes/default/close.png");
-                CheckCreation();
+        if (object->Id() == m_closeIcon->Id()) {
+            if (event == static_cast<int>(Object::Notification::CREATED)) {
+                Drawing::Image image("$sys/themes/default/close.png");
+                m_closeIcon->SetImage(image);
             }
             else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
                 exit(EXIT_SUCCESS);

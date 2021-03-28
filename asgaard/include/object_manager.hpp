@@ -98,8 +98,7 @@ namespace Asgaard {
                 return nullptr;
             }
             
-            std::shared_ptr<T> object = std::make_shared<T>(
-                id, std::forward<Params>(parameters)...);
+            std::shared_ptr<T> object = std::make_shared<T>(id, std::forward<Params>(parameters)...);
             m_objects.emplace(id, object);
             return object;
         }

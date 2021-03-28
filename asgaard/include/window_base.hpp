@@ -1,5 +1,4 @@
-/* ValiOS
- *
+/**
  * Copyright 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
@@ -32,16 +31,44 @@
 namespace Asgaard {
     class MemoryPool;
     class MemoryBuffer;
+    class WindowDecoration;
+    class WindowEdge;
+
+    namespace Drawing {
+        class Image;
+    }
     
     class WindowBase : public Surface {
     public:
-        WindowBase(uint32_t, const Rectangle&);
-        ~WindowBase();
-        
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+        enum class FullscreenMode : int {
+            EXIT,
+            NORMAL,
+            FULL
+        };
 
+        enum class PriorityLevel : int {
+            BOTTOM,
+            DEFAULT,
+            TOP
+        };
+        
+    public:
+        WindowBase(uint32_t, const std::shared_ptr<Screen>&, const Rectangle&);
+        ~WindowBase();
+
+        void SetTitle(const std::string& title);
+        void SetIconImage(const std::shared_ptr<Drawing::Image>& image);
+
+        void SetResizable(bool resizeable);
+        void EnableDecoration(bool enable);
+
+        void RequestPriorityLevel(enum PriorityLevel);
+        void RequestFullscreenMode(enum FullscreenMode);
+        
     // Window events that can/should be reacted on.
     protected:
+        virtual void OnMinimize() { }
+        virtual void OnMaximize() { }
         virtual void OnCreated(Object*) = 0;
         virtual void OnRefreshed(MemoryBuffer*) = 0;
         virtual void Teardown() = 0;
@@ -55,6 +82,11 @@ namespace Asgaard {
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        std::vector<enum PixelFormat> m_supportedFormats;
+        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+
+    private:
+        std::vector<enum PixelFormat>     m_supportedFormats;
+        std::shared_ptr<WindowDecoration> m_decoration;
+        std::shared_ptr<WindowEdge>       m_edge;
     };
 }

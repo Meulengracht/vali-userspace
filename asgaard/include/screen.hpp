@@ -38,12 +38,6 @@ namespace Asgaard {
             ROTATE_180,
             ROTATE_270,
         };
-        
-        enum class Notification : int {
-            ERROR = static_cast<int>(Object::Notification::CUSTOM_START),
-            CREATED
-        };
-        
     public:
         class ScreenMode {
         public:
@@ -89,14 +83,15 @@ namespace Asgaard {
                 return nullptr;
             }
 
-            auto window = OM.CreateClientObject<WC, Params...>(parameters...);
+            auto screen = std::dynamic_pointer_cast<Screen>(OM[Id()]);
+            auto window = OM.CreateClientObject<WC, const std::shared_ptr<Screen>&, Params...>(
+                screen, std::forward<Params>(parameters)...);
             if (window == nullptr) {
                 return nullptr;
             }
 
             // subscribe to the window events so we can listen for destroy
             window->Subscribe(this);
-            window->BindToScreen(std::dynamic_pointer_cast<Screen>(OM[Id()]));
             
             m_windows.push_back(window);
             return window;

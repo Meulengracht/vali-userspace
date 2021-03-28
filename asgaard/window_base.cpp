@@ -23,6 +23,8 @@
 
 #include "include/application.hpp"
 #include "include/window_base.hpp"
+#include "include/window_decoration.hpp"
+#include "include/window_edge.hpp"
 #include "include/object_manager.hpp"
 #include "include/memory_pool.hpp"
 #include "include/memory_buffer.hpp"
@@ -44,15 +46,112 @@ static enum wm_surface_edge ToWindowEdges(enum Asgaard::Surface::SurfaceEdges ed
 }
 
 namespace Asgaard {
-    WindowBase::WindowBase(uint32_t id, const Rectangle& dimensions)
-        : Surface(id, dimensions)
+    WindowBase::WindowBase(uint32_t id, const std::shared_ptr<Screen>& screen, const Rectangle& dimensions)
+        : Surface(id, screen, dimensions)
     {
-        
+        Rectangle decorationDimensions(0, 0, dimensions.Width(), 35);
+        m_decoration = OM.CreateClientObject<Asgaard::WindowDecoration>(screen, id, decorationDimensions);
+
+        // install in right lower corner
+        Rectangle edgeDimensions(dimensions.Width() - 16, dimensions.Height() - 16, 16, 16);
+        m_edge = OM.CreateClientObject<Asgaard::WindowEdge>(screen, id, edgeDimensions);
     }
 
     WindowBase::~WindowBase()
     {
         
+    }
+
+    void WindowBase::SetTitle(const std::string& title)
+    {
+        m_decoration->SetTitle(title);
+    }
+
+    void WindowBase::SetIconImage(const std::shared_ptr<Drawing::Image>& image)
+    {
+        m_decoration->SetImage(image);
+    }
+
+    void WindowBase::SetResizable(bool resizeable)
+    {
+        m_edge->SetVisible(resizeable);
+    }
+
+    void WindowBase::EnableDecoration(bool enable)
+    {
+        m_decoration->SetVisible(enable);
+    }
+
+    void WindowBase::RequestPriorityLevel(enum PriorityLevel level)
+    {
+        wm_surface_request_level(APP.GrachtClient(), nullptr, Id(),
+            static_cast<int>(level));
+    }
+
+    void WindowBase::RequestFullscreenMode(enum FullscreenMode mode)
+    {
+        wm_surface_request_fullscreen_mode(APP.GrachtClient(), nullptr, Id(), 
+            static_cast<wm_surface_fullscreen_mode>(mode));
+    }
+    
+    void WindowBase::InitiateResize(const std::shared_ptr<Pointer>& pointer, enum SurfaceEdges edges)
+    {
+        wm_surface_resize(APP.GrachtClient(), nullptr, Id(), pointer->Id(), ToWindowEdges(edges));
+    }
+    
+    void WindowBase::InitiateMove(const std::shared_ptr<Pointer>& pointer)
+    {
+        wm_surface_move(APP.GrachtClient(), nullptr, Id(), pointer->Id());
+    }
+    
+    void WindowBase::Notification(Publisher* source, int event, void* data)
+    {
+        auto object = dynamic_cast<Object*>(source);
+        if (object) {
+            if (object->Id() == m_decoration->Id()) {
+                switch (event) {
+                    case static_cast<int>(WindowDecoration::Notification::MINIMIZE): {
+                        OnMinimize();
+
+                        auto nullPointer = std::shared_ptr<MemoryBuffer>(nullptr);
+                        SetBuffer(nullPointer);
+                    } break;
+                    case static_cast<int>(WindowDecoration::Notification::MAXIMIZE): {
+                        OnMaximize();
+                        RequestFullscreenMode(FullscreenMode::NORMAL);
+                    } break;
+                    case static_cast<int>(WindowDecoration::Notification::INITIATE_DRAG): {
+                        auto pointerId = static_cast<uint32_t>(reinterpret_cast<intptr_t>(data));
+                        auto pointer = std::dynamic_pointer_cast<Asgaard::Pointer>(Asgaard::OM[pointerId]);
+                        InitiateMove(pointer);
+                    } break;
+
+                    default: break;
+                }
+            }
+            else if (object->Id() == m_edge->Id()) {
+                if (event == static_cast<int>(WindowEdge::Notification::CLICKED)) {
+                    auto pointerId = static_cast<uint32_t>(reinterpret_cast<intptr_t>(data));
+                    auto pointer = std::dynamic_pointer_cast<Asgaard::Pointer>(Asgaard::OM[pointerId]);
+                    InitiateResize(pointer, Surface::SurfaceEdges::RIGHT | Surface::SurfaceEdges::BOTTOM);
+                }
+            }
+            else {
+                switch (event) {
+                    case static_cast<int>(Object::Notification::CREATED): {
+                        OnCreated(object);
+                    } break;
+                    
+                    case static_cast<int>(Object::Notification::ERROR): {
+                        
+                    } break;
+
+                    case static_cast<int>(MemoryBuffer::Notification::REFRESHED): {
+                        OnRefreshed(dynamic_cast<MemoryBuffer*>(object));
+                    } break;
+                }
+            }
+        }
     }
     
     void WindowBase::ExternalEvent(enum ObjectEvent event, void* data)
@@ -81,45 +180,5 @@ namespace Asgaard {
         
         // Run the base class events as well
         Surface::ExternalEvent(event, data);
-    }
-    
-    void WindowBase::Notification(Publisher* source, int event, void* data)
-    {
-        auto memoryObject = dynamic_cast<MemoryPool*>(source);
-        if (memoryObject != nullptr) {
-            switch (static_cast<MemoryPool::Notification>(event)) {
-                case MemoryPool::Notification::CREATED: {
-                    OnCreated(memoryObject);
-                } break;
-                
-                case MemoryPool::Notification::ERROR: {
-                    
-                } break;
-            }
-            return;
-        }
-        
-        auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
-        if (bufferObject != nullptr) {
-            switch (static_cast<MemoryBuffer::Notification>(event)) {
-                case MemoryBuffer::Notification::CREATED: {
-                    OnCreated(bufferObject);
-                } break;
-                case MemoryBuffer::Notification::REFRESHED: {
-                    OnRefreshed(bufferObject);
-                } break;
-            }
-            return;
-        }
-    }
-    
-    void WindowBase::InitiateResize(const std::shared_ptr<Pointer>& pointer, enum SurfaceEdges edges)
-    {
-        wm_surface_resize(APP.GrachtClient(), nullptr, Id(), pointer->Id(), ToWindowEdges(edges));
-    }
-    
-    void WindowBase::InitiateMove(const std::shared_ptr<Pointer>& pointer)
-    {
-        wm_surface_move(APP.GrachtClient(), nullptr, Id(), pointer->Id());
     }
 }

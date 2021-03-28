@@ -38,9 +38,10 @@
 
 const int PRINTBUFFER_SIZE = 4096;
 
-Terminal::Terminal(uint32_t id, const Asgaard::Rectangle& dimensions, const std::shared_ptr<Asgaard::Drawing::Font>& font,
+Terminal::Terminal(uint32_t id, const std::shared_ptr<Asgaard::Screen>& screen, const Asgaard::Rectangle& dimensions, 
+    const std::shared_ptr<Asgaard::Drawing::Font>& font,
     const std::shared_ptr<ResolverBase>& resolver, int stdoutDescriptor, int stderrDescriptor)
-    : WindowBase(id, dimensions)
+    : WindowBase(id, screen, dimensions)
     , m_font(font)
     , m_resolver(resolver)
     , m_rows(-1)
@@ -264,9 +265,8 @@ void Terminal::OnCreated(Asgaard::Object* createdObject)
             Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
     }
     else if (createdObject->Id() == m_buffer->Id()) {
-        Asgaard::Rectangle decorationDimensions(0, 0, Dimensions().Width(), 35);
-        m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions, m_font);
-        m_decoration->Subscribe(this);
+        SetTitle("Alumni Terminal v1.0-dev");
+        EnableDecoration(true);
 
         // Now all resources are created
         PrepareBuffer();
@@ -275,31 +275,6 @@ void Terminal::OnCreated(Asgaard::Object* createdObject)
         SetTransparency(true);
         m_resolver->PrintCommandHeader();
     }
-}
-
-void Terminal::Notification(Publisher* source, int event, void* data)
-{
-    auto object = dynamic_cast<Object*>(source);
-    if (object == nullptr) {
-        return;
-    }
-    
-    if (m_decoration != nullptr && object->Id() == m_decoration->Id()) {
-        switch (event) {
-            case static_cast<int>(Asgaard::WindowDecoration::Notification::CREATED): {
-                m_decoration->SetTitle("Alumni Terminal v1.0-dev");
-                m_decoration->RequestRedraw();
-            } break;
-            
-            case static_cast<int>(Asgaard::WindowDecoration::Notification::ERROR): {
-                // @todo 
-            } break;
-        }
-        return;
-    }
-
-    // must propegate creation events down if we did not handle them
-    WindowBase::Notification(source, event, data);
 }
 
 void Terminal::OnRefreshed(Asgaard::MemoryBuffer*)

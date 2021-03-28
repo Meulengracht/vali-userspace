@@ -39,10 +39,6 @@ namespace Asgaard {
     namespace Widgets {
         class Label : public SubSurface {
         public:
-            enum class Notification : int {
-                CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
-                ERROR
-            };
             enum class Anchors {
                 TOP = 0x1,
                 CENTER = 0x2,

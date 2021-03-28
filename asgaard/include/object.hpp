@@ -50,7 +50,9 @@ namespace Asgaard {
         };
 
         enum class Notification : int {
-            DESTROY = 0,
+            CREATED = 0,
+            ERROR,
+            DESTROY,
 
             CUSTOM_START
         };
@@ -61,7 +63,6 @@ namespace Asgaard {
 
     public:
         uint32_t Id() const { return m_id; }
-        bool     Valid() const { return m_valid; }
         
         virtual void Destroy() {
             Notify(static_cast<int>(Notification::DESTROY));
@@ -69,11 +70,7 @@ namespace Asgaard {
 
         virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
         
-    protected:
-        void SetValid(bool valid) { m_valid = valid; }
-        
     private:
         uint32_t m_id;
-        bool     m_valid;
     };
 }

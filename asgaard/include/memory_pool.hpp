@@ -29,11 +29,6 @@
 namespace Asgaard {
     class MemoryPool : public Object {
     public:
-        enum class Notification : int {
-            CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
-            ERROR
-        };
-    public:
         MemoryPool(uint32_t id, int size);
         ~MemoryPool();
         

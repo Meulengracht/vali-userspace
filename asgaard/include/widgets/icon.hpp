@@ -29,6 +29,10 @@
 namespace Asgaard {
     class MemoryPool;
     class MemoryBuffer;
+
+    namespace Drawing {
+        class Image;
+    }
     
     namespace Widgets {
         class Icon : public SubSurface {
@@ -43,9 +47,7 @@ namespace Asgaard {
             };
             
             enum class Notification : int {
-                CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
-                ERROR,
-                CLICKED
+                CLICKED = static_cast<int>(Object::Notification::CUSTOM_START)
             };
         public:
             Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
@@ -53,7 +55,8 @@ namespace Asgaard {
 
             void Destroy() override;
             
-            bool LoadIcon(const std::string& path);
+            void SetImage(const Drawing::Image& image);
+            void SetStateImage(IconState state, const Drawing::Image& image);
             void SetState(IconState state);
     
         public:
@@ -69,10 +72,7 @@ namespace Asgaard {
             std::shared_ptr<Asgaard::MemoryPool>   m_memory;
             std::shared_ptr<Asgaard::MemoryBuffer> m_buffers[static_cast<int>(IconState::COUNT)];
             bool                                   m_stateAvailabilityMap[static_cast<int>(IconState::COUNT)];
-    
-            int         m_originalWidth;
-            int         m_originalHeight;
-            std::string m_originalPath;
+            enum IconState                         m_currentState;
         };
     }
 }

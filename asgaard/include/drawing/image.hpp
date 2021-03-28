@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, Philip Meulengracht
+ * Copyright 2021, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,24 +19,36 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
+#pragma once
 
-#include "include/application.hpp"
-#include "include/object_manager.hpp"
-#include "include/subsurface.hpp"
+#include "../pixel_format.hpp"
+#include "color.hpp"
 
-#include "protocols/wm_surface_protocol_client.h"
+#include <string>
 
 namespace Asgaard {
-    SubSurface::SubSurface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parent_id, const Rectangle& dimensions)
-        : Surface(id, screen, parent_id, dimensions) { }
+    namespace Drawing {
+        class Image {
+        public:
+            Image(const std::string& path);
+            Image(const void* imageData, PixelFormat format, int rows, int columns);
+            ~Image();
 
-    void SubSurface::Resize(int width, int height)
-    {
-        wm_surface_resize_subsurface(APP.GrachtClient(), nullptr, Id(), width, height);
-    }
+            Color GetPixel(int index) const;
+            void  SetPixel(int index, const Color& color);
 
-    void SubSurface::Move(int parentX, int parentY)
-    {
-        wm_surface_move_subsurface(APP.GrachtClient(), nullptr, Id(), parentX, parentY);
+            int Width()  const { return m_columns; }
+            int Height() const { return m_rows; }
+            int Stride() const { return m_columns * GetBytesPerPixel(m_format); }
+
+        private:
+            void ZeroImage();
+
+        private:
+            void*       m_data;
+            PixelFormat m_format;
+            int         m_rows;
+            int         m_columns;
+        };
     }
 }

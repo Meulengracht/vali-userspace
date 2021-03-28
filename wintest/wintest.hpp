@@ -23,7 +23,6 @@
 
 #include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
-#include <asgaard/window_decoration.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
 #include <asgaard/key_event.hpp>
@@ -32,8 +31,8 @@
 
 class TestWindow : public Asgaard::WindowBase {
 public:
-    TestWindow(uint32_t id, const Asgaard::Rectangle& dimensions)
-        : WindowBase(id, dimensions) { }
+    TestWindow(uint32_t id, const std::shared_ptr<Asgaard::Screen>& screen, const Asgaard::Rectangle& dimensions)
+        : WindowBase(id, screen, dimensions) { }
     
     ~TestWindow() { }
     
@@ -52,8 +51,7 @@ protected:
         }
         else if (createdObject->Id() == m_buffer->Id()) {
             // Create the window decoration
-            Asgaard::Rectangle decorationDimensions(0, 0, Dimensions().Width(), 64);
-            m_decoration = Asgaard::OM.CreateClientObject<Asgaard::WindowDecoration>(m_screen, Id(), decorationDimensions);
+            EnableDecoration(true);
 
             // Now all resources are created
             SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
@@ -105,7 +103,6 @@ private:
     }
     
 private:
-    std::shared_ptr<Asgaard::MemoryPool>      m_memory;
-    std::shared_ptr<Asgaard::MemoryBuffer>    m_buffer;
-    std::shared_ptr<Asgaard::WindowDecoration> m_decoration;
+    std::shared_ptr<Asgaard::MemoryPool>   m_memory;
+    std::shared_ptr<Asgaard::MemoryBuffer> m_buffer;
 };

@@ -32,8 +32,6 @@ namespace Asgaard {
     namespace Widgets {
         Label::Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
             : SubSurface(id, screen, parentId, dimensions)
-            , m_memory(nullptr)
-            , m_buffer(nullptr)
             , m_font(nullptr)
             , m_text("")
             , m_anchors(Anchors::TOP | Anchors::LEFT)
@@ -42,7 +40,15 @@ namespace Asgaard {
             , m_redraw(false)
             , m_redrawReady(false)
         {
-            
+            auto poolSize = Dimensions().Width() * Dimensions().Height() * 4;
+            m_memory = MemoryPool::Create(this, poolSize);
+
+            m_buffer = MemoryBuffer::Create(this, m_memory, 0,
+                Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+
+            SetBuffer(m_buffer);
+            SetTransparency(true);
+            RedrawReady();
         }
         
         Label::~Label()
@@ -156,17 +162,11 @@ namespace Asgaard {
         {
             switch (event)
             {
-                case ObjectEvent::CREATION: {
-                    auto poolSize = Dimensions().Width() * Dimensions().Height() * 4;
-                    m_memory = MemoryPool::Create(this, poolSize);
-                } break;
-                
                 case ObjectEvent::ERROR: {
                     Notify(static_cast<int>(Notification::ERROR));
                 } break;
     
-                default:
-                    break;
+                default: break;
             }
             
             // Run the base class events as well
@@ -180,31 +180,24 @@ namespace Asgaard {
                 // OK notification from the memory pool
                 switch (static_cast<MemoryPool::Notification>(event))
                 {
-                    case MemoryPool::Notification::CREATED: {
-                        m_buffer = MemoryBuffer::Create(this, m_memory, 0,
-                            Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
-                    } break;
-                    
                     case MemoryPool::Notification::ERROR: {
                         Notify(static_cast<int>(Notification::ERROR));
                     } break;
+
+                    default: break;
                 }
             }
             
             auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
             if (bufferObject != nullptr)
             {
-                switch (static_cast<MemoryBuffer::Notification>(event))
+                switch (event)
                 {
-                    case MemoryBuffer::Notification::CREATED: {
-                        SetBuffer(m_buffer);
-                        SetTransparency(true);
-                        RedrawReady();
-                        SetValid(true);
+                    case static_cast<int>(Object::Notification::CREATED): {
                         Notify(static_cast<int>(Notification::CREATED));
                     } break;
 
-                    case MemoryBuffer::Notification::REFRESHED: {
+                    case static_cast<int>(MemoryBuffer::Notification::REFRESHED): {
                         RedrawReady();
                     } break;
                     

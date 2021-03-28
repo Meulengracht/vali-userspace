@@ -25,6 +25,7 @@
 #include "object_manager.hpp"
 #include "rectangle.hpp"
 #include "object.hpp"
+#include "utils/bitset_enum.hpp"
 
 namespace Asgaard {
     class Screen;
@@ -40,22 +41,6 @@ namespace Asgaard {
             BOTTOM = 0x2,
             LEFT   = 0x4,
             RIGHT  = 0x8
-        };
-
-        enum class FullscreenMode : int {
-            EXIT,
-            NORMAL,
-            FULL
-        };
-
-        enum class PriorityLevel : int {
-            BOTTOM,
-            DEFAULT,
-            TOP
-        };
-        
-        enum class Notification : int {
-            CREATED = static_cast<int>(Object::Notification::CUSTOM_START)
         };
     public:
         Surface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
@@ -73,8 +58,6 @@ namespace Asgaard {
         void ApplyChanges();
         
         void RequestFrame();
-        void RequestPriorityLevel(enum PriorityLevel);
-        void RequestFullscreenMode(enum FullscreenMode);
 
         void GrabPointer(const std::shared_ptr<Pointer>&);
         void UngrabPointer(const std::shared_ptr<Pointer>&);
@@ -102,3 +85,9 @@ namespace Asgaard {
         std::shared_ptr<Screen> m_screen;
     };
 }
+
+// Enable bitset operations for the anchors enum
+template<>
+struct enable_bitmask_operators<Asgaard::Surface::SurfaceEdges> {
+    static const bool enable = true;
+};

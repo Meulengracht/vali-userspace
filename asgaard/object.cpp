@@ -24,6 +24,6 @@
 #include "include/object.hpp"
 
 namespace Asgaard {
-    Object::Object(uint32_t id) : m_id(id), m_valid(false) { }
+    Object::Object(uint32_t id) : m_id(id) { }
     Object::~Object() { }
 }

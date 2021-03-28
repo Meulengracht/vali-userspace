@@ -31,6 +31,7 @@ namespace Asgaard {
     
     namespace Drawing {
         class Font;
+        class Image;
         
         class Painter {
             public:
@@ -55,6 +56,8 @@ namespace Asgaard {
 
                 void RenderFill(const Rectangle& dimensions);
                 void RenderFill();
+
+                void RenderImage(const Image& image);
                 
                 void SetFont(const std::shared_ptr<Font>& font);
                 

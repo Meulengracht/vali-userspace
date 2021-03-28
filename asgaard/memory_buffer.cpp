@@ -81,8 +81,7 @@ namespace Asgaard {
         switch (event)
         {
             case ObjectEvent::CREATION: {
-                SetValid(true);
-                Notify(static_cast<int>(Notification::CREATED));
+                Notify(static_cast<int>(Object::Notification::CREATED));
             } break;
             
             case ObjectEvent::BUFFER_RELEASE: {

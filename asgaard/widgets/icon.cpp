@@ -24,61 +24,22 @@
 #include "../include/widgets/icon.hpp"
 #include "../include/memory_pool.hpp"
 #include "../include/memory_buffer.hpp"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-static std::string iconStateExtensions[static_cast<int>(
-    Asgaard::Widgets::Icon::IconState::COUNT)] = {
-    "",
-    "_hover",
-    "_active",
-    "_disabled"
-};
-
-static std::string ExtendFilename(std::string& path, std::string& extension)
-{
-    if (extension == "") {
-        return path;
-    }
-
-    auto lastTokenPos = path.find_last_of("/\\");
-    auto lastDotPos = path.find_last_of(".");
-    if (lastDotPos == std::string::npos) {
-        // filepath with no extension 
-        return path + extension;
-    }
-    else {
-        auto fileExtension = path.substr(lastDotPos);
-
-        if (lastTokenPos != std::string::npos) {
-            if (lastDotPos > lastTokenPos) {
-                // seperator comes before the last '.', which means the file has an extension
-                return path.substr(0, lastDotPos) + extension + fileExtension;
-            }
-            else {
-                // the dot is in a previous path token, which means no file extension
-                return path + extension;
-            }
-        }
-
-        // there is a dot but no seperator
-        return path.substr(0, lastDotPos) + extension + fileExtension;
-    }
-}
+#include "../include/drawing/painter.hpp"
 
 namespace Asgaard {
     namespace Widgets {
         Icon::Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
             : SubSurface(id, screen, parentId, dimensions)
             , m_memory(nullptr)
-            , m_originalPath("")
-            , m_originalWidth(0)
-            , m_originalHeight(0)
+            , m_currentState(IconState::NORMAL)
         {
             for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
                 m_stateAvailabilityMap[i] = false;
             }
+
+            // Create a new pool that can hold an icon of the requested size and full-color
+            auto poolSize = (dimensions.Width() * dimensions.Height() * 4) * static_cast<int>(IconState::COUNT);
+            m_memory = MemoryPool::Create(this, poolSize);
         }
     
         Icon::~Icon()
@@ -89,7 +50,7 @@ namespace Asgaard {
         void Icon::Destroy()
         {
             for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
-                if (m_stateAvailabilityMap[i]) {
+                if (m_buffers[i]) {
                     m_buffers[i]->Unsubscribe(this);
                 }
             }
@@ -99,26 +60,36 @@ namespace Asgaard {
             // invoke base destroy as well
             SubSurface::Destroy();
         }
-    
-        bool Icon::LoadIcon(const std::string& path)
+
+        void Icon::SetImage(const Drawing::Image& image)
         {
-            int numComponents;
-    
-            if (m_memory) {
-                // todo support for replacing icon
-                return false;
+            // clear current states
+            for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
+                m_stateAvailabilityMap[i] = false;
             }
-    
-            int status = stbi_info(path.c_str(), &m_originalWidth, &m_originalHeight, &numComponents);
-            if (!status) {
-                return false;
+
+            SetStateImage(IconState::NORMAL, image);
+        }
+
+        void Icon::SetStateImage(IconState state, const Drawing::Image& image)
+        {
+            // Create the neccessary buffer in case its first time we refer to this state
+            if (!m_buffers[static_cast<int>(state)]) {
+                auto bufferSize = Dimensions().Width() * Dimensions().Height() * 4;
+                m_buffers[static_cast<int>(state)] = MemoryBuffer::Create(this, m_memory, bufferSize,
+                    Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
             }
-    
-            m_originalPath = path;
-    
-            auto poolSize = (m_originalWidth * m_originalHeight * 4) * static_cast<int>(IconState::COUNT);
-            m_memory = MemoryPool::Create(this, poolSize);
-            return true;
+
+            // Copy data from the image to the buffer
+            Drawing::Painter painter(m_buffers[static_cast<int>(state)]);
+            painter.RenderImage(image);
+
+            // When the state image has been updated for the current state we should update
+            // the drawn buffer. But make sure the availability map is updated
+            m_stateAvailabilityMap[static_cast<int>(state)] = true;
+            if (m_currentState == state) {
+                SetState(state);
+            }
         }
     
         void Icon::SetState(IconState state)
@@ -127,6 +98,7 @@ namespace Asgaard {
                 !m_stateAvailabilityMap[static_cast<int>(state)]) {
                 return;
             }
+            m_currentState = state;
     
             SetBuffer(m_buffers[static_cast<int>(state)]);
             MarkDamaged(Dimensions());
@@ -138,12 +110,11 @@ namespace Asgaard {
             switch (event)
             {
                 case ObjectEvent::CREATION: {
-                    SetValid(true);
-                    Notify(static_cast<int>(Notification::CREATED));
+                    Notify(static_cast<int>(Object::Notification::CREATED));
                 } break;
                 
                 case ObjectEvent::ERROR: {
-                    Notify(static_cast<int>(Notification::ERROR));
+                    Notify(static_cast<int>(Object::Notification::ERROR));
                 } break;
     
                 default:
@@ -156,70 +127,18 @@ namespace Asgaard {
     
         void Icon::Notification(Publisher* source, int event, void* data)
         {
-            auto memoryObject = dynamic_cast<MemoryPool*>(source);
-            if (memoryObject != nullptr)
-            {
-                switch (static_cast<MemoryPool::Notification>(event))
+            auto object = dynamic_cast<Object*>(source);
+            if (object != nullptr) {
+                switch (event)
                 {
-                    case MemoryPool::Notification::CREATED: {
-                        auto bufferSize = m_originalWidth * m_originalHeight * 4;
-                        for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) { 
-                            m_buffers[i] = MemoryBuffer::Create(this, m_memory, i * bufferSize,
-                                m_originalWidth, m_originalHeight, PixelFormat::A8B8G8R8);
-                        }
+                    case static_cast<int>(Object::Notification::CREATED): {
                     } break;
                     
-                    case MemoryPool::Notification::ERROR: {
-                        Notify(static_cast<int>(Notification::ERROR));
+                    case static_cast<int>(Object::Notification::ERROR): {
+                        Notify(static_cast<int>(Object::Notification::ERROR));
                     } break;
                 }
                 return;
-            }
-            
-            auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
-            if (bufferObject != nullptr)
-            {
-                switch (static_cast<MemoryBuffer::Notification>(event))
-                {
-                    case MemoryBuffer::Notification::CREATED: {
-                        auto bufferSize = m_originalWidth * m_originalHeight * 4;
-                        int loadedWidth, loadedHeight, loadedComponents;
-                        auto state = IconState::NORMAL;
-
-                        if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::HOVERING)]->Id()) {
-                            state = IconState::HOVERING;
-                        }
-                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::ACTIVE)]->Id()) {
-                            state = IconState::ACTIVE;
-                        }
-                        else if (bufferObject->Id() == m_buffers[static_cast<int>(IconState::DISABLED)]->Id()) {
-                            state = IconState::DISABLED;
-                        }
-
-                        auto extension = iconStateExtensions[static_cast<int>(state)];
-                        auto path      = ExtendFilename(m_originalPath, extension);
-                        auto buffer    = stbi_load(path.c_str(), &loadedWidth, &loadedHeight, &loadedComponents, STBI_rgb_alpha);
-                        if (buffer != nullptr) {
-                            if (loadedWidth != m_originalWidth || loadedHeight != m_originalHeight) {
-                                Notify(static_cast<int>(Notification::ERROR) /*, error text*/);
-                                break;
-                            }
-                            
-                            m_stateAvailabilityMap[static_cast<int>(state)] = true;
-                            memcpy(bufferObject->Buffer(), buffer, bufferSize);
-                            stbi_image_free(buffer);
-
-                            if (state == IconState::NORMAL) {
-                                MarkInputRegion(Rectangle(0, 0, loadedWidth, loadedHeight));
-                                SetTransparency(true);
-                                SetState(IconState::NORMAL);
-                            }
-                        }
-                    } break;
-                    
-                    default:
-                        break;
-                }
             }
         }
 

@@ -31,7 +31,6 @@
 
 #include <asgaard/application.hpp>
 #include <asgaard/window_base.hpp>
-#include <asgaard/window_decoration.hpp>
 #include <asgaard/memory_pool.hpp>
 #include <asgaard/memory_buffer.hpp>
 #include <asgaard/drawing/font.hpp>
@@ -58,7 +57,8 @@ private:
     };
 
 public:
-    Terminal(uint32_t id, const Asgaard::Rectangle&, const std::shared_ptr<Asgaard::Drawing::Font>&,
+    Terminal(uint32_t id, const std::shared_ptr<Asgaard::Screen>& screen, const Asgaard::Rectangle&, 
+        const std::shared_ptr<Asgaard::Drawing::Font>&,
         const std::shared_ptr<ResolverBase>&, int stdoutDescriptor, int stderrDescriptor);
     ~Terminal();
 
@@ -99,12 +99,10 @@ private:
 
     // We do not allow override of these
     void DescriptorEvent(int iod, unsigned int events) override;
-    void Notification(Publisher*, int = 0, void* = 0) override;
 
 private:
     std::shared_ptr<Asgaard::MemoryPool>       m_memory;
     std::shared_ptr<Asgaard::MemoryBuffer>     m_buffer;
-    std::shared_ptr<Asgaard::WindowDecoration> m_decoration;
     std::shared_ptr<Asgaard::Drawing::Font>    m_font;
     std::shared_ptr<ResolverBase>              m_resolver;
     

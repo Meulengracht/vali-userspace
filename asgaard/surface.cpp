@@ -187,16 +187,6 @@ namespace Asgaard {
         wm_surface_request_frame(APP.GrachtClient(), nullptr, Id());
     }
 
-    void Surface::RequestPriorityLevel(enum PriorityLevel level)
-    {
-        wm_surface_request_level(APP.GrachtClient(), nullptr, Id(), static_cast<int>(level));
-    }
-
-    void Surface::RequestFullscreenMode(enum FullscreenMode mode)
-    {
-        wm_surface_request_fullscreen_mode(APP.GrachtClient(), nullptr, Id(), static_cast<wm_surface_fullscreen_mode>(mode));
-    }
-
     void Surface::GrabPointer(const std::shared_ptr<Pointer>& pointer)
     {
         wm_pointer_grab(APP.GrachtClient(), nullptr, pointer->Id(), Id());

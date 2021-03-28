@@ -35,7 +35,7 @@ namespace Asgaard {
             Color()
                 : Color(0xFF, 0, 0, 0) { }
 
-        unsigned int GetFormatted(PixelFormat format)
+        unsigned int GetFormatted(PixelFormat format) const
         {
             unsigned int color = 0;
             switch (format) {

@@ -37,6 +37,7 @@ namespace Asgaard {
     
     namespace Drawing {
         class Font;
+        class Image;
     }
     
     namespace Widgets {
@@ -47,9 +48,7 @@ namespace Asgaard {
     class WindowDecoration : public SubSurface {
     public:
         enum class Notification : int {
-            CREATED = static_cast<int>(Object::Notification::CUSTOM_START),
-            ERROR,
-            MINIMIZE,
+            MINIMIZE = static_cast<int>(Object::Notification::CUSTOM_START),
             MAXIMIZE,
             INITIATE_DRAG
         };
@@ -68,8 +67,8 @@ namespace Asgaard {
         ~WindowDecoration();
         
         void SetTitle(const std::string& title);
-        void SetIcon(const std::string& iconPath);
-        void UpdateIcon(int width, int height, PixelFormat format, const void* data);
+        void SetImage(const std::shared_ptr<Drawing::Image>& image);
+        void SetVisible(bool visible);
         void RequestRedraw();
         void Destroy() override;
 
@@ -77,12 +76,12 @@ namespace Asgaard {
         void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
     
     private:
+        void Initialize();
         void Redraw();
         void RedrawReady();
         void Notification(Publisher*, int = 0, void* = 0) override;
         void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) override;
         void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override;
-        void CheckCreation();
 
     private:
         // consists of multiple resources;

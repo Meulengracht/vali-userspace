@@ -23,6 +23,7 @@
  
 #include "../include/drawing/painter.hpp"
 #include "../include/drawing/font.hpp"
+#include "../include/drawing/image.hpp"
 #include "../include/memory_buffer.hpp"
 #include "../include/rectangle.hpp"
 #include <string> 
@@ -149,6 +150,17 @@ namespace Asgaard {
         {
             for (int y = 0; y < m_canvas->Height(); y++) {
                 RenderLine(0, y, m_canvas->Width(), y);
+            }
+        }
+
+        void Painter::RenderImage(const Image& image)
+        {
+            uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer());
+            for (int h = 0; h < image.Height(); h++) {
+                for (int w = 0; w < image.Width(); w++, pointer++) {
+                    auto pixel = image.GetPixel((h * image.Stride()) + w);
+                    *pointer = pixel.GetFormatted(m_canvas->Format());
+                }
             }
         }
         
