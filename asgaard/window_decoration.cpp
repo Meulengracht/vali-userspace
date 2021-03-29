@@ -59,6 +59,10 @@ namespace Asgaard {
         
         m_buffer = MemoryBuffer::Create(this, m_memory, 0,
             Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+            
+        SetBuffer(m_buffer);
+        SetTransparency(true);
+        RedrawReady();
 
         Initialize();
     }
@@ -87,10 +91,17 @@ namespace Asgaard {
         float halfHeight = (float)Dimensions().Height() / 2.0f;
         int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
 
+        // load icons
+        Drawing::Image appImage("$sys/themes/default/app.png");
+        Drawing::Image minImage("$sys/themes/default/minimize.png");
+        Drawing::Image maxImage("$sys/themes/default/maximize.png");
+        Drawing::Image closeImage("$sys/themes/default/close.png");
+
         // left corner
         m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
             Rectangle(8, (int)(halfHeight - (12.0f)), 24, 24));
         m_appIcon->Subscribe(this);
+        m_appIcon->SetImage(appImage);
 
         // middle
         m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
@@ -99,23 +110,29 @@ namespace Asgaard {
                 0, 
                 Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + 24),
                 Dimensions().Height()));
+        m_appTitle->SetFont(m_appFont);
+        m_appTitle->SetAnchors(Widgets::Label::Anchors::CENTER);
+        m_appTitle->SetBackgroundColor(DECORATION_FILL_COLOR);
+        m_appTitle->SetTextColor(DECORATION_TEXT_COLOR);
         m_appTitle->Subscribe(this);
         
         // right corner
         m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
             Rectangle(Dimensions().Width() - (3 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
         m_minIcon->Subscribe(this);
+        m_minIcon->SetImage(minImage);
 
         // right corner
         m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
             Rectangle(Dimensions().Width() - (2 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
         m_maxIcon->Subscribe(this);
+        m_maxIcon->SetImage(maxImage);
 
         // right corner
         m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
             Rectangle(Dimensions().Width() - (8 + ICON_SIZE), 8.0f, ICON_SIZE, ICON_SIZE));
         m_closeIcon->Subscribe(this);
-
+        m_closeIcon->SetImage(closeImage);
     }
     
     void WindowDecoration::SetTitle(const std::string& title)
@@ -199,108 +216,26 @@ namespace Asgaard {
         }
     }
     
-    void WindowDecoration::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        switch (event)
-        {
-            case ObjectEvent::CREATION: {
-                Notify(static_cast<int>(Object::Notification::CREATED));
-            } break;
-            
-            case ObjectEvent::ERROR: {
-                Notify(static_cast<int>(Object::Notification::ERROR));
-            } break;
-            
-            default:
-                break;
-        }
-        
-        // Run the base class events as well
-        SubSurface::ExternalEvent(event, data);
-    }
-    
     void WindowDecoration::Notification(Publisher* source, int event, void* data)
     {
         auto object = dynamic_cast<Object*>(source);
         if (object == nullptr) {
             return;
         }
-        
-        if (object->Id() == m_memory->Id()) {
-            switch (event) {
-                case static_cast<int>(Object::Notification::ERROR): {
-                    Notify(static_cast<int>(Object::Notification::ERROR));
-                } break;
 
-                default: break;
-            }
-            
-            return;
+        if (event == static_cast<int>(Object::Notification::ERROR)) {
+            Notify(static_cast<int>(Object::Notification::ERROR), data);
         }
-        
-        if (object->Id() == m_buffer->Id()) {
-            switch (event) {
-                case static_cast<int>(Object::Notification::CREATED): {
-                    SetBuffer(m_buffer);
-                    SetTransparency(true);
-                    RedrawReady();
-                } break;
-                
-                default:
-                    break;
-            }
-            
-            return;
-        }
-        
-        if (object->Id() == m_appTitle->Id()) {
-            m_appTitle->SetFont(m_appFont);
-            m_appTitle->SetAnchors(Widgets::Label::Anchors::CENTER);
-            m_appTitle->SetBackgroundColor(DECORATION_FILL_COLOR);
-            m_appTitle->SetTextColor(DECORATION_TEXT_COLOR);
-            return;
-        }
-        
-        if (object->Id() == m_appIcon->Id()) {
-            if (event == static_cast<int>(Object::Notification::CREATED)) {
-                // load app icon from current package './appIcon.png'
-                Drawing::Image image("$sys/themes/default/app.png");
-                m_appIcon->SetImage(image);
-                return;
-            }
-        }
-        
-        if (object->Id() == m_minIcon->Id()) {
-            if (event == static_cast<int>(Object::Notification::CREATED)) {
-                Drawing::Image image("$sys/themes/default/minimize.png");
-                m_minIcon->SetImage(image);
-            }
-            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+        else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+            if (object->Id() == m_minIcon->Id()) {
                 Notify(static_cast<int>(Notification::MINIMIZE));
             }
-            return;
-        }
-        
-        if (object->Id() == m_maxIcon->Id()) {
-            if (event == static_cast<int>(Object::Notification::CREATED)) {
-                Drawing::Image image("$sys/themes/default/maximize.png");
-                m_maxIcon->SetImage(image);
-            }
-            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+            else if (object->Id() == m_maxIcon->Id()) {
                 Notify(static_cast<int>(Notification::MAXIMIZE));
             }
-            return;
-        }
-        
-        if (object->Id() == m_closeIcon->Id()) {
-            if (event == static_cast<int>(Object::Notification::CREATED)) {
-                Drawing::Image image("$sys/themes/default/close.png");
-                m_closeIcon->SetImage(image);
-            }
-            else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
+            else if (object->Id() == m_closeIcon->Id()) {
                 exit(EXIT_SUCCESS);
             }
-            return;
         }
     }
 }

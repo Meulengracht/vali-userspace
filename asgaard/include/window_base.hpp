@@ -69,7 +69,7 @@ namespace Asgaard {
     protected:
         virtual void OnMinimize() { }
         virtual void OnMaximize() { }
-        virtual void OnCreated(Object*) = 0;
+        virtual void OnCreated() = 0;
         virtual void OnRefreshed(MemoryBuffer*) = 0;
         virtual void Teardown() = 0;
 

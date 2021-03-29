@@ -44,9 +44,6 @@ namespace Asgaard {
         void SetVisible(bool visible);
         void Destroy() override;
 
-    public:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
-
     private:
         void InitializeBuffer();
 

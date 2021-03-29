@@ -59,9 +59,6 @@ namespace Asgaard {
             void SetAnchors(Anchors anchors);
             void RequestRedraw();
             
-        public:
-            void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
-    
         private:
             void Notification(Publisher*, int = 0, void* = 0) override;
             

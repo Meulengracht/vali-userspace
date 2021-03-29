@@ -122,14 +122,6 @@ namespace Asgaard {
     void Screen::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event) {
-            case Object::ObjectEvent::ERROR: {
-                struct wm_core_error_event* error = 
-                    (struct wm_core_error_event*)data;
-                
-                // In case of fatal events:
-                Notify(static_cast<int>(Notification::ERROR));
-            } break;
-            
             case Object::ObjectEvent::SYNC: {
                 Notify(static_cast<int>(Notification::CREATED));
             } break;
@@ -161,6 +153,7 @@ namespace Asgaard {
             } break;
             
             default:
+                Object::ExternalEvent(event, data);
                 break;
         }
     }

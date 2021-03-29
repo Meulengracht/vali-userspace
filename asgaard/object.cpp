@@ -22,8 +22,28 @@
  */
 
 #include "include/object.hpp"
+#include "include/error.hpp"
+#include "protocols/wm_core_protocol_client.h"
 
-namespace Asgaard {
-    Object::Object(uint32_t id) : m_id(id) { }
-    Object::~Object() { }
+using namespace Asgaard;
+
+Object::Object(uint32_t id) : m_id(id) { }
+Object::~Object() { }
+
+void Object::ExternalEvent(enum ObjectEvent event, void* data) {
+    switch (event)
+    {
+        case ObjectEvent::CREATION: {
+            Notify(static_cast<int>(Notification::CREATED));
+        } break;
+
+        case ObjectEvent::ERROR: {
+            struct wm_core_error_event* error = (struct wm_core_error_event*)data;
+            Error appError(std::string(error->error_description), error->error_id);
+            Notify(static_cast<int>(Notification::ERROR), &appError);
+        } break;
+        
+        default:
+            break;
+    }
 }

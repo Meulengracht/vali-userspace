@@ -48,9 +48,4 @@ namespace Asgaard {
         // calling with an id of 0 will result in clearing the pointer surface
         wm_pointer_set_surface(APP.GrachtClient(), nullptr, Id(), id, 0, 0);
     }
-
-    void Pointer::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        // no events
-    }
 }

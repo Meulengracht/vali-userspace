@@ -297,7 +297,7 @@ namespace Asgaard {
                 
             }
             case ObjectEvent::ERROR: {
-                // todo app error for those who listen
+                Object::ExternalEvent(event, data);
             } break;
             case ObjectEvent::SYNC: {
                 // we are initalized

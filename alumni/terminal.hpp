@@ -82,7 +82,7 @@ public:
     int GetNumberOfCellsPerLine() const { return m_cellWidth; }
 
 protected:
-    void OnCreated(Asgaard::Object*) override;
+    void OnCreated() override;
     void Teardown() override;
     void OnRefreshed(Asgaard::MemoryBuffer*) override;
     void OnKeyEvent(const Asgaard::KeyEvent&) override;

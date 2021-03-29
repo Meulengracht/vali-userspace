@@ -37,27 +37,23 @@ public:
     ~TestWindow() { }
     
 protected:
-    void OnCreated(Asgaard::Object* createdObject) override
+    void OnCreated() override
     {
-        if (createdObject->Id() == Id()) {
-            // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-            auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
-            m_memory = Asgaard::MemoryPool::Create(this, screenSize);
-        }
-        else if (createdObject->Id() == m_memory->Id()) {
-            // Create initial buffer the size of this surface
-            m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-                Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
-        }
-        else if (createdObject->Id() == m_buffer->Id()) {
-            // Create the window decoration
-            EnableDecoration(true);
+        // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
+        auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
+        m_memory = Asgaard::MemoryPool::Create(this, screenSize);
 
-            // Now all resources are created
-            SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
-            SetBuffer(m_buffer);
-            Redraw();
-        }
+        // Create initial buffer the size of this surface
+        m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
+            Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
+        
+        // Create the window decoration
+        EnableDecoration(true);
+
+        // Now all resources are created
+        SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
+        SetBuffer(m_buffer);
+        Redraw();
     }
     
     void OnRefreshed(Asgaard::MemoryBuffer* buffer) override

@@ -55,6 +55,10 @@ namespace Asgaard {
         // install in right lower corner
         Rectangle edgeDimensions(dimensions.Width() - 16, dimensions.Height() - 16, 16, 16);
         m_edge = OM.CreateClientObject<Asgaard::WindowEdge>(screen, id, edgeDimensions);
+
+        // retrieve a list of supported window content formats
+        wm_surface_get_formats(APP.GrachtClient(), nullptr, Id());
+        wm_core_sync(APP.GrachtClient(), nullptr, Id());
     }
 
     WindowBase::~WindowBase()
@@ -138,14 +142,6 @@ namespace Asgaard {
             }
             else {
                 switch (event) {
-                    case static_cast<int>(Object::Notification::CREATED): {
-                        OnCreated(object);
-                    } break;
-                    
-                    case static_cast<int>(Object::Notification::ERROR): {
-                        
-                    } break;
-
                     case static_cast<int>(MemoryBuffer::Notification::REFRESHED): {
                         OnRefreshed(dynamic_cast<MemoryBuffer*>(object));
                     } break;
@@ -158,12 +154,6 @@ namespace Asgaard {
     {
         switch (event)
         {
-            case ObjectEvent::CREATION: {
-                // retrieve a list of supported window content formats
-                wm_surface_get_formats(APP.GrachtClient(), nullptr, Id());
-                wm_core_sync(APP.GrachtClient(), nullptr, Id());
-            } break;
-            
             case ObjectEvent::SURFACE_FORMAT: {
                 struct wm_surface_format_event* event = 
                     (struct wm_surface_format_event*)data;
@@ -171,7 +161,7 @@ namespace Asgaard {
             } break;
             
             case ObjectEvent::SYNC: {
-                OnCreated(this);
+                OnCreated();
             } break;
             
             default:

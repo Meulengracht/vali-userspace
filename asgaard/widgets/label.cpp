@@ -158,21 +158,6 @@ namespace Asgaard {
             return 0;
         }
         
-        void Label::ExternalEvent(enum ObjectEvent event, void* data)
-        {
-            switch (event)
-            {
-                case ObjectEvent::ERROR: {
-                    Notify(static_cast<int>(Notification::ERROR));
-                } break;
-    
-                default: break;
-            }
-            
-            // Run the base class events as well
-            Surface::ExternalEvent(event, data);
-        }
-        
         void Label::Notification(Publisher* source, int event, void* data)
         {
             auto memoryObject = dynamic_cast<MemoryPool*>(source);
@@ -181,7 +166,7 @@ namespace Asgaard {
                 switch (static_cast<MemoryPool::Notification>(event))
                 {
                     case MemoryPool::Notification::ERROR: {
-                        Notify(static_cast<int>(Notification::ERROR));
+                        Notify(static_cast<int>(Notification::ERROR), data);
                     } break;
 
                     default: break;
@@ -189,14 +174,8 @@ namespace Asgaard {
             }
             
             auto bufferObject = dynamic_cast<MemoryBuffer*>(source);
-            if (bufferObject != nullptr)
-            {
-                switch (event)
-                {
-                    case static_cast<int>(Object::Notification::CREATED): {
-                        Notify(static_cast<int>(Notification::CREATED));
-                    } break;
-
+            if (bufferObject != nullptr) {
+                switch (event) {
                     case static_cast<int>(MemoryBuffer::Notification::REFRESHED): {
                         RedrawReady();
                     } break;

@@ -25,3 +25,6 @@
 [submodule "lite"]
 	path = lite
 	url = https://github.com/umbrella-c/lite
+[submodule "libsodium"]
+	path = libsodium
+	url = https://github.com/umbrella-c/libsodium

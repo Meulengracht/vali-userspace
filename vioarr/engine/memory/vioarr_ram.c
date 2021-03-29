@@ -35,10 +35,9 @@ typedef struct vioarr_memory_pool {
     struct dma_attachment attachment;
 } vioarr_memory_pool_t;
 
-int vioarr_memory_create_pool(int client, uint32_t id, size_t size, vioarr_memory_pool_t** poolOut)
+int vioarr_memory_create_pool(int client, uint32_t id, UUId_t handle, size_t size, vioarr_memory_pool_t** poolOut)
 {
     vioarr_memory_pool_t*  pool;
-    struct dma_buffer_info dmaInfo;
     OsStatus_t             osStatus;
     
     if (!size) {
@@ -49,16 +48,19 @@ int vioarr_memory_create_pool(int client, uint32_t id, size_t size, vioarr_memor
     if (!pool) {
         return -1;
     }
-    
-    dmaInfo.name     = "wm_buffer";
-    dmaInfo.length   = size;
-    dmaInfo.capacity = size;
-    dmaInfo.flags    = DMA_CLEAN;
-    
-    osStatus = dma_create(&dmaInfo, &pool->attachment);
+
+    osStatus = dma_attach(handle, &pool->attachment);
     if (osStatus != OsSuccess) {
-        OsStatusToErrno(osStatus);
         free(pool);
+        OsStatusToErrno(osStatus);
+        return -1;
+    }
+    
+    osStatus = dma_attachment_map(&pool->attachment, 0);
+    if (osStatus != OsSuccess) {
+        dma_detach(&pool->attachment);
+        free(pool);
+        OsStatusToErrno(osStatus);
         return -1;
     }
     

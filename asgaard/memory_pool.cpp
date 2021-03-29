@@ -22,19 +22,34 @@
  */
 
 #include "include/application.hpp"
+#include "include/exceptions/application_exception.h"
 #include "include/memory_pool.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
 #include "protocols/wm_memory_pool_protocol_client.h"
 #include "protocols/wm_memory_protocol_client.h"
 
+#include <os/mollenos.h>
+
 namespace Asgaard {
     MemoryPool::MemoryPool(uint32_t id, int size)
         : Object(id)
         , m_size(size)
-        , m_attachment({ 0 })
     {
-        wm_memory_create_pool(APP.GrachtClient(), nullptr, 0 /* memory_system_id */, id, size);
+        // create the dma buffer that should be shared with the WM
+        struct dma_buffer_info info;
+
+        info.name = "asgaard_pool";
+        info.capacity = size;
+        info.length = size;
+        info.flags = DMA_CLEAN;
+
+        auto status = dma_create(&info, &m_attachment);
+        if (status != OsSuccess) {
+            throw ApplicationException("failed to create a new memory pool", OsStatusToErrno(status));
+        }
+
+        wm_memory_create_pool(APP.GrachtClient(), nullptr, id, m_attachment.handle, size);
     }
     
     MemoryPool::~MemoryPool()
@@ -44,35 +59,6 @@ namespace Asgaard {
             dma_detach(&m_attachment);
         }
         wm_memory_pool_destroy(APP.GrachtClient(), nullptr, Id());
-    }
-    
-    void MemoryPool::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        switch (event)
-        {
-            case ObjectEvent::CREATION: {
-                struct wm_core_object_event* event =
-                    (struct wm_core_object_event*)data;
-                OsStatus_t status;
-                
-                status = dma_attach(event->system_handle, &m_attachment);
-                if (status != OsSuccess) {
-                    Notify(static_cast<int>(Notification::ERROR) /* string text todo */);
-                    return;
-                }
-                
-                status = dma_attachment_map(&m_attachment, DMA_ACCESS_WRITE);
-                if (status != OsSuccess) {
-                    Notify(static_cast<int>(Notification::ERROR) /* string text todo */);
-                    return;
-                }
-                
-                Notify(static_cast<int>(Notification::CREATED));
-            } break;
-            
-            default:
-                break;
-        }
     }
     
     void* MemoryPool::CreateBufferPointer(int memoryOffset)

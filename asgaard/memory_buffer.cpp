@@ -78,18 +78,11 @@ namespace Asgaard {
     
     void MemoryBuffer::ExternalEvent(enum ObjectEvent event, void* data)
     {
-        switch (event)
-        {
-            case ObjectEvent::CREATION: {
-                Notify(static_cast<int>(Object::Notification::CREATED));
-            } break;
-            
-            case ObjectEvent::BUFFER_RELEASE: {
-                Notify(static_cast<int>(Notification::REFRESHED));
-            } break;
-            
-            default:
-                break;
+        if (event == ObjectEvent::BUFFER_RELEASE) {
+            Notify(static_cast<int>(Notification::REFRESHED));
+            return;
         }
+
+        Object::ExternalEvent(event, data);
     }
 }

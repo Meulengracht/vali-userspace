@@ -121,8 +121,8 @@
             <functions>
                 <function name="create_pool">
                     <request>
-                        <param name="memory_id" type="uint32_t"/>
                         <param name="pool_id" type="uint32_t"/>
+                        <param name="system_handle" type="UUId_t"/>
                         <param name="size" type="int"/>
                     </request>
                 </function>

@@ -248,33 +248,29 @@ void Terminal::PrepareBuffer()
     paint.RenderFill();
 }
 
-void Terminal::OnCreated(Asgaard::Object* createdObject)
+void Terminal::OnCreated()
 {
-    if (createdObject->Id() == Id()) {
-        // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
-        auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
-        m_memory = Asgaard::MemoryPool::Create(this, screenSize);
-        
-        // we couldn't do this in constructor as the OM had not registered us
-        auto terminal = std::dynamic_pointer_cast<Terminal>(Asgaard::OM[Id()]);
-        m_resolver->SetTerminal(terminal);
-    }
-    else if (createdObject->Id() == m_memory->Id()) {
-        // Create initial buffer the size of this surface
-        m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-            Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
-    }
-    else if (createdObject->Id() == m_buffer->Id()) {
-        SetTitle("Alumni Terminal v1.0-dev");
-        EnableDecoration(true);
+    // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
+    auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
+    m_memory = Asgaard::MemoryPool::Create(this, screenSize);
+    
+    // Create initial buffer the size of this surface
+    m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
+        Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
+    
+    // we couldn't do this in constructor as the OM had not registered us
+    auto terminal = std::dynamic_pointer_cast<Terminal>(Asgaard::OM[Id()]);
+    m_resolver->SetTerminal(terminal);
 
-        // Now all resources are created
-        PrepareBuffer();
-        SetBuffer(m_buffer);
-        SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
-        SetTransparency(true);
-        m_resolver->PrintCommandHeader();
-    }
+    SetTitle("Alumni Terminal v1.0-dev");
+    EnableDecoration(true);
+
+    // Now all resources are created
+    PrepareBuffer();
+    SetBuffer(m_buffer);
+    SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
+    SetTransparency(true);
+    m_resolver->PrintCommandHeader();
 }
 
 void Terminal::OnRefreshed(Asgaard::MemoryBuffer*)

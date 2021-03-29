@@ -1,5 +1,4 @@
-/* ValiOS
- *
+/**
  * Copyright 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
@@ -22,29 +21,19 @@
  */
 #pragma once
 
-#include "object_manager.hpp"
-#include "object.hpp"
-#include <os/dmabuf.h>
+#include <string>
 
 namespace Asgaard {
-    class MemoryPool : public Object {
+    class Error {
     public:
-        MemoryPool(uint32_t id, int size);
-        ~MemoryPool();
-        
-        static std::shared_ptr<MemoryPool> Create(Object* owner, std::size_t size)
-        {
-            // Create the memory pool we're going to use
-            auto memory = OM.CreateClientObject<MemoryPool, std::size_t>(size);
-            memory->Subscribe(owner);
-            return memory;
-        }
-        
-    public:
-        void* CreateBufferPointer(int memoryOffset);
-        
+        Error(const std::string& message, int errorCode) : m_message(message), m_errorCode(errorCode) { }
+        ~Error() = default;
+
+        const std::string& What() const { return m_message; }
+        int                Code() const { return m_errorCode; }
+
     private:
-        int                   m_size;
-        struct dma_attachment m_attachment;
+        std::string m_message;
+        int         m_errorCode;
     };
 }

@@ -34,8 +34,5 @@ namespace Asgaard {
         ~Pointer();
         
         void SetSurface(const std::shared_ptr<Surface>&);
-
-    public:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
     };
 }

@@ -38,12 +38,9 @@ void wm_memory_create_pool_callback(struct gracht_recv_message* message, struct 
     vioarr_memory_pool_t* pool;
     int                   status;
     
-    // get memory subsystem
-    // TODO
-    
-    status = vioarr_memory_create_pool(message->client, input->pool_id, input->size, &pool);
+    status = vioarr_memory_create_pool(message->client, input->pool_id, input->system_handle, input->size, &pool);
     if (status) {
-        wm_core_event_error_single(message->client, 0 /* input->object_id */, status, "wm_memory: failed to create memory pool");
+        wm_core_event_error_single(message->client, input->pool_id, status, "wm_memory: failed to create memory pool");
         return;
     }
     

@@ -59,9 +59,6 @@ namespace Asgaard {
             void SetStateImage(IconState state, const Drawing::Image& image);
             void SetState(IconState state);
     
-        public:
-            void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
-    
         private:
             void Notification(Publisher*, int = 0, void* = 0) override;
             void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) override;

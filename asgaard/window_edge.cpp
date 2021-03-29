@@ -66,6 +66,7 @@ namespace Asgaard {
         paint.RenderFill();
 
         SetTransparency(true);
+        MarkInputRegion(Dimensions());
     }
 
     void WindowEdge::SetVisible(bool visible)
@@ -79,22 +80,6 @@ namespace Asgaard {
             SetBuffer(nullp);
         }
         ApplyChanges();
-    }
-
-    void WindowEdge::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        switch (event)
-        {
-            case ObjectEvent::ERROR: {
-                Notify(static_cast<int>(Object::Notification::ERROR));
-            } break;
-            
-            default:
-                break;
-        }
-        
-        // Run the base class events as well
-        SubSurface::ExternalEvent(event, data);
     }
 
     void WindowEdge::Notification(Publisher* source, int event, void* data)

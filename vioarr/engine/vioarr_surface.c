@@ -380,7 +380,7 @@ void vioarr_surface_restore_size(vioarr_surface_t* surface)
 
 int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
 {
-    if (!surface) {
+    if (!surface || !surface->visible) {
         return 0;
     }
 

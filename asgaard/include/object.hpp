@@ -1,5 +1,4 @@
-/* ValiOS
- *
+/**
  * Copyright 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
@@ -68,7 +67,7 @@ namespace Asgaard {
             Notify(static_cast<int>(Notification::DESTROY));
         };
 
-        virtual void ExternalEvent(enum ObjectEvent event, void* data = 0) = 0;
+        virtual void ExternalEvent(enum ObjectEvent event, void* data = 0);
         
     private:
         uint32_t m_id;

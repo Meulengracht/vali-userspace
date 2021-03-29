@@ -40,6 +40,9 @@ namespace Asgaard {
             // Create a new pool that can hold an icon of the requested size and full-color
             auto poolSize = (dimensions.Width() * dimensions.Height() * 4) * static_cast<int>(IconState::COUNT);
             m_memory = MemoryPool::Create(this, poolSize);
+
+            // Configure the surface
+            SetTransparency(true);
         }
     
         Icon::~Icon()
@@ -105,37 +108,13 @@ namespace Asgaard {
             ApplyChanges();
         }
     
-        void Icon::ExternalEvent(enum ObjectEvent event, void* data)
-        {
-            switch (event)
-            {
-                case ObjectEvent::CREATION: {
-                    Notify(static_cast<int>(Object::Notification::CREATED));
-                } break;
-                
-                case ObjectEvent::ERROR: {
-                    Notify(static_cast<int>(Object::Notification::ERROR));
-                } break;
-    
-                default:
-                    break;
-            }
-            
-            // Run the base class events as well
-            Surface::ExternalEvent(event, data);
-        }
-    
         void Icon::Notification(Publisher* source, int event, void* data)
         {
             auto object = dynamic_cast<Object*>(source);
             if (object != nullptr) {
-                switch (event)
-                {
-                    case static_cast<int>(Object::Notification::CREATED): {
-                    } break;
-                    
+                switch (event) {
                     case static_cast<int>(Object::Notification::ERROR): {
-                        Notify(static_cast<int>(Object::Notification::ERROR));
+                        Notify(static_cast<int>(Object::Notification::ERROR), data);
                     } break;
                 }
                 return;
