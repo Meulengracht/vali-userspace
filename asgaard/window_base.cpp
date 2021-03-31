@@ -134,7 +134,7 @@ namespace Asgaard {
                 }
             }
             else if (object->Id() == m_edge->Id()) {
-                if (event == static_cast<int>(WindowEdge::Notification::CLICKED)) {
+                if (event == static_cast<int>(WindowEdge::Notification::INITIATE_DRAG)) {
                     auto pointerId = static_cast<uint32_t>(reinterpret_cast<intptr_t>(data));
                     auto pointer = std::dynamic_pointer_cast<Asgaard::Pointer>(Asgaard::OM[pointerId]);
                     InitiateResize(pointer, Surface::SurfaceEdges::RIGHT | Surface::SurfaceEdges::BOTTOM);

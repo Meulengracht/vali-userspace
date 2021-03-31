@@ -23,6 +23,7 @@
  */
 
 #include <ds/list.h>
+#include <os/keycodes.h>
 #include "vioarr_engine.h"
 #include "vioarr_input.h"
 #include "vioarr_objects.h"
@@ -51,7 +52,6 @@ typedef struct vioarr_input_source {
             int                  x;
             int                  y;
             int                  z;
-            uint32_t             buttons;
             vioarr_surface_t*    surface;
 
             // move/resize/grab op
@@ -354,7 +354,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     }
 }
 
-static void __normal_mode_click(vioarr_input_source_t* source)
+static void __normal_mode_click(vioarr_input_source_t* source, uint32_t button, int pressed)
 {
     vioarr_surface_t* clickedSurface;
     vioarr_surface_t* currentSurface;
@@ -377,56 +377,60 @@ static void __normal_mode_click(vioarr_input_source_t* source)
         wm_pointer_event_click_single(
             vioarr_surface_client(clickedSurface),
             vioarr_surface_id(clickedSurface), 
-            source->id, source->state.pointer.buttons);
+            source->id, button, pressed);
     }
 }
 
-static void __resize_mode_click(vioarr_input_source_t* source)
+static void __resize_mode_click(vioarr_input_source_t* source, uint32_t button, int pressed)
 {
     vioarr_surface_t* currentSurface = source->state.pointer.op_surface;
 
-    // send end
-    wm_surface_event_resize_end_single(
+    // send click to notify surface of the end
+    wm_pointer_event_click_single(
         vioarr_surface_client(currentSurface),
-        vioarr_surface_id(currentSurface));
+        vioarr_surface_id(currentSurface), 
+        source->id, button, pressed);
 
     // reset mode
     __clear_state(source);
 }
 
-void vioarr_input_pointer_click(UUId_t deviceId, uint32_t buttons)
+static void vioarr_input_pointer_click(vioarr_input_source_t* source, uint32_t button, int pressed)
 {
-    vioarr_input_source_t* source = list_find_value(&g_inputDevices, (void*)(uintptr_t)deviceId);
-    if (!source) {
-        return;
-    }
-
-    if (source->state.pointer.buttons == buttons) {
-        return;
-    }
-    source->state.pointer.buttons = buttons;
-
     if (source->state.pointer.mode == POINTER_MODE_NORMAL ||
         source->state.pointer.mode == POINTER_MODE_GRABBED) {
-        __normal_mode_click(source);
+        __normal_mode_click(source, button, pressed);
     }
     else if (source->state.pointer.mode == POINTER_MODE_RESIZING) {
-        __resize_mode_click(source);
+        __resize_mode_click(source, button, pressed);
     }
     else {
-        __normal_mode_click(source);
+        __normal_mode_click(source, button, pressed);
         __clear_state(source); // todo only clear on release of lmb?!
     }
 }
 
-void vioarr_input_keyboard_click(UUId_t deviceId, uint32_t keycode, uint32_t modifiers)
+void vioarr_input_button_event(UUId_t deviceId, uint32_t keycode, uint32_t modifiers)
 {
-    vioarr_surface_t* currentSurface = vioarr_manager_front_surface();
-    if (currentSurface) {
-        wm_keyboard_event_key_single(
-            vioarr_surface_client(currentSurface),
-            vioarr_surface_id(currentSurface),
-            keycode, 
-            modifiers);
+    vioarr_input_source_t* source = list_find_value(&g_inputDevices, (void*)(uintptr_t)deviceId);
+    if (!source) {
+        // should probably handle this or something
+        return;
+    }
+
+    if (source->type == VIOARR_INPUT_POINTER) {
+        uint32_t button = keycode - (uint32_t)VK_LBUTTON;
+        vioarr_input_pointer_click(source, button, (modifiers & VK_MODIFIER_RELEASED) ? 0 : 1);
+    }
+    else {
+        // keyboard
+        vioarr_surface_t* currentSurface = vioarr_manager_front_surface();
+        if (currentSurface) {
+            wm_keyboard_event_key_single(
+                vioarr_surface_client(currentSurface),
+                vioarr_surface_id(currentSurface),
+                keycode, 
+                modifiers);
+        }
     }
 }

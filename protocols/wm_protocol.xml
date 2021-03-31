@@ -289,9 +289,6 @@
                     <param name="height" type="int"/>
                     <param name="edges" type="edge"/>
                 </event>
-                <event name="resize_end">
-                    <param name="surface_id" type="uint32_t"/>
-                </event>
                 <event name="focus">
                     <param name="surface_id" type="uint32_t"/>
                     <param name="focus" type="int"/>
@@ -316,6 +313,14 @@
         </protocol>
 
         <protocol name="pointer" id="0x16">
+            <enums>
+                <enum name="buttons">
+                    <value name="left" value="0"></value>
+                    <value name="middle" value="1"></value>
+                    <value name="right" value="2"></value>
+                </enum>
+            </enums>
+
             <functions>
                 <function name="set_surface">
                     <request>
@@ -359,7 +364,8 @@
                 <event name="click">
                     <param name="pointer_id" type="uint32_t"/>
                     <param name="surface_id" type="uint32_t"/>
-                    <param name="buttons" type="uint32_t"/>
+                    <param name="button" type="buttons"/>
+                    <param name="pressed" type="uint8_t"/>
                 </event>
             </events>
         </protocol>

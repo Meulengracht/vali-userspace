@@ -104,10 +104,21 @@ namespace Asgaard {
         // reset pointer surface
     }
 
-    void WindowEdge::OnMouseClick(const std::shared_ptr<Pointer>& pointer, unsigned int buttons)
+    void WindowEdge::OnMouseClick(const std::shared_ptr<Pointer>& pointer, enum Pointer::Buttons button, bool pressed)
     {
-        if (buttons & 0x1) {
-            Notify(static_cast<int>(Notification::CLICKED), 
+        if (button == Pointer::Buttons::LEFT) {
+            m_lmbHold = pressed;
+            if (!m_lmbHold) {
+                m_dragInOperation = false;
+            }
+        }
+    }
+
+    void WindowEdge::OnMouseMove(const std::shared_ptr<Pointer>& pointer, int localX, int localY)
+    {
+        if (m_lmbHold && !m_dragInOperation) {
+            m_dragInOperation = true;
+            Notify(static_cast<int>(Notification::INITIATE_DRAG), 
                 reinterpret_cast<void*>(static_cast<intptr_t>(pointer->Id())));
         }
     }

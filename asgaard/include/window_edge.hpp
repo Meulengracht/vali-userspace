@@ -31,7 +31,7 @@ namespace Asgaard {
     class WindowEdge : public SubSurface {
     public:
         enum class Notification : int {
-            CLICKED = static_cast<int>(Object::Notification::CUSTOM_START)
+            INITIATE_DRAG = static_cast<int>(Object::Notification::CUSTOM_START)
         };
 
     public:
@@ -49,11 +49,15 @@ namespace Asgaard {
 
         void Notification(Publisher*, int = 0, void* = 0) override;
         void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) override;
+        void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override;
         void OnMouseLeave(const std::shared_ptr<Pointer>&) override;
-        void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) override;
+        void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) override;
 
     private:
         std::shared_ptr<Asgaard::MemoryPool>   m_memory;
         std::shared_ptr<Asgaard::MemoryBuffer> m_buffer;
+
+        bool m_lmbHold;
+        bool m_dragInOperation;
     };
 }

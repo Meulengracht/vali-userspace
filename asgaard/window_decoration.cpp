@@ -137,17 +137,13 @@ namespace Asgaard {
     
     void WindowDecoration::SetTitle(const std::string& title)
     {
-        if (m_appTitle) {
-            m_appTitle->SetText(title);
-            m_appTitle->RequestRedraw();
-        }
+        m_appTitle->SetText(title);
+        m_appTitle->RequestRedraw();
     }
     
     void WindowDecoration::SetImage(const std::shared_ptr<Drawing::Image>& image)
     {
-        if (m_appIcon) {
-            m_appIcon->SetImage(*image.get());
-        }
+        m_appIcon->SetImage(*image.get());
     }
 
     void WindowDecoration::SetVisible(bool visible)
@@ -196,14 +192,13 @@ namespace Asgaard {
         }
     }
 
-    void WindowDecoration::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons)
+    void WindowDecoration::OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed)
     {
-        if (buttons & 0x1) {
-            m_lmbHold = true;
-        }
-        else {
-            m_lmbHold = false;
-            m_dragInOperation = false;
+        if (button == Pointer::Buttons::LEFT) {
+            m_lmbHold = pressed;
+            if (!m_lmbHold) {
+                m_dragInOperation = false;
+            }
         }
     }
 

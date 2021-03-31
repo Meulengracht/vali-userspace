@@ -63,7 +63,7 @@ namespace Asgaard {
             void Notification(Publisher*, int = 0, void* = 0) override;
             void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) override;
             void OnMouseLeave(const std::shared_ptr<Pointer>&) override;
-            void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) override;
+            void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) override;
     
         private:
             std::shared_ptr<Asgaard::MemoryPool>   m_memory;

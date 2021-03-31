@@ -23,7 +23,6 @@
 
 #include "include/application.hpp"
 #include "include/key_event.hpp"
-#include "include/pointer.hpp"
 #include "include/object_manager.hpp"
 #include "include/memory_buffer.hpp"
 #include "include/surface.hpp"
@@ -91,10 +90,6 @@ namespace Asgaard {
                 m_dimensions.SetHeight(event->height);
             } break;
 
-            case ObjectEvent::SURFACE_RESIZE_END: {
-                OnResizedEnd();
-            } break;
-            
             case ObjectEvent::SURFACE_FRAME: {
                 OnFrame();
             } break;
@@ -134,7 +129,10 @@ namespace Asgaard {
                 struct wm_pointer_click_event* event = 
                     (struct wm_pointer_click_event*)data;
                 auto pointer = Asgaard::OM[event->pointer_id];
-                OnMouseClick(std::dynamic_pointer_cast<Pointer>(pointer), event->buttons);
+                OnMouseClick(
+                    std::dynamic_pointer_cast<Pointer>(pointer), 
+                    static_cast<enum Pointer::Buttons>(event->button),
+                    static_cast<bool>(event->pressed));
             } break;
 
             default:
@@ -199,12 +197,11 @@ namespace Asgaard {
     }
     
     void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }
-    void Surface::OnResizedEnd() { }
     void Surface::OnFocus(bool focus) { }
     void Surface::OnFrame() { }
     void Surface::OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) { }
     void Surface::OnMouseLeave(const std::shared_ptr<Pointer>&) { }
     void Surface::OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) { }
-    void Surface::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) { }
+    void Surface::OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) { }
     void Surface::OnKeyEvent(const KeyEvent&) { }
 }

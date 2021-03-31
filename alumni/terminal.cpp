@@ -285,11 +285,6 @@ void Terminal::OnRefreshed(Asgaard::MemoryBuffer*)
     }
 }
 
-void Terminal::Teardown()
-{
-    
-}
-
 void Terminal::OnKeyEvent(const Asgaard::KeyEvent& key)
 {
     // Check if we should forward input first

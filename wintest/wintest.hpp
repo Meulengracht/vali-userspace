@@ -80,11 +80,6 @@ protected:
         }
     }
 
-    void Teardown() override
-    {
-        
-    }
-
 private:
     void Redraw()
     {

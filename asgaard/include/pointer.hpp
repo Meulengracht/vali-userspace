@@ -30,6 +30,14 @@ namespace Asgaard {
 
     class Pointer : public Object {
     public:
+        enum class Buttons : int {
+            LEFT = 0,
+            MIDDLE,
+            RIGHT
+            // 2 > is possible
+        };
+
+    public:
         Pointer(uint32_t id);
         ~Pointer();
         

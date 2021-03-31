@@ -83,7 +83,6 @@ public:
 
 protected:
     void OnCreated() override;
-    void Teardown() override;
     void OnRefreshed(Asgaard::MemoryBuffer*) override;
     void OnKeyEvent(const Asgaard::KeyEvent&) override;
     

@@ -77,7 +77,7 @@ namespace Asgaard {
         void Redraw();
         void RedrawReady();
         void Notification(Publisher*, int = 0, void* = 0) override;
-        void OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons) override;
+        void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) override;
         void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override;
 
     private:

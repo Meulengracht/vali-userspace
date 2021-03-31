@@ -71,7 +71,6 @@ namespace Asgaard {
         virtual void OnMaximize() { }
         virtual void OnCreated() = 0;
         virtual void OnRefreshed(MemoryBuffer*) = 0;
-        virtual void Teardown() = 0;
 
     // Window functions that can be called to configure this window 
     protected:

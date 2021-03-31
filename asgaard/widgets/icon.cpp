@@ -131,15 +131,16 @@ namespace Asgaard {
             SetState(IconState::NORMAL);
         }
 
-        void Icon::OnMouseClick(const std::shared_ptr<Pointer>&, unsigned int buttons)
+        void Icon::OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed)
         {
-            // LMB
-            if (buttons & 0x1) {
-                SetState(IconState::ACTIVE);
-                Notify(static_cast<int>(Notification::CLICKED));
-            }
-            else {
-                SetState(IconState::NORMAL);
+            if (button == Pointer::Buttons::LEFT) {
+                if (pressed) {
+                    SetState(IconState::ACTIVE);
+                    Notify(static_cast<int>(Notification::CLICKED));
+                }
+                else {
+                    SetState(IconState::NORMAL);
+                }
             }
         }
     }
