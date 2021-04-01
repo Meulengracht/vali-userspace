@@ -44,12 +44,12 @@ namespace Asgaard {
             RIGHT  = 0x8
         };
     public:
-        Surface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
-        Surface(uint32_t, const std::shared_ptr<Screen>&, const Rectangle&);
-        Surface(uint32_t, const Rectangle&);
+        Surface(uint32_t id, const std::shared_ptr<Screen>&, uint32_t parentId, const Rectangle&);
+        Surface(uint32_t id, const std::shared_ptr<Screen>&, const Rectangle&);
+        Surface(uint32_t id, const Rectangle&);
         ~Surface();
         
-        void BindToScreen(const std::shared_ptr<Screen>&);
+        void BindToScreen(const std::shared_ptr<Screen>&, uint32_t parentId);
         
         void SetBuffer(const std::shared_ptr<MemoryBuffer>&);
         void MarkDamaged(const Rectangle&);
@@ -81,7 +81,6 @@ namespace Asgaard {
         
     protected:
         Rectangle               m_dimensions;
-        std::shared_ptr<Object> m_parent;
         std::shared_ptr<Screen> m_screen;
     };
 }

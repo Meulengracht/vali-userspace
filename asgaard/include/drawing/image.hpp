@@ -40,6 +40,8 @@ namespace Asgaard {
             int Width()  const { return m_columns; }
             int Height() const { return m_rows; }
             int Stride() const { return m_columns * GetBytesPerPixel(m_format); }
+            PixelFormat Format() const { return m_format; }
+            void* Data() const { return m_data; }
 
         private:
             void ZeroImage();

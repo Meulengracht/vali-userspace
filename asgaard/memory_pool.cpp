@@ -32,7 +32,7 @@
 #include <os/mollenos.h>
 
 namespace Asgaard {
-    MemoryPool::MemoryPool(uint32_t id, int size)
+    MemoryPool::MemoryPool(uint32_t id, std::size_t size)
         : Object(id)
         , m_size(size)
     {

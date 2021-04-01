@@ -26,7 +26,9 @@
 #include "../include/drawing/image.hpp"
 #include "../include/memory_buffer.hpp"
 #include "../include/rectangle.hpp"
-#include <string> 
+#include <cassert>
+#include <cstring>
+#include <string>
 
 namespace {
     unsigned int AlphaBlendAXGX(unsigned int colorA, unsigned int colorB, unsigned int alpha, unsigned int resultAlpha)
@@ -155,13 +157,16 @@ namespace Asgaard {
 
         void Painter::RenderImage(const Image& image)
         {
-            uint32_t* pointer = static_cast<uint32_t*>(m_canvas->Buffer());
-            for (int h = 0; h < image.Height(); h++) {
-                for (int w = 0; w < image.Width(); w++, pointer++) {
-                    auto pixel = image.GetPixel((h * image.Stride()) + w);
-                    *pointer = pixel.GetFormatted(m_canvas->Format());
-                }
-            }
+            assert((image.Stride() * image.Height()) <= (m_canvas->Stride() * m_canvas->Height()));
+            memcpy(m_canvas->Buffer(), image.Data(), image.Stride() * image.Height());
+
+            //auto pointer = static_cast<uint32_t*>(m_canvas->Buffer());
+            //for (int h = 0; h < image.Height(); h++) {
+            //    for (int w = 0; w < image.Width(); w++, pointer++) {
+            //        auto pixel = image.GetPixel((h * image.Stride()) + w);
+            //        *pointer = pixel.GetFormatted(m_canvas->Format());
+            //    }
+            //}
         }
         
         void Painter::RenderCharacter(int x, int y, char character)

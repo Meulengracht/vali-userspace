@@ -72,7 +72,7 @@ namespace Asgaard {
             }
             
             m_data = buffer;
-            m_format = PixelFormat::A8R8G8B8; // images are loaded as rgba
+            m_format = PixelFormat::A8B8G8R8; // images are loaded as rgba
             m_columns = width;
             m_rows = height;
         }

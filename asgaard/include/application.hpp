@@ -86,11 +86,15 @@ namespace Asgaard {
         void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
+        bool IsInitialized() const;
+
+    private:
         std::map<int, std::shared_ptr<Utils::DescriptorListener>> m_listeners;
         std::list<std::shared_ptr<Screen>>                        m_screens;
         gracht_client_t*                                          m_client;
         int                                                       m_ioset;
-        volatile bool                                             m_initialized;
+        volatile bool                                             m_syncRecieved;
+        volatile bool                                             m_screenFound;
         char*                                                     m_messageBuffer;
     };
     

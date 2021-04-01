@@ -28,7 +28,7 @@
 #include "subsurface.hpp"
 
 #define DECORATION_FILL_COLOR Drawing::Color(0x0, 0x0C, 0x35, 0x33)
-#define DECORATION_TEXT_COLOR Drawing::Color(0x28, 0x57, 0x5A)
+#define DECORATION_TEXT_COLOR Drawing::Color(0xFF, 0xFF, 0xFF)
 #define DECORATION_TEXT_SIZE  12
 
 namespace Asgaard {

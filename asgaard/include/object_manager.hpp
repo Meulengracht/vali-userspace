@@ -35,13 +35,6 @@ namespace Asgaard {
         ObjectManager();
         ~ObjectManager();
 
-        /**
-         * Destroy
-         * Handles application cleanup. This should not be invoked manually, will automatically be called
-         * upon exit of the application
-         */
-        void Destroy();
-        
         template<class T>
         std::shared_ptr<T> CreateClientObject()
         {

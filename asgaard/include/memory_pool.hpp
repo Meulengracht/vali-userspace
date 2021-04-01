@@ -29,9 +29,12 @@
 namespace Asgaard {
     class MemoryPool : public Object {
     public:
-        MemoryPool(uint32_t id, int size);
+        MemoryPool(uint32_t id, std::size_t size);
         ~MemoryPool();
         
+        std::size_t Size() const { return m_size; }
+
+    public:
         static std::shared_ptr<MemoryPool> Create(Object* owner, std::size_t size)
         {
             // Create the memory pool we're going to use
@@ -44,7 +47,7 @@ namespace Asgaard {
         void* CreateBufferPointer(int memoryOffset);
         
     private:
-        int                   m_size;
+        std::size_t           m_size;
         struct dma_attachment m_attachment;
     };
 }

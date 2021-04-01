@@ -39,14 +39,12 @@ static enum Asgaard::Surface::SurfaceEdges GetSurfaceEdges(enum wm_surface_edge 
 }
 
 namespace Asgaard {
-    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parent_id, const Rectangle& dimensions)
+    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
         : Object(id)
         , m_screen(nullptr)
-        , m_parent(OM[parent_id])
         , m_dimensions(dimensions)
     {
-        // Try to perform binding.
-        BindToScreen(screen);
+        BindToScreen(screen, parentId);
     }
     
     Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, const Rectangle& dimensions)
@@ -60,21 +58,21 @@ namespace Asgaard {
         wm_surface_destroy(APP.GrachtClient(), nullptr, Id());
     }
     
-    void Surface::BindToScreen(const std::shared_ptr<Screen>& screen)
+    void Surface::BindToScreen(const std::shared_ptr<Screen>& screen, uint32_t parentId)
     {
         // If we previously were not attached to a screen and now are attaching
         // then we need to provide an underlying surface
         if (m_screen == nullptr && screen != nullptr) {
             wm_screen_create_surface(APP.GrachtClient(), nullptr, screen->Id(), Id(),    
                 m_dimensions.Width(), m_dimensions.Height());
-            if (m_parent != nullptr) {
-                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, m_parent->Id(),
+            if (parentId != 0) {
+                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, parentId,
                     Id(), m_dimensions.X(), m_dimensions.Y());
             }
         }
         m_screen = screen;
     }
-    
+
     void Surface::ExternalEvent(enum ObjectEvent event, void* data)
     {
         switch (event) {

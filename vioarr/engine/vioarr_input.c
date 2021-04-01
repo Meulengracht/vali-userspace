@@ -30,6 +30,7 @@
 #include "vioarr_manager.h"
 #include "vioarr_region.h"
 #include "vioarr_surface.h"
+#include "vioarr_utils.h"
 #include "../protocols/wm_core_protocol.h"
 #include "../protocols/wm_surface_protocol_server.h"
 #include "../protocols/wm_pointer_protocol_server.h"
@@ -415,6 +416,7 @@ void vioarr_input_button_event(UUId_t deviceId, uint32_t keycode, uint32_t modif
     vioarr_input_source_t* source = list_find_value(&g_inputDevices, (void*)(uintptr_t)deviceId);
     if (!source) {
         // should probably handle this or something
+        vioarr_utils_error("vioarr_input_button_event no input device found with deviceId %u", deviceId);
         return;
     }
 
@@ -431,6 +433,9 @@ void vioarr_input_button_event(UUId_t deviceId, uint32_t keycode, uint32_t modif
                 vioarr_surface_id(currentSurface),
                 keycode, 
                 modifiers);
+        }
+        else {
+            vioarr_utils_trace("vioarr_input_button_event no surface for key event");
         }
     }
 }

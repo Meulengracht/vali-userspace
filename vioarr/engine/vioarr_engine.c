@@ -118,8 +118,8 @@ static int vioarr_engine_update(void* context)
         diffMs = (end - start) / CLOCKS_PER_SEC;
         start = end;
         
-        vioarr_utils_trace("vioarr_engine_update update took %" PRIuIN "ms, next in %" PRIuIN "ms", 
-            diffMs, ENGINE_SCREEN_REFRESH_MS - (diffMs % ENGINE_SCREEN_REFRESH_MS));
+        //vioarr_utils_trace("vioarr_engine_update update took %" PRIuIN "ms, next in %" PRIuIN "ms", 
+        //    diffMs, ENGINE_SCREEN_REFRESH_MS - (diffMs % ENGINE_SCREEN_REFRESH_MS));
         thrd_sleepex(ENGINE_SCREEN_REFRESH_MS - (diffMs % ENGINE_SCREEN_REFRESH_MS));
     }
 }

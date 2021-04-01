@@ -24,6 +24,7 @@
 #include "../include/widgets/icon.hpp"
 #include "../include/memory_pool.hpp"
 #include "../include/memory_buffer.hpp"
+#include "../include/drawing/image.hpp"
 #include "../include/drawing/painter.hpp"
 
 namespace Asgaard {
@@ -36,10 +37,6 @@ namespace Asgaard {
             for (int i = 0; i < static_cast<int>(IconState::COUNT); i++) {
                 m_stateAvailabilityMap[i] = false;
             }
-
-            // Create a new pool that can hold an icon of the requested size and full-color
-            auto poolSize = (dimensions.Width() * dimensions.Height() * 4) * static_cast<int>(IconState::COUNT);
-            m_memory = MemoryPool::Create(this, poolSize);
 
             // Configure the surface
             SetTransparency(true);
@@ -76,11 +73,22 @@ namespace Asgaard {
 
         void Icon::SetStateImage(IconState state, const Drawing::Image& image)
         {
+            auto requiredPoolSize = image.Stride() * image.Height() * static_cast<int>(IconState::COUNT);
+            if (!m_memory || requiredPoolSize > m_memory->Size()) {
+                if (m_memory) {
+                    // migrate, todo
+                }
+                else {
+                    // Create a new pool that can hold an  of the requested size and full-ciconolor
+                    m_memory = MemoryPool::Create(this, requiredPoolSize);
+                }
+            }
+
             // Create the neccessary buffer in case its first time we refer to this state
             if (!m_buffers[static_cast<int>(state)]) {
-                auto bufferSize = Dimensions().Width() * Dimensions().Height() * 4;
-                m_buffers[static_cast<int>(state)] = MemoryBuffer::Create(this, m_memory, bufferSize,
-                    Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+                auto memoryOffset = image.Stride() * image.Height() * static_cast<int>(state);
+                m_buffers[static_cast<int>(state)] = MemoryBuffer::Create(this, m_memory, memoryOffset,
+                    image.Width(), image.Height(), image.Format());
             }
 
             // Copy data from the image to the buffer

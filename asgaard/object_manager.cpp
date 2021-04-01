@@ -34,11 +34,6 @@ namespace Asgaard {
 
     ObjectManager::~ObjectManager()
     {
-        Destroy();
-    }
-
-    void ObjectManager::Destroy()
-    {
         // unsubscribe to all objects
         for (const auto& object : m_objects) {
             if (object.first > 256 && object.first < 0x80000000) {

@@ -130,7 +130,8 @@ namespace Asgaard {
         : Object(0)
         , m_client(nullptr)
         , m_ioset(-1)
-        , m_initialized(false)
+        , m_syncRecieved(false)
+        , m_screenFound(false)
         , m_messageBuffer(nullptr)
     {
         
@@ -147,7 +148,7 @@ namespace Asgaard {
         struct gracht_client_configuration clientConfiguration;
         int                                status;
 
-        if (m_initialized) {
+        if (IsInitialized()) {
             throw ApplicationException("Initialize has been called twice", -1);
         }
         
@@ -177,19 +178,17 @@ namespace Asgaard {
         m_messageBuffer = new char[GRACHT_MAX_MESSAGE_SIZE];
         
         // add the client as a target
-        m_initialized = true;
         AddEventDescriptor(
             gracht_client_iod(m_client), 
             IOSETIN | IOSETCTL | IOSETLVT,
             std::shared_ptr<Utils::DescriptorListener>(nullptr));
-        m_initialized = false;
 
         // kick off a chain reaction by asking for all objects
         wm_core_get_objects(m_client, nullptr);
         wm_core_sync(m_client, nullptr, 0);
 
         // wait for initialization to complete
-        while (!m_initialized) {
+        while (!IsInitialized()) {
             (void)gracht_client_wait_message(m_client, NULL, m_messageBuffer, 0);
         }
     }
@@ -212,12 +211,17 @@ namespace Asgaard {
             delete[] m_messageBuffer;
         }
     }
+
+    bool Application::IsInitialized() const
+    {
+        return m_screenFound && m_syncRecieved;
+    }
     
     void Application::PumpMessages()
     {
         int status = 0;
 
-        if (!m_initialized) {
+        if (!IsInitialized()) {
             Initialize();
         }
 
@@ -230,7 +234,7 @@ namespace Asgaard {
     {
         struct ioset_event events[8];
 
-        if (!m_initialized) {
+        if (!IsInitialized()) {
             Initialize();
         }
         
@@ -254,7 +258,7 @@ namespace Asgaard {
     
     void Application::AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>& listener)
     {
-        if (!m_initialized) {
+        if (m_ioset == -1) {
             throw new ApplicationException("Initialize() must be called before AddEventDescriptor", -1);
         }
 
@@ -298,8 +302,7 @@ namespace Asgaard {
                 Object::ExternalEvent(event, data);
             } break;
             case ObjectEvent::SYNC: {
-                // we are initalized
-                m_initialized = true;
+                m_syncRecieved = true;
             } break;
             
             default:
@@ -312,6 +315,10 @@ namespace Asgaard {
         auto screen = dynamic_cast<Screen*>(source);
         if (screen == nullptr) {
             return;
+        }
+
+        if (event == static_cast<int>(Object::Notification::CREATED)) {
+            m_screenFound = true;
         }
 
         if (event == static_cast<int>(Object::Notification::DESTROY)) {

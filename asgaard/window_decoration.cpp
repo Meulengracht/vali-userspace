@@ -99,16 +99,16 @@ namespace Asgaard {
 
         // left corner
         m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
-            Rectangle(8, (int)(halfHeight - (12.0f)), 24, 24));
+            Rectangle(8, (int)(halfHeight - (ICON_SIZE / 2.0f)), ICON_SIZE, ICON_SIZE));
         m_appIcon->Subscribe(this);
         m_appIcon->SetImage(appImage);
 
         // middle
         m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
             Rectangle(
-                8 + 8 + 24, // start text next to app icon
+                8 + 8 + ICON_SIZE, // start text next to app icon
                 0, 
-                Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + 24),
+                Dimensions().Width() - ((3 * (8 + ICON_SIZE)) + 8 + 8 + 8 + ICON_SIZE),
                 Dimensions().Height()));
         m_appTitle->SetFont(m_appFont);
         m_appTitle->SetAnchors(Widgets::Label::Anchors::CENTER);
