@@ -52,6 +52,24 @@ void TerminalLine::Reset()
     m_dirty       = true;
 }
 
+void TerminalLine::Reset(const std::vector<TerminalCell>& cells)
+{
+    m_cells       = cells;
+    m_showCursor  = false;
+    m_inputOffset = 0;
+    m_cursor      = 0;
+    m_dirty       = true;
+
+    // build text from cells
+    m_text.clear();
+    for (const auto& cell : m_cells) {
+        if (!cell.m_character) {
+            break;
+        } 
+        m_text.push_back(cell.m_character);
+    }
+}
+
 void TerminalLine::Resize(int cellCount)
 {
     if (cellCount < m_cells.size()) {
@@ -168,43 +186,6 @@ void TerminalLine::Redraw(std::shared_ptr<Asgaard::MemoryBuffer>& buffer)
         }
         m_dirty = false;
     }
-}
-
-void TerminalLine::SetText(const std::string& text)
-{
-    if (text.length() > m_cells.size()) {
-        return;
-    }
-
-    Reset();
-    m_text   = text;
-    m_cursor = text.length();
-
-    Asgaard::Drawing::Color color(0xFF, 0xFF, 0xFF);
-    int                     i = 0;
-    for (const auto c : text) {
-        auto& cell = m_cells[i++];
-        cell.m_character = c;
-        cell.m_color = color;
-    }
-}
-
-void TerminalLine::SetText(const std::vector<TerminalCell>& cells)
-{
-    int i = 0;
-    for (const auto& srcCell : cells) {
-        auto& dstCell = m_cells[i++];
-        dstCell.m_character = srcCell.m_character;
-        dstCell.m_color = srcCell.m_color;
-    }
-}
-
-std::string TerminalLine::GetInput()
-{
-    if ((int)m_text.length() > m_inputOffset) {
-        return m_text.substr(m_inputOffset);
-    }
-    return "";
 }
 
 void TerminalLine::HideCursor()

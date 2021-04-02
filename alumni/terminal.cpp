@@ -47,7 +47,8 @@ Terminal::Terminal(uint32_t id, const std::shared_ptr<Asgaard::Screen>& screen, 
     , m_rows(-1)
     , m_cellWidth(0)
     , m_historyIndex(0)
-    , m_lineIndex(0)
+    , m_inputLineIndexStart(0)
+    , m_inputLineIndexCurrent(0)
     , m_stdoutDescriptor(stdoutDescriptor)
     , m_stderrDescriptor(stderrDescriptor)
     , m_redraw(false)
@@ -76,21 +77,27 @@ Terminal::Terminal(uint32_t id, const std::shared_ptr<Asgaard::Screen>& screen, 
 Terminal::~Terminal()
 {
     std::free(m_printBuffer);
-    m_history.clear();
-    m_lines.clear();
 }
 
 void Terminal::AddInput(int character)
 {
-    if (!m_lines[m_lineIndex]->AddInput(character)) {
-        // uh todo, we should skip to next line
-        return;
+    // add to our copy of command buffer
+    m_command.push_back(character);
+
+    if (!m_lines[m_inputLineIndexCurrent]->AddInput(character)) {
+        CommitLine();
     }
 }
 
 void Terminal::RemoveInput()
 {
-    if (!m_lines[m_lineIndex]->RemoveInput()) {
+    // remove from our copy
+    if (!m_command.size()) {
+        return; // nothing to remove
+    }
+    m_command.erase(m_command.size() - 1, 1);
+
+    if (!m_lines[m_inputLineIndexCurrent]->RemoveInput()) {
         // uh todo, we should skip to prev line
         return;
     }
@@ -98,61 +105,78 @@ void Terminal::RemoveInput()
 
 std::string Terminal::ClearInput(bool newline)
 {
-    std::string input = m_lines[m_lineIndex]->GetInput();
+    auto command = m_command;
+    m_commandHistory.push_back(command);
+    m_command = "";
+
+    m_inputLineIndexStart = m_inputLineIndexCurrent;
     if (newline) {
-        FinishCurrentLine();
+        CommitLine();
     }
     else {
-        m_lines[m_lineIndex]->Reset();
+        m_lines[m_inputLineIndexCurrent]->Reset();
     }
-    return input;
+    return command;
 }
 
-void Terminal::FinishCurrentLine()
+void Terminal::CommitLine()
 {
-    m_history.push_back(m_lines[m_lineIndex]->GetText());
+    m_history.push_back(std::make_shared<TerminalLineHistory>(m_lines[m_inputLineIndexCurrent]));
     m_historyIndex = m_history.size();
 
     // Are we at the end?
-    if (m_lineIndex == m_rows - 1) {
+    if (m_inputLineIndexCurrent == m_rows - 1) {
         ScrollToLine(true);
     }
     else {
-        m_lines[m_lineIndex]->HideCursor();
-        m_lineIndex++;
-        m_lines[m_lineIndex]->ShowCursor();
+        m_lines[m_inputLineIndexCurrent]->HideCursor();
+        m_inputLineIndexCurrent++;
+        m_lines[m_inputLineIndexCurrent]->ShowCursor();
     }
+}
+
+void Terminal::UndoLine()
+{
+    m_history.pop_back();
+
+    m_lines[m_inputLineIndexCurrent]->HideCursor();
+    m_inputLineIndexCurrent--;
+    m_lines[m_inputLineIndexCurrent]->ShowCursor();
 }
 
 void Terminal::ScrollToLine(bool clearInput)
 {
     // If clear input is given, we need the last row free
-    int clearCount   = m_rows - (clearInput ? 1 : 0);
-    int historyStart = m_historyIndex - clearCount;
+    auto numInputLines = (m_inputLineIndexCurrent - m_inputLineIndexStart) + 1;
+    auto clearCount    = m_rows - (clearInput ? numInputLines : 0);
+    auto historyStart  = m_historyIndex - clearCount;
     for (int i = 0; i < clearCount; i++, historyStart++) {
-        m_lines[i]->SetText(m_history[historyStart]);
+        m_lines[i]->Reset(m_history[historyStart]->GetCells());
     }
 
     if (clearInput) {
         m_lines[m_rows - 1]->Reset();
+        m_lines[m_rows - 1]->ShowCursor();
     }
 }
 
 void Terminal::HistoryNext()
 {
+    auto historySize = static_cast<int>(m_history.size());
+
     // History must be longer than the number of rows - 1
-    if (m_history.size()        >= (size_t)m_rows &&
-        (size_t)m_historyIndex  < m_history.size()) {
+    if (historySize > m_rows && m_historyIndex < historySize) {
         m_historyIndex++;
-        ScrollToLine(false);
+        ScrollToLine(m_historyIndex == historySize);
     }
 }
 
 void Terminal::HistoryPrevious()
 {
-    // History must be longer than the number of rows - 1
-    if (m_history.size()    >= (size_t)m_rows &&
-        m_historyIndex      >= m_rows) {
+    auto historySize = static_cast<int>(m_history.size());
+
+    // History must be longer than the number of rows
+    if (m_historyIndex > m_rows) {
         m_historyIndex--;
         ScrollToLine(false);
     }
@@ -180,7 +204,7 @@ void Terminal::Print(const char* format, ...)
 
     for (i = 0; i < PRINTBUFFER_SIZE && m_printBuffer[i]; i++) {
         if (m_printBuffer[i] == '\n') {
-            FinishCurrentLine();
+            CommitLine();
         }
         else if (m_printBuffer[i] == '\033') { // 0x1B
             auto charsConsumed = ParseVTEscapeCode(&m_printBuffer[i]);
@@ -190,8 +214,8 @@ void Terminal::Print(const char* format, ...)
             i += (charsConsumed - 1); // take i++ into account in loop body
         }
         else {
-            if (!m_lines[m_lineIndex]->AddCharacter(m_printBuffer[i], m_textState.m_fgColor)) {
-                FinishCurrentLine();
+            if (!m_lines[m_inputLineIndexCurrent]->AddCharacter(m_printBuffer[i], m_textState.m_fgColor)) {
+                CommitLine();
                 i--;
             }
         }

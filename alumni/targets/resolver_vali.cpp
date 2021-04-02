@@ -33,6 +33,10 @@
 #include "../terminal.hpp"
 #include "resolver_vali.hpp"
 
+#define __TRACE
+#include <ddk/utils.h>
+
+
 namespace {
     static bool EndsWith(const std::string& String, const std::string& Suffix)
     {
@@ -164,9 +168,11 @@ std::vector<std::string> ResolverVali::GetDirectoryContents(const std::string& P
     struct DIR*              dir;
     struct DIRENT            dp;
     std::vector<std::string> entries;
+    TRACE("ResolverVali::GetDirectoryContents(path=%s)", Path.c_str());
 
     if (opendir(Path.c_str(), 0, &dir) != -1) {
         while (readdir(dir, &dp) != -1) {
+            TRACE("ResolverVali::GetDirectoryContents entry %s", &dp.d_name[0]);
             entries.push_back(std::string(&dp.d_name[0]));
         }
         closedir(dir);
@@ -220,6 +226,7 @@ bool ResolverVali::CommandResolver(const std::string& Command, const std::vector
 
 bool ResolverVali::ListDirectory(const std::vector<std::string>& Arguments)
 {
+    TRACE("ResolverVali::ListDirectory()");
     auto path = m_currentDirectory;
     if (Arguments.size() != 0) {
         path = Arguments[0];
@@ -235,17 +242,18 @@ bool ResolverVali::ListDirectory(const std::vector<std::string>& Arguments)
 
     // account for a space after each entry
     int entriesPerLine = m_terminal->GetNumberOfCellsPerLine() / (longestEntry + 1);
+    TRACE("ResolverVali::ListDirectory entriesPerLine=%i, longestEntry=%i", entriesPerLine, longestEntry);
     for (int i = 0; i < directoryEntries.size(); i++) {
         // if all entries fit on one line, we don't pad
         if (entriesPerLine >= directoryEntries.size()) {
-            m_terminal->Print("%s", longestEntry, directoryEntries[i].c_str());
+            m_terminal->Print("%s", directoryEntries[i].c_str());
         }
         else {
             m_terminal->Print("%-*s", longestEntry, directoryEntries[i].c_str());
         }
 
         // if we reach the max entries per line or we are the last entry, we newline instead of space
-        if ((i != 0 && i % entriesPerLine == 0) || i == (directoryEntries.size() - 1)) {
+        if ((i != 0 && (i % entriesPerLine) == 0) || i == (directoryEntries.size() - 1)) {
             m_terminal->Print("\n");
         }
         else {

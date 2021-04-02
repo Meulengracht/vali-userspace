@@ -40,6 +40,7 @@ public:
     ~TerminalLine() = default;
 
     void Reset();
+    void Reset(const std::vector<TerminalCell>&);
     void Resize(int cellCount);
     void Redraw(std::shared_ptr<Asgaard::MemoryBuffer>&);
 
@@ -49,14 +50,10 @@ public:
     bool AddCharacter(int character);
     bool AddCharacter(int character, const Asgaard::Drawing::Color& color);
 
-    void SetText(const std::string& text);
-    void SetText(const std::vector<TerminalCell>& cells);
     void HideCursor();
     void ShowCursor();
 
-    std::string                      GetInput();
-    const std::string&               GetText() const { return m_text; }
-    const std::vector<TerminalCell>& GetCells() const { return m_cells; }
+    const std::vector<TerminalCell>& GetCells() const { return m_cells; } 
 
 private:
     void ShiftCellsRight(int index);
@@ -73,4 +70,15 @@ private:
     int                       m_inputOffset;
     bool                      m_showCursor;
     bool                      m_dirty;
+};
+
+class TerminalLineHistory {
+public:
+    TerminalLineHistory(const std::unique_ptr<TerminalLine>& line)
+        : m_cells(line->GetCells()) { }
+
+    const std::vector<TerminalCell>& GetCells() const { return m_cells; } 
+
+private:
+    std::vector<TerminalCell> m_cells;
 };

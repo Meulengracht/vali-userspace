@@ -44,6 +44,7 @@
 
 class ResolverBase;
 class TerminalLine;
+class TerminalLineHistory;
 
 class Terminal : public Asgaard::WindowBase, public Asgaard::Utils::DescriptorListener {
 private:
@@ -89,7 +90,8 @@ protected:
 private:
     void Redraw();
     void PrepareBuffer();
-    void FinishCurrentLine();
+    void CommitLine();
+    void UndoLine();
     void ScrollToLine(bool clearInput);
 
     void   InitializeVT();
@@ -100,20 +102,23 @@ private:
     void DescriptorEvent(int iod, unsigned int events) override;
 
 private:
-    std::shared_ptr<Asgaard::MemoryPool>       m_memory;
-    std::shared_ptr<Asgaard::MemoryBuffer>     m_buffer;
-    std::shared_ptr<Asgaard::Drawing::Font>    m_font;
-    std::shared_ptr<ResolverBase>              m_resolver;
+    std::shared_ptr<Asgaard::MemoryPool>    m_memory;
+    std::shared_ptr<Asgaard::MemoryBuffer>  m_buffer;
+    std::shared_ptr<Asgaard::Drawing::Font> m_font;
+    std::shared_ptr<ResolverBase>           m_resolver;
     
-    struct TextState                           m_textState;
-    int                                        m_rows;
-    int                                        m_cellWidth;
-    std::vector<std::string>                   m_history;
-    int                                        m_historyIndex;
-    std::vector<std::unique_ptr<TerminalLine>> m_lines;
-    int                                        m_lineIndex;
-    char*                                      m_printBuffer;
-    std::mutex                                 m_printLock;
+    struct TextState                                  m_textState;
+    int                                               m_rows;
+    int                                               m_cellWidth;
+    std::vector<std::shared_ptr<TerminalLineHistory>> m_history;
+    int                                               m_historyIndex;
+    std::string                                       m_command;
+    std::vector<std::string>                          m_commandHistory;
+    std::vector<std::unique_ptr<TerminalLine>>        m_lines;
+    int                                               m_inputLineIndexStart;
+    int                                               m_inputLineIndexCurrent;
+    char*                                             m_printBuffer;
+    std::mutex                                        m_printLock;
 
     int m_stdoutDescriptor;
     int m_stderrDescriptor;
