@@ -209,6 +209,43 @@ sdl-build:
 build_sdl: sdl-build
 	cd sdl-build && make -j$(CPU_COUNT) && make install
 
+sdlimage-build:
+	mkdir -p sdlimage-build
+	cd sdlimage-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		-DPNG_BUILD_ZLIB=ON \
+		../SDL_image
+
+.PHONY: build_sdlimage
+build_sdlimage: sdlimage-build
+	cd sdlimage-build && make -j$(CPU_COUNT) && make install
+
+sdlttf-build:
+	mkdir -p sdlttf-build
+	cd sdlttf-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../SDL_ttf
+
+.PHONY: build_sdlttf
+build_sdlttf: sdlttf-build
+	cd sdlttf-build && make -j$(CPU_COUNT) && make install
+
+sdlmixer-build:
+	mkdir -p sdlmixer-build
+	cd sdlmixer-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../SDL_mixer
+
+.PHONY: build_sdlmixer
+build_sdlmixer: sdlmixer-build
+	cd sdlmixer-build && make -j$(CPU_COUNT) && make install
+
 lite-build:
 	mkdir -p lite-build
 	cd lite-build && cmake -G "Unix Makefiles" \
@@ -249,6 +286,18 @@ clean_lua:
 .PHONY: clean_sdl
 clean_sdl:
 	@rm -rf sdl-build
+
+.PHONY: clean_sdlimage
+clean_sdlimage:
+	@rm -rf sdlimage-build
+
+.PHONY: clean_sdlttf
+clean_sdlttf:
+	@rm -rf sdlttf-build
+
+.PHONY: clean_sdlmixer
+clean_sdlmixer:
+	@rm -rf sdlmixer-build
 
 .PHONY: clean_lite
 clean_lite:
@@ -306,4 +355,7 @@ clean:
 	@rm -rf lua-build
 	@rm -rf sdl-build
 	@rm -rf lite-build
+	@rm -rf sdlimage-build
+	@rm -rf sdlttf-build
+	@rm -rf sdlmixer-build
 	@rm -rf $(VALI_APPLICATION_PATH)

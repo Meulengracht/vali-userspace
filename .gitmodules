@@ -28,3 +28,12 @@
 [submodule "libsodium"]
 	path = libsodium
 	url = https://github.com/umbrella-c/libsodium
+[submodule "SDL_mixer"]
+	path = SDL_mixer
+	url = https://github.com/umbrella-c/SDL_mixer
+[submodule "SDL_ttf"]
+	path = SDL_ttf
+	url = https://github.com/umbrella-c/SDL_ttf
+[submodule "SDL_image"]
+	path = SDL_image
+	url = https://github.com/umbrella-c/SDL_image
