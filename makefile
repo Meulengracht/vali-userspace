@@ -68,6 +68,9 @@ build_apps: build_asgaard build_macia build_wintest build_alumni build_doom
 .PHONY: build_wm
 build_wm: build_mesa build_glm build_vioarr
 
+.PHONY: build_sdl_apps
+build_sdl_apps: build_sdl build_sdlttf build_sdlimage build_sdlmixer
+
 .PHONY: build_zlib
 build_zlib:
 	@printf "%b" "\033[1;35mChecking if zlib needs to be built\033[m\n"
@@ -148,7 +151,7 @@ build_llvm: llvm-build
 	@-mv llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
 	@-mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
 
-asmjit-build:
+asmjit-build:lua liblua
 	mkdir -p asmjit-build
 	cd asmjit-build && cmake -G "Unix Makefiles" \
 		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
@@ -246,6 +249,18 @@ sdlmixer-build:
 build_sdlmixer: sdlmixer-build
 	cd sdlmixer-build && make -j$(CPU_COUNT) && make install
 
+sdlshooter-build:
+	mkdir -p sdlshooter-build
+	cd sdlshooter-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../sdlshooter
+
+.PHONY: build_sdlshooter
+build_sdlshooter: sdlshooter-build
+	cd sdlshooter-build && make -j$(CPU_COUNT) && make install
+
 lite-build:
 	mkdir -p lite-build
 	cd lite-build && cmake -G "Unix Makefiles" \
@@ -298,6 +313,10 @@ clean_sdlttf:
 .PHONY: clean_sdlmixer
 clean_sdlmixer:
 	@rm -rf sdlmixer-build
+
+.PHONY: clean_sdlshooter
+clean_sdlshooter:
+	@rm -rf sdlshooter-build
 
 .PHONY: clean_lite
 clean_lite:
@@ -358,4 +377,5 @@ clean:
 	@rm -rf sdlimage-build
 	@rm -rf sdlttf-build
 	@rm -rf sdlmixer-build
+	@rm -rf sdlshooter-build
 	@rm -rf $(VALI_APPLICATION_PATH)
