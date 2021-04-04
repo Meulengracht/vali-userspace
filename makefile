@@ -69,7 +69,7 @@ build_apps: build_asgaard build_macia build_wintest build_alumni build_doom
 build_wm: build_mesa build_glm build_vioarr
 
 .PHONY: build_sdl_apps
-build_sdl_apps: build_sdl build_sdlttf build_sdlimage build_sdlmixer
+build_sdl_apps: build_sdl build_sdlttf build_sdlimage build_sdlmixer build_sdlshooter build_lite
 
 .PHONY: build_zlib
 build_zlib:
@@ -206,6 +206,7 @@ sdl-build:
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
 		-DSDL_SHARED_ENABLED_BY_DEFAULT=ON \
+		-DSDL_AUDIO=ON \
 		../SDL
 
 .PHONY: build_sdl
@@ -373,9 +374,9 @@ clean:
 	@rm -rf doom-build
 	@rm -rf lua-build
 	@rm -rf sdl-build
-	@rm -rf lite-build
 	@rm -rf sdlimage-build
 	@rm -rf sdlttf-build
 	@rm -rf sdlmixer-build
 	@rm -rf sdlshooter-build
+	@rm -rf lite-build
 	@rm -rf $(VALI_APPLICATION_PATH)

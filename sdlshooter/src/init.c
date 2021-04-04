@@ -36,7 +36,7 @@ void initSDL(void)
 	
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
     {
-        printf("Couldn't initialize SDL Mixer\n");
+        printf("Couldn't initialize SDL Mixer: %s\n", SDL_GetError());
 		exit(1);
     }
 

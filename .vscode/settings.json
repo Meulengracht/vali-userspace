@@ -114,6 +114,9 @@
         "dlfcn.h": "c",
         "sdl_vali.h": "c",
         "osmesa.h": "c",
-        "api.h": "c"
+        "api.h": "c",
+        "main.h": "c",
+        "common.h": "c",
+        "sdl_internal.h": "c"
     }
 }
