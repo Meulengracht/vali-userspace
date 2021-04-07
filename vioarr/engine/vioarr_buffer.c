@@ -34,10 +34,12 @@ typedef struct vioarr_buffer {
     int                   height;
     enum wm_pixel_format  format;
     void*                 data;
+    unsigned int          flags;
 } vioarr_buffer_t;
 
-int vioarr_buffer_create(uint32_t id, vioarr_memory_pool_t* pool, int pool_index,
-    int width, int height, int stride, enum wm_pixel_format format, vioarr_buffer_t** bufferOut)
+int vioarr_buffer_create(uint32_t id, vioarr_memory_pool_t* pool, int poolIndex,
+    int width, int height, int stride, enum wm_pixel_format format,
+    unsigned int flags, vioarr_buffer_t** bufferOut)
 {
     vioarr_buffer_t* buffer;
     size_t           size;
@@ -58,7 +60,9 @@ int vioarr_buffer_create(uint32_t id, vioarr_memory_pool_t* pool, int pool_index
     buffer->width      = width;
     buffer->height     = height;
     buffer->format     = format;
-    buffer->data       = vioarr_memory_pool_data(pool, pool_index, height * stride);
+    buffer->flags      = flags;
+
+    buffer->data = vioarr_memory_pool_data(pool, poolIndex, height * stride);
     if (!buffer->data) {
         free(buffer);
         return -1;
@@ -129,6 +133,21 @@ void* vioarr_buffer_data(vioarr_buffer_t* buffer)
     if (!buffer) {
         return NULL;
     }
-
     return buffer->data;
+}
+
+enum wm_pixel_format vioarr_buffer_format(vioarr_buffer_t* buffer)
+{
+    if (!buffer) {
+        return (enum wm_pixel_format)0;
+    }
+    return buffer->format;
+}
+
+int vioarr_buffer_flags(vioarr_buffer_t* buffer)
+{
+    if (!buffer) {
+        return 0;
+    }
+    return buffer->flags;
 }

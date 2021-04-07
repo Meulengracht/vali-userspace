@@ -25,6 +25,7 @@
 #include "pixel_format.hpp"
 #include "object_manager.hpp"
 #include "object.hpp"
+#include "utils/bitset_enum.hpp"
 
 namespace Asgaard {
     class MemoryPool;
@@ -35,9 +36,14 @@ namespace Asgaard {
             REFRESHED = static_cast<int>(Object::Notification::CUSTOM_START),
         };
         
+        enum class Flags : int {
+            NONE = 0,
+            FLIP_Y
+        };
+
     public:
         MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset,
-            int width, int height, enum PixelFormat format);
+            int width, int height, enum PixelFormat format, enum Flags flags);
         ~MemoryBuffer();
         
         void* Buffer() const { return m_buffer; }
@@ -50,11 +56,11 @@ namespace Asgaard {
         
     public:
         static std::shared_ptr<MemoryBuffer> Create(Object* owner, const std::shared_ptr<MemoryPool>& memory,
-            int memoryOffset, int width, int height, enum PixelFormat format)
+            int memoryOffset, int width, int height, enum PixelFormat format, enum Flags flags)
         {
             auto buffer = OM.CreateClientObject<
                 MemoryBuffer, const std::shared_ptr<MemoryPool>&, int, int, int, enum PixelFormat>(
-                    memory, memoryOffset, width, height, format);
+                    memory, memoryOffset, width, height, format, flags);
             buffer->Subscribe(owner);
             return buffer;
         }
@@ -67,6 +73,13 @@ namespace Asgaard {
         int                         m_width;
         int                         m_height;
         enum PixelFormat            m_format;
+        enum Flags                  m_flags;
         void*                       m_buffer;
     };
 }
+
+// Enable bitset operations for the anchors enum
+template<>
+struct enable_bitmask_operators<Asgaard::MemoryBuffer::Flags> {
+    static const bool enable = true;
+};

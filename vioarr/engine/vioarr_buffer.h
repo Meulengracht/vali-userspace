@@ -30,12 +30,16 @@
 
 typedef struct vioarr_buffer vioarr_buffer_t;
 
-int      vioarr_buffer_create(uint32_t, vioarr_memory_pool_t*, int, int, int, int, enum wm_pixel_format, vioarr_buffer_t**);
-int      vioarr_buffer_acquire(vioarr_buffer_t*);
-int      vioarr_buffer_destroy(vioarr_buffer_t*);
-uint32_t vioarr_buffer_id(vioarr_buffer_t*);
-int      vioarr_buffer_width(vioarr_buffer_t*);
-int      vioarr_buffer_height(vioarr_buffer_t*);
-void*    vioarr_buffer_data(vioarr_buffer_t*);
+int                  vioarr_buffer_create(uint32_t id, vioarr_memory_pool_t* pool, int poolIndex, int width, 
+                                            int height, int stride, enum wm_pixel_format format, 
+                                            unsigned int flags, vioarr_buffer_t** bufferOut);
+int                  vioarr_buffer_acquire(vioarr_buffer_t*);
+int                  vioarr_buffer_destroy(vioarr_buffer_t*);
+uint32_t             vioarr_buffer_id(vioarr_buffer_t*);
+int                  vioarr_buffer_width(vioarr_buffer_t*);
+int                  vioarr_buffer_height(vioarr_buffer_t*);
+void*                vioarr_buffer_data(vioarr_buffer_t*);
+enum wm_pixel_format vioarr_buffer_format(vioarr_buffer_t*);
+int                  vioarr_buffer_flags(vioarr_buffer_t*);
 
 #endif //!__VIOARR_BUFFER_H__

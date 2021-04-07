@@ -88,7 +88,7 @@ namespace Asgaard {
             if (!m_buffers[static_cast<int>(state)]) {
                 auto memoryOffset = image.Stride() * image.Height() * static_cast<int>(state);
                 m_buffers[static_cast<int>(state)] = MemoryBuffer::Create(this, m_memory, memoryOffset,
-                    image.Width(), image.Height(), image.Format());
+                    image.Width(), image.Height(), image.Format(), MemoryBuffer::Flags::NONE);
             }
 
             // Copy data from the image to the buffer

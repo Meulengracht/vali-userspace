@@ -379,6 +379,7 @@ int nvgCreateImageMem(NVGcontext* ctx, int imageFlags, unsigned char* data, int 
 // Creates image from specified image data.
 // Returns handle to the image.
 int nvgCreateImageRGBA(NVGcontext* ctx, int w, int h, int imageFlags, const unsigned char* data);
+int nvgCreateImageAs(NVGcontext* ctx, int w, int h, int type, int imageFlags, const unsigned char* data);
 
 // Updates image data specified by image handle.
 void nvgUpdateImage(NVGcontext* ctx, int image, const unsigned char* data);
@@ -619,6 +620,11 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 enum NVGtexture {
 	NVG_TEXTURE_ALPHA = 0x01,
 	NVG_TEXTURE_RGBA = 0x02,
+	NVG_TEXTURE_RGBX = 0x03,
+	NVG_TEXTURE_BGRA = 0x04,
+	NVG_TEXTURE_BRGX = 0x05,
+	NVG_TEXTURE_ARGB = 0x06,
+	NVG_TEXTURE_ABGR = 0x07
 };
 
 struct NVGscissor {

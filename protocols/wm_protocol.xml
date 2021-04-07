@@ -9,6 +9,7 @@
             <value name="format_a8r8g8b8" />
             <value name="format_a8b8g8r8" />
             <value name="format_x8r8g8b8" />
+            <value name="format_x8b8g8r8" />
             <value name="format_r8g8b8a8" />
             <value name="format_b8g8r8a8" />
         </enum>
@@ -140,6 +141,9 @@
                         <param name="height" type="int"/>
                         <param name="stride" type="int"/>
                         <param name="format" type="pixel_format"/>
+                        <param name="flags" type="unsigned int">
+                            <value name="FLIP_Y" value="0x1" />
+                        </param>
                     </request>
                 </function>
                 <function name="destroy">

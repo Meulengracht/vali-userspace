@@ -136,6 +136,38 @@ int vioarr_renderer_rotation(vioarr_renderer_t* renderer)
     return renderer->rotation;
 }
 
+#ifdef VIOARR_BACKEND_NANOVG
+int get_nvg_format(vioarr_buffer_t* buffer)
+{
+    switch (vioarr_buffer_format(buffer)) {
+        case format_a8r8g8b8: return NVG_TEXTURE_RGBA;
+        case format_a8b8g8r8: return NVG_TEXTURE_BGRA;
+        case format_x8r8g8b8: return NVG_TEXTURE_RGBX;
+        case format_x8b8g8r8: return -1;
+        case format_r8g8b8a8: return NVG_TEXTURE_ARGB;
+        case format_b8g8r8a8: return NVG_TEXTURE_ABGR;
+    }
+}
+
+int get_nvg_flags(vioarr_buffer_t* buffer)
+{
+    unsigned int bufferFlags = vioarr_buffer_flags(buffer);
+    int          nvgFlags = 0;
+
+    if (bufferFlags & WM_MEMORY_POOL_CREATE_BUFFER_FLAGS_FLIP_Y) {
+        nvgFlags |= NVG_IMAGE_FLIPY;
+    }
+
+    switch (vioarr_buffer_format(buffer)) {
+        case format_x8b8g8r8: nvgFlags |= NVG_IMAGE_PREMULTIPLIED; break;
+        case format_x8r8g8b8: nvgFlags |= NVG_IMAGE_PREMULTIPLIED; break;
+        default: break;
+    }
+
+    return nvgFlags;
+}
+#endif
+
 int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* buffer)
 {
     int resourceId = -1;
@@ -152,8 +184,7 @@ int vioarr_renderer_create_image(vioarr_renderer_t* renderer, vioarr_buffer_t* b
     mtx_lock(&renderer->context_sync);
     resourceId = nvgCreateImageRGBA(renderer->context,
             vioarr_buffer_width(buffer), vioarr_buffer_height(buffer),
-            /* NVG_IMAGE_FLIPY */ 0,
-            (const uint8_t*)vioarr_buffer_data(buffer));
+            get_nvg_flags(buffer), (const uint8_t*)vioarr_buffer_data(buffer));
     mtx_unlock(&renderer->context_sync);
 #endif
     return resourceId;

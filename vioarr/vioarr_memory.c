@@ -59,7 +59,9 @@ void wm_memory_pool_create_buffer_callback(struct gracht_recv_message* message, 
         return;
     }
     
-    status = vioarr_buffer_create(input->buffer_id, pool, input->offset, input->width, input->height, input->stride, input->format, &buffer);
+    status = vioarr_buffer_create(input->buffer_id, pool, input->offset, 
+        input->width, input->height, input->stride, input->format, 
+        input->flags, &buffer);
     if (status) {
         wm_core_event_error_single(message->client, input->pool_id, status, "wm_memory: failed to create memory buffer");
         return;

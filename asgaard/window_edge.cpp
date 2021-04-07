@@ -38,7 +38,9 @@ namespace Asgaard {
         // create required memory
         auto poolSize = (dimensions.Width() * dimensions.Height() * 4);
         m_memory = MemoryPool::Create(this, poolSize);
-        m_buffer = MemoryBuffer::Create(this, m_memory, 0, dimensions.Width(), dimensions.Height(), PixelFormat::A8R8G8B8);
+        m_buffer = MemoryBuffer::Create(this, m_memory, 0, 
+            dimensions.Width(), dimensions.Height(), 
+            PixelFormat::A8R8G8B8, MemoryBuffer::Flags::NONE);
 
         // clear buffer transparent
         InitializeBuffer();

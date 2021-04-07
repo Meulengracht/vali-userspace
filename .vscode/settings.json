@@ -117,6 +117,7 @@
         "api.h": "c",
         "main.h": "c",
         "common.h": "c",
-        "sdl_internal.h": "c"
+        "sdl_internal.h": "c",
+        "vioarr_buffer.h": "c"
     }
 }

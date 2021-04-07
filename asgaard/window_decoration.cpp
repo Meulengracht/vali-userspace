@@ -58,7 +58,8 @@ namespace Asgaard {
         m_memory = MemoryPool::Create(this, poolSize);
         
         m_buffer = MemoryBuffer::Create(this, m_memory, 0,
-            Dimensions().Width(), Dimensions().Height(), PixelFormat::A8B8G8R8);
+            Dimensions().Width(), Dimensions().Height(),
+            PixelFormat::A8B8G8R8, MemoryBuffer::Flags::NONE);
             
         SetBuffer(m_buffer);
         SetTransparency(true);

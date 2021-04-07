@@ -226,7 +226,8 @@ void Terminal::Print(const char* format, ...)
 /**
  * Window Handling Code
  */
-
+#define __TRACE
+#include <ddk/utils.h>
 void Terminal::DescriptorEvent(int iod, unsigned int events)
 {
     if (iod == m_stdoutDescriptor || iod == m_stderrDescriptor) {
@@ -239,6 +240,7 @@ void Terminal::DescriptorEvent(int iod, unsigned int events)
             // set zero terminator
             inputBuffer[bytesRead] = 0;
             Print("%s", &inputBuffer[0]);
+            TRACE("%s", &inputBuffer[0]);
             bytesRead = read(iod, &inputBuffer[0], sizeof(inputBuffer) - 1);
         }
     }
@@ -280,7 +282,7 @@ void Terminal::OnCreated()
     
     // Create initial buffer the size of this surface
     m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-        Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
+        Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8, Asgaard::MemoryBuffer::Flags::NONE);
     
     // we couldn't do this in constructor as the OM had not registered us
     auto terminal = std::dynamic_pointer_cast<Terminal>(Asgaard::OM[Id()]);

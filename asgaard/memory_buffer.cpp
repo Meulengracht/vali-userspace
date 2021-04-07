@@ -41,48 +41,50 @@ static enum wm_pixel_format GetWmPixelFormat(enum Asgaard::PixelFormat format)
         case Asgaard::PixelFormat::A8R8G8B8: return format_a8r8g8b8;
         case Asgaard::PixelFormat::A8B8G8R8: return format_a8b8g8r8;
         case Asgaard::PixelFormat::X8R8G8B8: return format_x8r8g8b8;
+        case Asgaard::PixelFormat::X8B8G8R8: return format_x8b8g8r8;
         case Asgaard::PixelFormat::R8G8B8A8: return format_r8g8b8a8;
         case Asgaard::PixelFormat::B8G8R8A8: return format_b8g8r8a8;
-        case Asgaard::PixelFormat::X8B8G8R8: return (enum wm_pixel_format)0;
     }
 }
 
-namespace Asgaard {
-    MemoryBuffer::MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset, int width, int height, enum PixelFormat format)
-        : Object(id)
-        , m_memory(memory)
-        , m_width(width)
-        , m_height(height)
-        , m_format(format)
-        , m_buffer(memory->CreateBufferPointer(memoryOffset))
-    {
-        enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
-        int                  stride   = CalculateStride(width, format);
-        
-        wm_memory_pool_create_buffer(APP.GrachtClient(), nullptr, memory->Id(),
-            id, memoryOffset, width, height, stride, wmFormat);
-    }
+Asgaard::MemoryBuffer::MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, 
+                            int memoryOffset, int width, int height, 
+                            enum PixelFormat format, enum Flags flags)
+    : Object(id)
+    , m_memory(memory)
+    , m_width(width)
+    , m_height(height)
+    , m_format(format)
+    , m_flags(flags)
+    , m_buffer(memory->CreateBufferPointer(memoryOffset))
+{
+    enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
+    int                  stride   = CalculateStride(width, format);
     
-    MemoryBuffer::~MemoryBuffer()
-    {
-        wm_buffer_destroy(APP.GrachtClient(), nullptr, Id());
-    }
-    
-    void* MemoryBuffer::Buffer(int x, int y) {
-        uint8_t* pointer       = static_cast<uint8_t*>(m_buffer);
-        int      bytesPerPixel = GetBytesPerPixel(m_format);
-        
-        pointer += ((y * (m_width * bytesPerPixel)) + (x * bytesPerPixel));
-        return pointer;
-    }
-    
-    void MemoryBuffer::ExternalEvent(enum ObjectEvent event, void* data)
-    {
-        if (event == ObjectEvent::BUFFER_RELEASE) {
-            Notify(static_cast<int>(Notification::REFRESHED));
-            return;
-        }
+    wm_memory_pool_create_buffer(APP.GrachtClient(), nullptr, memory->Id(),
+        id, memoryOffset, width, height, stride, wmFormat, 
+        static_cast<unsigned int>(flags));
+}
 
-        Object::ExternalEvent(event, data);
+Asgaard::MemoryBuffer::~MemoryBuffer()
+{
+    wm_buffer_destroy(APP.GrachtClient(), nullptr, Id());
+}
+
+void* Asgaard::MemoryBuffer::Buffer(int x, int y) {
+    uint8_t* pointer       = static_cast<uint8_t*>(m_buffer);
+    int      bytesPerPixel = GetBytesPerPixel(m_format);
+    
+    pointer += ((y * (m_width * bytesPerPixel)) + (x * bytesPerPixel));
+    return pointer;
+}
+
+void Asgaard::MemoryBuffer::ExternalEvent(enum ObjectEvent event, void* data)
+{
+    if (event == ObjectEvent::BUFFER_RELEASE) {
+        Notify(static_cast<int>(Notification::REFRESHED));
+        return;
     }
+
+    Object::ExternalEvent(event, data);
 }
