@@ -217,10 +217,11 @@ namespace Asgaard {
         return m_screenFound && m_syncRecieved;
     }
     
+
     void Application::PumpMessages()
     {
         int status = 0;
-
+        
         if (!IsInitialized()) {
             Initialize();
         }
@@ -470,7 +471,6 @@ extern "C"
     {
         auto object = Asgaard::OM[event->surface_id];
         if (!object) {
-            // log
             return;
         }
         
@@ -481,7 +481,6 @@ extern "C"
     {
         auto object = Asgaard::OM[event->surface_id];
         if (!object) {
-            // log
             return;
         }
         
@@ -503,7 +502,6 @@ extern "C"
     {
         auto object = Asgaard::OM[event->surface_id];
         if (!object) {
-            // log
             return;
         }
         

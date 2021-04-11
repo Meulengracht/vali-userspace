@@ -241,6 +241,7 @@ static void __normal_mode_motion(vioarr_input_source_t* source, int clampedX, in
                 source->id,
                 vioarr_surface_id(currentSurface));
         }
+        
         if (sendUpdates) {
             wm_pointer_event_enter_single(
                 vioarr_surface_client(surfaceAfterMove),
@@ -268,8 +269,8 @@ static void __normal_mode_motion(vioarr_input_source_t* source, int clampedX, in
         vioarr_region_t* region = vioarr_surface_region(surfaceAfterMove);
         wm_pointer_event_move_single(
             vioarr_surface_client(surfaceAfterMove),
-            vioarr_surface_id(surfaceAfterMove),
             source->id,
+            vioarr_surface_id(surfaceAfterMove),
             source->state.pointer.x - vioarr_region_x(region),
             source->state.pointer.y - vioarr_region_y(region));
     }
@@ -317,8 +318,8 @@ static void __grabbed_mode_motion(vioarr_input_source_t* source, int clampedX, i
 
     wm_pointer_event_move_single(
         vioarr_surface_client(currentSurface),
-        vioarr_surface_id(currentSurface),
         source->id,
+        vioarr_surface_id(currentSurface),
         clampedX,
         clampedY);
 
@@ -331,6 +332,7 @@ void vioarr_input_axis_event(UUId_t deviceId, int x, int y, int z)
     vioarr_input_source_t* source = list_find_value(&g_inputDevices, (void*)(uintptr_t)deviceId);
     int                    clampedX = x;
     int                    clampedY = y;
+    
     if (!source) {
         return;
     }
@@ -377,8 +379,9 @@ static void __normal_mode_click(vioarr_input_source_t* source, uint32_t button, 
     if (vioarr_surface_supports_input(clickedSurface, source->state.pointer.x, source->state.pointer.y)) {
         wm_pointer_event_click_single(
             vioarr_surface_client(clickedSurface),
+            source->id, 
             vioarr_surface_id(clickedSurface), 
-            source->id, button, pressed);
+            button, pressed);
     }
 }
 
@@ -389,8 +392,9 @@ static void __resize_mode_click(vioarr_input_source_t* source, uint32_t button, 
     // send click to notify surface of the end
     wm_pointer_event_click_single(
         vioarr_surface_client(currentSurface),
+        source->id,
         vioarr_surface_id(currentSurface), 
-        source->id, button, pressed);
+        button, pressed);
 
     // reset mode
     __clear_state(source);

@@ -118,6 +118,7 @@
         "main.h": "c",
         "common.h": "c",
         "sdl_internal.h": "c",
-        "vioarr_buffer.h": "c"
+        "vioarr_buffer.h": "c",
+        "fcntl.h": "c"
     }
 }
