@@ -171,7 +171,7 @@ namespace Asgaard {
         // Prepare the ioset to listen to multiple events
         m_ioset = ioset(0);
         if (m_ioset <= 0) {
-            throw new ApplicationException("failed to initialize the ioset descriptor", errno);
+            throw ApplicationException("failed to initialize the ioset descriptor", errno);
         }
 
         // allocate the message buffer
@@ -260,7 +260,7 @@ namespace Asgaard {
     void Application::AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>& listener)
     {
         if (m_ioset == -1) {
-            throw new ApplicationException("Initialize() must be called before AddEventDescriptor", -1);
+            throw ApplicationException("Initialize() must be called before AddEventDescriptor", -1);
         }
 
         int status = ioset_ctrl(m_ioset, IOSET_ADD, iod,
@@ -269,7 +269,7 @@ namespace Asgaard {
                     .data.iod = iod
                });
         if (status) {
-            throw new ApplicationException("ioset_ctrl failed to add event descriptor", status);
+            throw ApplicationException("ioset_ctrl failed to add event descriptor", status);
         }
 
         m_listeners[iod] = listener;

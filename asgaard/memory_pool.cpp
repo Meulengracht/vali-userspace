@@ -23,6 +23,7 @@
 
 #include "include/application.hpp"
 #include "include/exceptions/application_exception.h"
+#include "include/exceptions/invalid_argument_exception.h"
 #include "include/memory_pool.hpp"
 
 #include "protocols/wm_core_protocol_client.h"
@@ -36,9 +37,12 @@ namespace Asgaard {
         : Object(id)
         , m_size(size)
     {
+        if (size == 0) {
+            throw InvalidArgumentException("MemoryPool::MemoryPool 0-size provided");
+        }
+
         // create the dma buffer that should be shared with the WM
         struct dma_buffer_info info;
-
         info.name = "asgaard_pool";
         info.capacity = size;
         info.length = size;
@@ -46,7 +50,7 @@ namespace Asgaard {
 
         auto status = dma_create(&info, &m_attachment);
         if (status != OsSuccess) {
-            throw ApplicationException("failed to create a new memory pool", OsStatusToErrno(status));
+            throw ApplicationException("MemoryPool::MemoryPool() failed to create a new memory pool", OsStatusToErrno(status));
         }
 
         wm_memory_create_pool(APP.GrachtClient(), nullptr, id, m_attachment.handle, size);
@@ -65,6 +69,10 @@ namespace Asgaard {
     {
         uint8_t* bufferPointer = static_cast<uint8_t*>(m_attachment.buffer);
         if (bufferPointer == nullptr) {
+            return nullptr;
+        }
+        
+        if (memoryOffset >= m_size) {
             return nullptr;
         }
         

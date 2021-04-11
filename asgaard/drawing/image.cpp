@@ -22,6 +22,7 @@
 
 #include "../include/drawing/color.hpp"
 #include "../include/drawing/image.hpp"
+#include "../include/exceptions/out_of_range_exception.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -95,17 +96,25 @@ namespace Asgaard {
 
         Color Image::GetPixel(int index) const
         {
-            uint8_t*  pointer = static_cast<uint8_t*>(m_data);
-            int       byteIndex = index * GetBytesPerPixel(m_format);
-            uint32_t* colorPointer = reinterpret_cast<uint32_t*>(&pointer[byteIndex]);
+            auto pointer = static_cast<uint8_t*>(m_data);
+            int  byteIndex = index * GetBytesPerPixel(m_format);
+            if (byteIndex >= Stride() * m_rows) {
+                throw OutOfRangeException("Image::GetPixel(index) was out of range");
+            }
+
+            auto colorPointer = reinterpret_cast<uint32_t*>(&pointer[byteIndex]);
             return Color::FromFormatted(*colorPointer, m_format);
         }
 
         void Image::SetPixel(int index, const Color& color)
         {
-            uint8_t*  pointer = static_cast<uint8_t*>(m_data);
-            int       byteIndex = index * GetBytesPerPixel(m_format);
-            uint32_t* colorPointer = reinterpret_cast<uint32_t*>(&pointer[byteIndex]);
+            auto pointer = static_cast<uint8_t*>(m_data);
+            int  byteIndex = index * GetBytesPerPixel(m_format);
+            if (byteIndex >= Stride() * m_rows) {
+                throw OutOfRangeException("Image::GetPixel(index) was out of range");
+            }
+
+            auto colorPointer = reinterpret_cast<uint32_t*>(&pointer[byteIndex]);
             *colorPointer = color.GetFormatted(m_format);
         }
 

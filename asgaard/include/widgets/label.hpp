@@ -47,7 +47,7 @@ namespace Asgaard {
                 LEFT = 0x10
             };
         public:
-            Label(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle&);
+            Label(uint32_t id, const std::shared_ptr<Screen>& screen, const Surface* parent, const Rectangle&);
             ~Label();
 
             void Destroy() override;

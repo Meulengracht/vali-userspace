@@ -38,15 +38,15 @@
 #define ICON_SIZE 16
 
 namespace Asgaard {
-    WindowDecoration::WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
-        : WindowDecoration(id, screen, parentId, dimensions, Drawing::FM.CreateFont("$sys/fonts/DejaVuSansMono.ttf", DECORATION_TEXT_SIZE)) { }
+    WindowDecoration::WindowDecoration(uint32_t id, const std::shared_ptr<Screen>& screen, const Surface* parent, const Rectangle& dimensions)
+        : WindowDecoration(id, screen, parent, dimensions, Drawing::FM.CreateFont("$sys/fonts/DejaVuSansMono.ttf", DECORATION_TEXT_SIZE)) { }
 
     WindowDecoration::WindowDecoration(uint32_t id, 
         const std::shared_ptr<Screen>& screen,
-        uint32_t parentId,
+        const Surface* parent,
         const Rectangle& dimensions,
         const std::shared_ptr<Drawing::Font>& font) 
-        : SubSurface(id, screen, parentId, dimensions)
+        : SubSurface(id, screen, parent, dimensions)
         , m_appFont(font)
         , m_lmbHold(false)
         , m_dragInOperation(false)
@@ -99,13 +99,13 @@ namespace Asgaard {
         Drawing::Image closeImage("$sys/themes/default/close.png");
 
         // left corner
-        m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+        m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, this,
             Rectangle(8, (int)(halfHeight - (ICON_SIZE / 2.0f)), ICON_SIZE, ICON_SIZE));
         m_appIcon->Subscribe(this);
         m_appIcon->SetImage(appImage);
 
         // middle
-        m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, Id(),
+        m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, this,
             Rectangle(
                 8 + 8 + ICON_SIZE, // start text next to app icon
                 0, 
@@ -118,19 +118,19 @@ namespace Asgaard {
         m_appTitle->Subscribe(this);
         
         // right corner
-        m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+        m_minIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, this,
             Rectangle(Dimensions().Width() - (3 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
         m_minIcon->Subscribe(this);
         m_minIcon->SetImage(minImage);
 
         // right corner
-        m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+        m_maxIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, this,
             Rectangle(Dimensions().Width() - (2 * (8 + ICON_SIZE)), 8.0f, ICON_SIZE, ICON_SIZE));
         m_maxIcon->Subscribe(this);
         m_maxIcon->SetImage(maxImage);
 
         // right corner
-        m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, Id(),
+        m_closeIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, this,
             Rectangle(Dimensions().Width() - (8 + ICON_SIZE), 8.0f, ICON_SIZE, ICON_SIZE));
         m_closeIcon->Subscribe(this);
         m_closeIcon->SetImage(closeImage);

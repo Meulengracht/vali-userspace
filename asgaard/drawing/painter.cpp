@@ -26,7 +26,6 @@
 #include "../include/drawing/image.hpp"
 #include "../include/memory_buffer.hpp"
 #include "../include/rectangle.hpp"
-#include <cassert>
 #include <cstring>
 #include <string>
 
@@ -157,8 +156,14 @@ namespace Asgaard {
 
         void Painter::RenderImage(const Image& image)
         {
-            assert((image.Stride() * image.Height()) <= (m_canvas->Stride() * m_canvas->Height()));
-            memcpy(m_canvas->Buffer(), image.Data(), image.Stride() * image.Height());
+            // if faulty images are provided we just return
+            if (image.Width() == 0 || image.Height() == 0) {
+                return;
+            }
+
+            auto bytesInSource = image.Stride() * image.Height();
+            auto bytesInDestination = m_canvas->Stride() * m_canvas->Height();
+            memcpy(m_canvas->Buffer(), image.Data(), std::min(bytesInDestination, bytesInSource));
 
             //auto pointer = static_cast<uint32_t*>(m_canvas->Buffer());
             //for (int h = 0; h < image.Height(); h++) {

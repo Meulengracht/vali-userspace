@@ -22,6 +22,9 @@
  */
 
 #include "include/application.hpp"
+#include "include/exceptions/application_exception.h"
+#include "include/exceptions/invalid_argument_exception.h"
+#include "include/exceptions/out_of_range_exception.h"
 #include "include/memory_pool.hpp"
 #include "include/memory_buffer.hpp"
 
@@ -60,6 +63,22 @@ Asgaard::MemoryBuffer::MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPoo
 {
     enum wm_pixel_format wmFormat = GetWmPixelFormat(format);
     int                  stride   = CalculateStride(width, format);
+    if (stride <= 0) {
+        throw InvalidArgumentException("MemoryBuffer::MemoryBuffer() invalid width provided");
+    }
+    if (height <= 0) {
+        throw InvalidArgumentException("MemoryBuffer::MemoryBuffer() invalid height provided");
+    }
+    if (memoryOffset < 0) {
+        throw InvalidArgumentException("MemoryBuffer::MemoryBuffer() invalid memoryOffset provided");
+    }
+    if (m_buffer == nullptr) {
+        throw ApplicationException("MemoryBuffer::MemoryBuffer() buffer pointer was null", EINVAL);
+    }
+
+    if ((memoryOffset + (stride * height)) > memory->Size()) {
+        throw ApplicationException("MemoryBuffer::MemoryBuffer() size too large would overrun the memory in the pool", EINVAL);
+    }
     
     wm_memory_pool_create_buffer(APP.GrachtClient(), nullptr, memory->Id(),
         id, memoryOffset, width, height, stride, wmFormat, 
@@ -74,6 +93,9 @@ Asgaard::MemoryBuffer::~MemoryBuffer()
 void* Asgaard::MemoryBuffer::Buffer(int x, int y) {
     uint8_t* pointer       = static_cast<uint8_t*>(m_buffer);
     int      bytesPerPixel = GetBytesPerPixel(m_format);
+    if (x < 0 || x >= m_width || y < 0 || y >= m_height) {
+        throw OutOfRangeException("MemoryBuffer::Buffer(x, y) arguments were out of range");
+    }
     
     pointer += ((y * (m_width * bytesPerPixel)) + (x * bytesPerPixel));
     return pointer;

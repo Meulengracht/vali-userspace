@@ -27,8 +27,8 @@
 #include "protocols/wm_surface_protocol_client.h"
 
 namespace Asgaard {
-    SubSurface::SubSurface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parent_id, const Rectangle& dimensions)
-        : Surface(id, screen, parent_id, dimensions) { }
+    SubSurface::SubSurface(uint32_t id, const std::shared_ptr<Screen>& screen, const Surface* parent, const Rectangle& dimensions)
+        : Surface(id, screen, parent, dimensions) { }
 
     void SubSurface::Resize(int width, int height)
     {

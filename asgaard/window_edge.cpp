@@ -31,9 +31,9 @@ namespace Asgaard {
     WindowEdge::WindowEdge(
             uint32_t id, 
             const std::shared_ptr<Screen>& screen, 
-            uint32_t parentId, 
+            const Surface* parent, 
             const Rectangle& dimensions)
-        : SubSurface(id, screen, parentId, dimensions)
+        : SubSurface(id, screen, parent, dimensions)
     {
         // create required memory
         auto poolSize = (dimensions.Width() * dimensions.Height() * 4);

@@ -29,8 +29,8 @@
 
 namespace Asgaard {
     namespace Widgets {
-        Icon::Icon(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
-            : SubSurface(id, screen, parentId, dimensions)
+        Icon::Icon(uint32_t id, const std::shared_ptr<Screen>& screen, const Surface* parent, const Rectangle& dimensions)
+            : SubSurface(id, screen, parent, dimensions)
             , m_memory(nullptr)
             , m_currentState(IconState::NORMAL)
         {

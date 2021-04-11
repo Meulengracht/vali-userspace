@@ -39,16 +39,16 @@ static enum Asgaard::Surface::SurfaceEdges GetSurfaceEdges(enum wm_surface_edge 
 }
 
 namespace Asgaard {
-    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, uint32_t parentId, const Rectangle& dimensions)
+    Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, const Surface* parent, const Rectangle& dimensions)
         : Object(id)
         , m_screen(nullptr)
         , m_dimensions(dimensions)
     {
-        BindToScreen(screen, parentId);
+        BindToScreen(screen, parent);
     }
     
     Surface::Surface(uint32_t id, const std::shared_ptr<Screen>& screen, const Rectangle& dimensions)
-        : Surface(id, screen, 0, dimensions) { }
+        : Surface(id, screen, nullptr, dimensions) { }
 
     Surface::Surface(uint32_t id, const Rectangle& dimensions)
         : Surface(id, std::shared_ptr<Screen>(nullptr), 0, dimensions) { }
@@ -58,15 +58,23 @@ namespace Asgaard {
         wm_surface_destroy(APP.GrachtClient(), nullptr, Id());
     }
     
-    void Surface::BindToScreen(const std::shared_ptr<Screen>& screen, uint32_t parentId)
+    void Surface::BindToScreen(const std::shared_ptr<Screen>& screen, const Surface* parent)
     {
         // If we previously were not attached to a screen and now are attaching
         // then we need to provide an underlying surface
         if (m_screen == nullptr && screen != nullptr) {
+            // we do not allow surfaces to go beyond the screen size.
+            if (m_dimensions.Width() > screen->GetCurrentWidth()) {
+                m_dimensions.SetWidth(screen->GetCurrentWidth());
+            }
+            if (m_dimensions.Height() > screen->GetCurrentHeight()) {
+                m_dimensions.SetHeight(screen->GetCurrentHeight());
+            }
+
             wm_screen_create_surface(APP.GrachtClient(), nullptr, screen->Id(), Id(),    
                 m_dimensions.Width(), m_dimensions.Height());
-            if (parentId != 0) {
-                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, parentId,
+            if (parent) {
+                wm_surface_add_subsurface(APP.GrachtClient(), nullptr, parent->Id(),
                     Id(), m_dimensions.X(), m_dimensions.Y());
             }
         }

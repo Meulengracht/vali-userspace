@@ -55,12 +55,12 @@ namespace Asgaard {
     public:
         WindowDecoration(uint32_t id, 
             const std::shared_ptr<Screen>& screen, 
-            uint32_t parentId, 
+            const Surface* parent, 
             const Rectangle&);
 
         WindowDecoration(uint32_t id, 
             const std::shared_ptr<Screen>& screen, 
-            uint32_t parentId, 
+            const Surface* parent, 
             const Rectangle&,
             const std::shared_ptr<Drawing::Font>& font);
 

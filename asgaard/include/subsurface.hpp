@@ -29,7 +29,7 @@ namespace Asgaard {
     
     class SubSurface : public Surface {
     public:
-        SubSurface(uint32_t, const std::shared_ptr<Screen>&, uint32_t, const Rectangle&);
+        SubSurface(uint32_t, const std::shared_ptr<Screen>&, const Surface*, const Rectangle&);
         
         void Resize(int width, int height);
         void Move(int parentX, int parentY);
