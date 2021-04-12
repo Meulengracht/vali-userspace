@@ -78,18 +78,22 @@ namespace Asgaard {
             m_rows = height;
         }
 
-        Image::Image(const void* imageData, PixelFormat format, int rows, int columns)
+        Image::Image(const void* imageData, PixelFormat format, int rows, int columns, bool takeOwnership)
             : m_data(const_cast<void*>(imageData))
             , m_format(format)
             , m_rows(rows)
             , m_columns(columns)
+            , m_ownsBuffer(takeOwnership)
         {
 
         }
 
+        Image::Image(const void* imageData, PixelFormat format, int rows, int columns)
+            : Image(imageData, format, rows, columns, false) { }
+
         Image::~Image()
         {
-            if (m_data) {
+            if (m_data && m_ownsBuffer) {
                 free(m_data);
             }
         }

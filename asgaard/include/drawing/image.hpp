@@ -32,6 +32,7 @@ namespace Asgaard {
         public:
             Image(const std::string& path);
             Image(const void* imageData, PixelFormat format, int rows, int columns);
+            Image(const void* imageData, PixelFormat format, int rows, int columns, bool takeOwnership);
             ~Image();
 
             Color GetPixel(int index) const;
@@ -51,6 +52,7 @@ namespace Asgaard {
             PixelFormat m_format;
             int         m_rows;
             int         m_columns;
+            bool        m_ownsBuffer;
         };
     }
 }

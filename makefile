@@ -151,30 +151,6 @@ build_llvm: llvm-build
 	@-mv llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
 	@-mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
 
-asmjit-build:lua liblua
-	mkdir -p asmjit-build
-	cd asmjit-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../asmjit
-
-.PHONY: build_asmjit
-build_asmjit: asmjit-build
-	cd asmjit-build && make -j$(CPU_COUNT) && make install
-
-blend2d-build:
-	mkdir -p blend2d-build
-	cd blend2d-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../blend2d
-
-.PHONY: build_blend2d
-build_blend2d: blend2d-build
-	cd blend2d-build && make -j$(CPU_COUNT) && make install
-
 doom-build:
 	mkdir -p doom-build
 	cd doom-build && cmake -G "Unix Makefiles" \
@@ -274,6 +250,18 @@ lite-build:
 build_lite: lite-build
 	cd lite-build && make -j$(CPU_COUNT) && make install
 
+libzip-build:
+	mkdir -p libzip-build
+	cd libzip-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../libzip
+
+.PHONY: build_libzip
+build_libzip: libzip-build
+	cd libzip-build && make -j$(CPU_COUNT) && make install
+
 .PHONY: build_mesa
 build_mesa:
 	#$(eval CPU_COUNT = $(shell nproc))
@@ -323,6 +311,10 @@ clean_sdlshooter:
 clean_lite:
 	@rm -rf lite-build
 
+.PHONY: clean_libzip
+clean_libzip:
+	@rm -rf libzip-build
+
 .PHONY: clean_asgaard
 clean_asgaard:
 	cd asgaard && make clean
@@ -369,8 +361,6 @@ clean:
 	@$(MAKE) -s -C vioarr -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf llvm-build
-	@rm -rf asmjit-build
-	@rm -rf blend2d-build
 	@rm -rf doom-build
 	@rm -rf lua-build
 	@rm -rf sdl-build
@@ -379,4 +369,5 @@ clean:
 	@rm -rf sdlmixer-build
 	@rm -rf sdlshooter-build
 	@rm -rf lite-build
+	@rm -rf libzip-build
 	@rm -rf $(VALI_APPLICATION_PATH)
