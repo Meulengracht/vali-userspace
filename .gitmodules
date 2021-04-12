@@ -31,3 +31,6 @@
 [submodule "SDL_image"]
 	path = SDL_image
 	url = https://github.com/umbrella-c/SDL_image
+[submodule "libzip"]
+	path = libzip
+	url = https://github.com/umbrella-c/libzip
