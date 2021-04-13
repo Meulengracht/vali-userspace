@@ -78,8 +78,8 @@ namespace Asgaard {
         int Execute();
 
     public:
-        gracht_client_t* GrachtClient() const { return m_client; }
-        const std::shared_ptr<Screen>& GetScreen() const { return m_screens.front(); }
+        gracht_client_t*               GrachtClient() const { return m_client; }
+        const std::shared_ptr<Screen>& GetScreen() const    { return m_screens.front(); }
 
     public:
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;

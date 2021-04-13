@@ -24,6 +24,7 @@
 
 #include "../drawing/image.hpp"
 #include "../drawing/color.hpp"
+#include <map>
 #include <memory>
 
 namespace Asgaard {
@@ -42,23 +43,31 @@ namespace Asgaard {
                 IMAGE_APP_DEFAULT,
 
                 // UI Elements
+                IMAGE_SEARCH,
+                IMAGE_BACKGROUND,
                 IMAGE_TERMINAL,
                 IMAGE_EDITOR,
                 IMAGE_GAME
             };
 
             enum class Colors : int {
-                DECORATION_FILL
+                DECORATION_FILL,
+                DECORATION_TEXT
             };
         public:
-            Theme();
+            Theme(const std::string& themePack);
             ~Theme();
 
             Drawing::Image GetImage(enum Elements element);
             Drawing::Color GetColor(enum Colors color);
 
         private:
-            std::unique_ptr<ThemeLoader> m_loader;
+            void InitializeTheme();
+
+        private:
+            std::unique_ptr<ThemeLoader>  m_loader;
+            std::map<int, Drawing::Color> m_colors;
+            std::map<int, std::string>    m_paths;
         };
     }
 }

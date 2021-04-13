@@ -7,6 +7,7 @@ LFLAGS := ddk.lib libgracht.lib libfreetype.lib
 APP_SOURCES_C :=
 APP_SOURCES_CXX := $(wildcard drawing/*.cpp) \
 				   $(wildcard widgets/*.cpp) \
+				   $(wildcard theming/*.cpp) \
 				   $(wildcard *.cpp)
 		         
 APP_PROTOCOLS_C := protocols/wm_core_protocol_client.c \

@@ -23,6 +23,8 @@
 #include "../include/drawing/color.hpp"
 #include "../include/drawing/image.hpp"
 #include "../include/exceptions/out_of_range_exception.h"
+#include <vector>
+#include <iterator>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -76,6 +78,28 @@ namespace Asgaard {
             m_format = PixelFormat::A8B8G8R8; // images are loaded as rgba
             m_columns = width;
             m_rows = height;
+            m_ownsBuffer = true;
+        }
+
+        Image::Image(std::istream& stream)
+        {
+            std::vector<char> v((std::istream_iterator<char>(stream)), std::istream_iterator<char>());
+            int               width;
+            int               height;
+            int               numComponents;
+
+            auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(v.data()), v.size(), 
+                &width, &height, &numComponents, STBI_rgb_alpha);
+            if (buffer == nullptr) {
+                ZeroImage();
+                return;
+            }
+
+            m_data = buffer;
+            m_format = PixelFormat::A8B8G8R8; // images are loaded as rgba
+            m_columns = width;
+            m_rows = height;
+            m_ownsBuffer = true;
         }
 
         Image::Image(const void* imageData, PixelFormat format, int rows, int columns, bool takeOwnership)
@@ -90,6 +114,11 @@ namespace Asgaard {
 
         Image::Image(const void* imageData, PixelFormat format, int rows, int columns)
             : Image(imageData, format, rows, columns, false) { }
+
+        Image::Image()
+        {
+            ZeroImage();
+        }
 
         Image::~Image()
         {
@@ -128,6 +157,7 @@ namespace Asgaard {
             m_format = PixelFormat::A8R8G8B8;
             m_rows = 0;
             m_columns = 0;
+            m_ownsBuffer = false;
         }
     }
 }

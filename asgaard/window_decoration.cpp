@@ -27,6 +27,8 @@
 #include "include/rectangle.hpp"
 #include "include/pointer.hpp"
 #include "include/window_decoration.hpp"
+#include "include/theming/theme_manager.hpp"
+#include "include/theming/theme.hpp"
 #include "include/drawing/painter.hpp"
 #include "include/drawing/font_manager.hpp"
 #include "include/drawing/font.hpp"
@@ -90,13 +92,14 @@ namespace Asgaard {
     void WindowDecoration::Initialize()
     {
         float halfHeight = (float)Dimensions().Height() / 2.0f;
-        int   iconY      = (int)(halfHeight - (ICON_SIZE / 2.0f));
+        int        iconY = (int)(halfHeight - (ICON_SIZE / 2.0f));
+        const auto theme = Theming::TM.GetTheme();
 
         // load icons
-        Drawing::Image appImage("$sys/themes/default/app.png");
-        Drawing::Image minImage("$sys/themes/default/minimize.png");
-        Drawing::Image maxImage("$sys/themes/default/maximize.png");
-        Drawing::Image closeImage("$sys/themes/default/close.png");
+        Drawing::Image appImage   = theme->GetImage(Theming::Theme::Elements::IMAGE_APP_DEFAULT);
+        Drawing::Image minImage   = theme->GetImage(Theming::Theme::Elements::IMAGE_MINIMIZE);
+        Drawing::Image maxImage   = theme->GetImage(Theming::Theme::Elements::IMAGE_MAXIMIZE);
+        Drawing::Image closeImage = theme->GetImage(Theming::Theme::Elements::IMAGE_CLOSE);
 
         // left corner
         m_appIcon = OM.CreateClientObject<Asgaard::Widgets::Icon>(m_screen, this,

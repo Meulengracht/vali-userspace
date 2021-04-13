@@ -25,12 +25,15 @@
 #include "color.hpp"
 
 #include <string>
+#include <istream>
 
 namespace Asgaard {
     namespace Drawing {
         class Image {
         public:
+            Image();
             Image(const std::string& path);
+            Image(std::istream& stream);
             Image(const void* imageData, PixelFormat format, int rows, int columns);
             Image(const void* imageData, PixelFormat format, int rows, int columns, bool takeOwnership);
             ~Image();
