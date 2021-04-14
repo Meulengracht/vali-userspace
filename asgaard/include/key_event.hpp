@@ -22,10 +22,12 @@
  */
 #pragma once
 
+#include "config.hpp"
+
 struct wm_keyboard_key_event;
 
 namespace Asgaard {
-    class KeyEvent {
+    class ASGAARD_API KeyEvent {
     public:
         KeyEvent(struct wm_keyboard_key_event*);
         

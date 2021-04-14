@@ -24,8 +24,8 @@
 #include "include/application.hpp"
 #include "include/screen.hpp"
 #include "include/window_base.hpp"
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_screen_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_screen_protocol_client.h"
 
 static Asgaard::Screen::ScreenTransform ConvertProtocolTransform(enum wm_screen_transform transform)
 {

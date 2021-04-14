@@ -25,7 +25,7 @@
 #include "include/pointer.hpp"
 #include "include/surface.hpp"
 
-#include "protocols/wm_pointer_protocol_client.h"
+#include "wm_pointer_protocol_client.h"
 
 namespace Asgaard {
     Pointer::Pointer(uint32_t id) : Object(id)

@@ -26,6 +26,7 @@
 #include <map>
 #include <memory>
 
+#include "config.hpp"
 #include "object.hpp"
 
 namespace Asgaard {
@@ -96,7 +97,7 @@ namespace Asgaard {
             return object;
         }
 
-        std::shared_ptr<Object> operator[](uint32_t);
+        ASGAARD_API std::shared_ptr<Object> operator[](uint32_t);
 
     public:
         static void *operator new   (size_t)   = delete;
@@ -105,13 +106,13 @@ namespace Asgaard {
         static void  operator delete[] (void*) = delete;
 
     private:
-        void     Notification(Utils::Publisher* source, int event, void* data) override;
-        uint32_t CreateObjectId();
+        void                 Notification(Utils::Publisher* source, int event, void* data) override;
+        ASGAARD_API uint32_t CreateObjectId();
 
     private:
         std::map<uint32_t, std::shared_ptr<Object>> m_objects;
         uint32_t                                    m_idIndex;
     };
     
-    extern ObjectManager OM;
+    extern ASGAARD_API ObjectManager OM;
 }

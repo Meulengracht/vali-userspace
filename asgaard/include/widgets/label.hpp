@@ -24,6 +24,7 @@
 
 #include <atomic>
 #include <memory>
+#include "../config.hpp"
 #include "../utils/bitset_enum.hpp"
 #include "../subsurface.hpp"
 #include "../drawing/color.hpp"

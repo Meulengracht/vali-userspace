@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include "config.hpp"
 #include "pixel_format.hpp"
 #include "rectangle.hpp"
 #include "surface.hpp"
@@ -53,17 +54,17 @@ namespace Asgaard {
         };
         
     public:
-        WindowBase(uint32_t, const std::shared_ptr<Screen>&, const Rectangle&);
-        ~WindowBase();
+        ASGAARD_API WindowBase(uint32_t, const std::shared_ptr<Screen>&, const Rectangle&);
+        ASGAARD_API ~WindowBase();
 
-        void SetTitle(const std::string& title);
-        void SetIconImage(const std::shared_ptr<Drawing::Image>& image);
+        ASGAARD_API void SetTitle(const std::string& title);
+        ASGAARD_API void SetIconImage(const std::shared_ptr<Drawing::Image>& image);
 
-        void SetResizable(bool resizeable);
-        void EnableDecoration(bool enable);
+        ASGAARD_API void SetResizable(bool resizeable);
+        ASGAARD_API void EnableDecoration(bool enable);
 
-        void RequestPriorityLevel(enum PriorityLevel);
-        void RequestFullscreenMode(enum FullscreenMode);
+        ASGAARD_API void RequestPriorityLevel(enum PriorityLevel);
+        ASGAARD_API void RequestFullscreenMode(enum FullscreenMode);
         
     // Window events that can/should be reacted on.
     protected:
@@ -74,14 +75,14 @@ namespace Asgaard {
 
     // Window functions that can be called to configure this window 
     protected:
-        void InitiateResize(const std::shared_ptr<Pointer>&, enum SurfaceEdges);
-        void InitiateMove(const std::shared_ptr<Pointer>&);
+        ASGAARD_API void InitiateResize(const std::shared_ptr<Pointer>&, enum SurfaceEdges);
+        ASGAARD_API void InitiateMove(const std::shared_ptr<Pointer>&);
 
         // Protected function, allow override
-        void Notification(Publisher*, int = 0, void* = 0) override;
+        ASGAARD_API void Notification(Publisher*, int = 0, void* = 0) override;
 
     private:
-        void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
+        ASGAARD_API void ExternalEvent(enum ObjectEvent event, void* data = 0) final;
 
     private:
         std::vector<enum PixelFormat>     m_supportedFormats;

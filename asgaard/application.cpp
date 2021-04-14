@@ -37,12 +37,12 @@
 #include <ioset.h>
 #include <type_traits>
 
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_screen_protocol_client.h"
-#include "protocols/wm_surface_protocol_client.h"
-#include "protocols/wm_buffer_protocol_client.h"
-#include "protocols/wm_pointer_protocol_client.h"
-#include "protocols/wm_keyboard_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_screen_protocol_client.h"
+#include "wm_surface_protocol_client.h"
+#include "wm_buffer_protocol_client.h"
+#include "wm_pointer_protocol_client.h"
+#include "wm_keyboard_protocol_client.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Waddress-of-temporary"
@@ -332,6 +332,10 @@ namespace Asgaard {
 // Protocol callbacks
 extern "C"
 {
+    void dllmain(int reason) {
+        (void)reason;
+    }
+
     // CORE PROTOCOL EVENTS
     void wm_core_event_sync_callback(struct wm_core_sync_event* input)
     {

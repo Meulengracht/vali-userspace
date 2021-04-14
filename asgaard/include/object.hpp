@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cstdint>
+#include "config.hpp"
 #include "utils/publisher.hpp"
 #include "utils/subscriber.hpp"
 
@@ -57,7 +58,7 @@ namespace Asgaard {
         
     public:
         Object(uint32_t id);
-        virtual ~Object();
+        ASGAARD_API virtual ~Object();
 
     public:
         uint32_t Id() const { return m_id; }

@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include "config.hpp"
 #include "object_manager.hpp"
 #include "window_base.hpp"
 
@@ -43,7 +44,7 @@ namespace Asgaard {
          * call made in this class. 
          * @throw ApplicationException
          */
-        void Initialize();
+        ASGAARD_API void Initialize();
 
         /**
          * Destroy
@@ -60,14 +61,14 @@ namespace Asgaard {
          * @param events The events to listen for, defined in <ioset.h>
          * @throw ApplicationException
          */
-        void AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>&);
+        ASGAARD_API void AddEventDescriptor(int iod, unsigned int events, const std::shared_ptr<Utils::DescriptorListener>&);
 
         /**
          * PumpMessages
          * Can be used to handle all currently queued application messages. This emulates a single
          * loop in Execute - and enables users to run this application "on-demand".
          */
-        void PumpMessages();
+        ASGAARD_API void PumpMessages();
 
         /**
          * Execute
@@ -75,7 +76,7 @@ namespace Asgaard {
          * or any fault happens (caught exception).
          * @return Status code of execution
          */
-        int Execute();
+        ASGAARD_API int Execute();
 
     public:
         gracht_client_t*               GrachtClient() const { return m_client; }
@@ -98,5 +99,5 @@ namespace Asgaard {
         char*                                                     m_messageBuffer;
     };
     
-    extern Application APP;
+    extern ASGAARD_API Application APP;
 }

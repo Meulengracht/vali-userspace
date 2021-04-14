@@ -86,11 +86,6 @@ build_libfreetype:
 	@printf "%b" "\033[1;35mChecking if freetype needs to be built\033[m\n"
 	@$(MAKE) -s -C freetype -f makefile
 
-.PHONY: build_asgaard
-build_asgaard:
-	@printf "%b" "\033[1;35mChecking if asgaard needs to be built\033[m\n"
-	@$(MAKE) -s -C asgaard -f makefile
-
 .PHONY: build_wintest
 build_wintest:
 	@printf "%b" "\033[1;35mChecking if wintest needs to be built\033[m\n"
@@ -106,6 +101,18 @@ build_macia:
 	@printf "%b" "\033[1;35mChecking if macia needs to be built\033[m\n"
 	@$(MAKE) -s -C macia -f makefile
 
+asgaard-build:
+	mkdir -p asgaard-build
+	cd asgaard-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../asgaard
+
+.PHONY: build_asgaard
+build_asgaard: asgaard-build
+	cd asgaard-build && make -j$(CPU_COUNT) && make install
+
 # Repositories
 llvm/projects/libcxx:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libcxx.git
@@ -113,7 +120,7 @@ llvm/projects/libcxx:
 llvm/projects/libcxxabi:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libcxxabi.git
 
-llvm/projects/libunwind:
+llvm/projects/libun-DASGAARD_DLLwind:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libunwind.git
 
 llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
@@ -271,13 +278,9 @@ build_mesa:
 clean_mesa:
 	cd mesa && make clean
 
-.PHONY: clean_asmjit
-clean_asmjit:
-	@rm -rf asmjit-build
-
-.PHONY: clean_blend2d
-clean_blend2d:
-	@rm -rf blend2d-build
+.PHONY: clean_asgaard
+clean_asgaard:
+	@rm -rf asgaard-build
 
 .PHONY: clean_doom
 clean_doom:
@@ -315,10 +318,6 @@ clean_lite:
 clean_libzip:
 	@rm -rf libzip-build
 
-.PHONY: clean_asgaard
-clean_asgaard:
-	cd asgaard && make clean
-
 .PHONY: clean_alumni
 clean_alumni:
 	cd alumni && make clean
@@ -344,22 +343,22 @@ clean_apps:
 	@$(MAKE) -s -C zlib -f makefile clean
 	@$(MAKE) -s -C libpng -f makefile clean
 	@$(MAKE) -s -C freetype -f makefile clean
-	@$(MAKE) -s -C asgaard -f makefile clean
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
+	@rm -rf asgaard-build
 
 .PHONY: clean
 clean:
 	@$(MAKE) -s -C zlib -f makefile clean
 	@$(MAKE) -s -C libpng -f makefile clean
 	@$(MAKE) -s -C freetype -f makefile clean
-	@$(MAKE) -s -C asgaard -f makefile clean
 	@$(MAKE) -s -C macia -f makefile clean
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C mesa -f makefile clean
 	@$(MAKE) -s -C vioarr -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
+	@rm -rf asgaard-build
 	@rm -rf llvm-build
 	@rm -rf doom-build
 	@rm -rf lua-build

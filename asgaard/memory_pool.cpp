@@ -26,9 +26,9 @@
 #include "include/exceptions/invalid_argument_exception.h"
 #include "include/memory_pool.hpp"
 
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_memory_pool_protocol_client.h"
-#include "protocols/wm_memory_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_memory_pool_protocol_client.h"
+#include "wm_memory_protocol_client.h"
 
 #include <os/mollenos.h>
 

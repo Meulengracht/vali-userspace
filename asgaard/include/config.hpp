@@ -1,5 +1,4 @@
-/* ValiOS
- *
+/**
  * Copyright 2018, Philip Meulengracht
  *
  * This program is free software : you can redistribute it and / or modify
@@ -22,17 +21,14 @@
  */
 #pragma once
 
-#include "config.hpp"
-#include "surface.hpp"
+#if defined(WINDOWS) || defined(WIN32) || defined(MOLLENOS)
+#  ifdef ASGAARD_BUILD
+#    define ASGAARD_API __declspec(dllexport)
+#  else
+#    define ASGAARD_API __declspec(dllimport)
+#  endif
+#endif
 
-namespace Asgaard {
-    class Screen;
-    
-    class SubSurface : public Surface {
-    public:
-        SubSurface(uint32_t, const std::shared_ptr<Screen>&, const Surface*, const Rectangle&);
-        
-        void Resize(int width, int height);
-        void Move(int parentX, int parentY);
-    };
-}
+#ifndef ASGAARD_API
+#define ASGAARD_API
+#endif

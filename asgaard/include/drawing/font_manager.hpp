@@ -20,7 +20,9 @@
  *  - Contains the implementation of the application framework used for building
  *    graphical applications.
  */
- 
+#pragma once
+
+#include "../config.hpp"
 #include <memory>
 
 namespace Asgaard {
@@ -36,12 +38,12 @@ namespace Asgaard {
             FontManager();
             ~FontManager();
             
-            std::shared_ptr<Font> CreateFont(const std::string& path, int pixelSize);
+            ASGAARD_API std::shared_ptr<Font> CreateFont(const std::string& path, int pixelSize);
             
         private:
             std::shared_ptr<Utils::FreeType> m_freetype;
         };
         
-        extern FontManager FM;
+        extern ASGAARD_API FontManager FM;
     }
 }

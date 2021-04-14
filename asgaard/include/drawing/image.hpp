@@ -21,6 +21,7 @@
  */
 #pragma once
 
+#include "../config.hpp"
 #include "../pixel_format.hpp"
 #include "color.hpp"
 
@@ -29,7 +30,7 @@
 
 namespace Asgaard {
     namespace Drawing {
-        class Image {
+        class ASGAARD_API Image {
         public:
             Image();
             Image(const std::string& path);

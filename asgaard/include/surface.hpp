@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include "config.hpp"
 #include "object_manager.hpp"
 #include "rectangle.hpp"
 #include "object.hpp"
@@ -44,24 +45,24 @@ namespace Asgaard {
             RIGHT  = 0x8
         };
     public:
-        Surface(uint32_t id, const std::shared_ptr<Screen>&, const Surface* parent, const Rectangle&);
-        Surface(uint32_t id, const std::shared_ptr<Screen>&, const Rectangle&);
-        Surface(uint32_t id, const Rectangle&);
-        ~Surface();
+        ASGAARD_API Surface(uint32_t id, const std::shared_ptr<Screen>&, const Surface* parent, const Rectangle&);
+        ASGAARD_API Surface(uint32_t id, const std::shared_ptr<Screen>&, const Rectangle&);
+        ASGAARD_API Surface(uint32_t id, const Rectangle&);
+        ASGAARD_API ~Surface();
         
         void BindToScreen(const std::shared_ptr<Screen>&, const Surface* parent);
         
-        void SetBuffer(const std::shared_ptr<MemoryBuffer>&);
-        void MarkDamaged(const Rectangle&);
-        void MarkInputRegion(const Rectangle&);
-        void SetDropShadow(const Rectangle&);
-        void SetTransparency(bool enable);
-        void ApplyChanges();
+        ASGAARD_API void SetBuffer(const std::shared_ptr<MemoryBuffer>&);
+        ASGAARD_API void MarkDamaged(const Rectangle&);
+        ASGAARD_API void MarkInputRegion(const Rectangle&);
+        ASGAARD_API void SetDropShadow(const Rectangle&);
+        ASGAARD_API void SetTransparency(bool enable);
+        ASGAARD_API void ApplyChanges();
         
-        void RequestFrame();
+        ASGAARD_API void RequestFrame();
 
-        void GrabPointer(const std::shared_ptr<Pointer>&);
-        void UngrabPointer(const std::shared_ptr<Pointer>&);
+        ASGAARD_API void GrabPointer(const std::shared_ptr<Pointer>&);
+        ASGAARD_API void UngrabPointer(const std::shared_ptr<Pointer>&);
         
         const Rectangle& Dimensions() const { return m_dimensions; }
         const std::shared_ptr<Screen>& GetScreen() const { return m_screen; }
@@ -70,14 +71,14 @@ namespace Asgaard {
         void ExternalEvent(enum ObjectEvent event, void* data = 0) override;
         
     protected:
-        virtual void OnResized(enum SurfaceEdges, int width, int height);
-        virtual void OnFocus(bool);
-        virtual void OnFrame();
-        virtual void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY);
-        virtual void OnMouseLeave(const std::shared_ptr<Pointer>&);
-        virtual void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY);
-        virtual void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed);
-        virtual void OnKeyEvent(const KeyEvent&);
+        virtual void OnResized(enum SurfaceEdges, int width, int height) { }
+        virtual void OnFocus(bool) { }
+        virtual void OnFrame() { }
+        virtual void OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) { }
+        virtual void OnMouseLeave(const std::shared_ptr<Pointer>&) { }
+        virtual void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) { }
+        virtual void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) { }
+        virtual void OnKeyEvent(const KeyEvent&) { }
         
     protected:
         Rectangle               m_dimensions;

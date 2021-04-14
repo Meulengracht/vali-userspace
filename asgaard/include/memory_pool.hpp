@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include "config.hpp"
 #include "object_manager.hpp"
 #include "object.hpp"
 #include <os/dmabuf.h>
@@ -29,8 +30,8 @@
 namespace Asgaard {
     class MemoryPool : public Object {
     public:
-        MemoryPool(uint32_t id, std::size_t size);
-        ~MemoryPool();
+        ASGAARD_API MemoryPool(uint32_t id, std::size_t size);
+        ASGAARD_API ~MemoryPool();
         
         std::size_t Size() const { return m_size; }
 

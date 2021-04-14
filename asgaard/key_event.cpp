@@ -22,7 +22,7 @@
  */
  
 #include "include/key_event.hpp"
-#include "protocols/wm_keyboard_protocol_client.h"
+#include "wm_keyboard_protocol_client.h"
 #include <os/keycodes.h>
 
 namespace Asgaard {

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include "config.hpp"
 #include "object.hpp"
 
 namespace Asgaard {
@@ -66,15 +67,15 @@ namespace Asgaard {
         
     public:
         Screen(uint32_t id);
-        ~Screen();
+        ASGAARD_API ~Screen();
 
         void Destroy() override;
         
-        int GetCurrentWidth() const;
-        int GetCurrentHeight() const;
-        int GetCurrentRefreshRate() const;
+        ASGAARD_API int GetCurrentWidth() const;
+        ASGAARD_API int GetCurrentHeight() const;
+        ASGAARD_API int GetCurrentRefreshRate() const;
 
-        const std::list<std::unique_ptr<ScreenMode>>& GetModes() const;
+        ASGAARD_API const std::list<std::unique_ptr<ScreenMode>>& GetModes() const;
         
     public:
         template<class WC, typename... Params>

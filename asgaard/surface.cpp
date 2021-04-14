@@ -27,11 +27,11 @@
 #include "include/memory_buffer.hpp"
 #include "include/surface.hpp"
 
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_screen_protocol_client.h"
-#include "protocols/wm_memory_protocol_client.h"
-#include "protocols/wm_surface_protocol_client.h"
-#include "protocols/wm_pointer_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_screen_protocol_client.h"
+#include "wm_memory_protocol_client.h"
+#include "wm_surface_protocol_client.h"
+#include "wm_pointer_protocol_client.h"
 
 static enum Asgaard::Surface::SurfaceEdges GetSurfaceEdges(enum wm_surface_edge edges)
 {
@@ -201,13 +201,4 @@ namespace Asgaard {
     {
         wm_pointer_ungrab(APP.GrachtClient(), nullptr, pointer->Id(), Id());
     }
-    
-    void Surface::OnResized(enum SurfaceEdges edge, int width, int height) { }
-    void Surface::OnFocus(bool focus) { }
-    void Surface::OnFrame() { }
-    void Surface::OnMouseEnter(const std::shared_ptr<Pointer>&, int localX, int localY) { }
-    void Surface::OnMouseLeave(const std::shared_ptr<Pointer>&) { }
-    void Surface::OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) { }
-    void Surface::OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) { }
-    void Surface::OnKeyEvent(const KeyEvent&) { }
 }

@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include "../config.hpp"
 #include "../utils/publisher.hpp"
 #include <cstdint>
 #include <map>
@@ -31,16 +32,10 @@ namespace Asgaard {
     namespace Theming {
         class Theme;
 
-        class ThemeManager final : Utils::Publisher {
+        class ThemeManager final : public Utils::Publisher {
         public:
             ThemeManager();
             ~ThemeManager();
-
-        private:
-            static void *operator new   (size_t);
-            static void *operator new[] (size_t);
-            static void  operator delete(void*);
-            static void  operator delete[] (void*);
 
         public:
             const std::shared_ptr<Theme>& GetTheme() const;
@@ -49,6 +44,6 @@ namespace Asgaard {
             std::shared_ptr<Theme> m_theme;
         };
         
-        extern ThemeManager TM;
+        extern ASGAARD_API ThemeManager TM;
     }
 }

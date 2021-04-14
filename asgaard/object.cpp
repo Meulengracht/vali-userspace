@@ -23,7 +23,7 @@
 
 #include "include/object.hpp"
 #include "include/error.hpp"
-#include "protocols/wm_core_protocol_client.h"
+#include "wm_core_protocol_client.h"
 
 using namespace Asgaard;
 

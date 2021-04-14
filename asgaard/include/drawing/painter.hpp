@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include "../config.hpp"
 #include "color.hpp"
 
 namespace Asgaard {
@@ -33,7 +34,7 @@ namespace Asgaard {
         class Font;
         class Image;
         
-        class Painter {
+        class ASGAARD_API Painter {
             public:
                 Painter(const std::shared_ptr<MemoryBuffer>& canvas);
                 

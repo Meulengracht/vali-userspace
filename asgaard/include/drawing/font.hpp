@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include "../config.hpp"
 #include "../rectangle.hpp"
 
 namespace Asgaard {
@@ -31,7 +32,7 @@ namespace Asgaard {
     }
     
     namespace Drawing {
-        class Font {
+        class ASGAARD_API Font {
         public:
             struct Glyph;
             typedef struct FT_FaceRec_* FT_Face;

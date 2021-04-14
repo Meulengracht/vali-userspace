@@ -28,9 +28,9 @@
 #include "include/memory_pool.hpp"
 #include "include/memory_buffer.hpp"
 
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_memory_pool_protocol_client.h"
-#include "protocols/wm_buffer_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_memory_pool_protocol_client.h"
+#include "wm_buffer_protocol_client.h"
 
 
 static int CalculateStride(int width, enum Asgaard::PixelFormat format)

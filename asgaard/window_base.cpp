@@ -30,10 +30,10 @@
 #include "include/memory_buffer.hpp"
 #include "include/pointer.hpp"
 
-#include "protocols/wm_core_protocol_client.h"
-#include "protocols/wm_screen_protocol_client.h"
-#include "protocols/wm_memory_protocol_client.h"
-#include "protocols/wm_surface_protocol_client.h"
+#include "wm_core_protocol_client.h"
+#include "wm_screen_protocol_client.h"
+#include "wm_memory_protocol_client.h"
+#include "wm_surface_protocol_client.h"
 
 static enum Asgaard::Surface::SurfaceEdges GetWindowEdges(enum wm_surface_edge edges)
 {

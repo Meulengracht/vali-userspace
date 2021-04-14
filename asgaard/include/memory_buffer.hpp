@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include "config.hpp"
 #include "pixel_format.hpp"
 #include "object_manager.hpp"
 #include "object.hpp"
@@ -42,12 +43,12 @@ namespace Asgaard {
         };
 
     public:
-        MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset,
+        ASGAARD_API MemoryBuffer(uint32_t id, const std::shared_ptr<MemoryPool>& memory, int memoryOffset,
             int width, int height, enum PixelFormat format, enum Flags flags);
-        ~MemoryBuffer();
+        ASGAARD_API ~MemoryBuffer();
         
-        void* Buffer() const { return m_buffer; }
-        void* Buffer(int x, int y);
+        void*             Buffer() const { return m_buffer; }
+        ASGAARD_API void* Buffer(int x, int y);
         
         int         Width()  const { return m_width; }
         int         Height() const { return m_height; }
