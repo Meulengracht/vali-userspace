@@ -31,7 +31,7 @@
 namespace Asgaard {
     class WindowBase;
 
-    class Screen : public Object {
+    class Screen : public Object, public std::enable_shared_from_this<Screen> {
     public:
         enum ScreenTransform {
             NONE,
@@ -84,9 +84,8 @@ namespace Asgaard {
                 return nullptr;
             }
 
-            auto screen = std::dynamic_pointer_cast<Screen>(OM[Id()]);
             auto window = OM.CreateClientObject<WC, const std::shared_ptr<Screen>&, Params...>(
-                screen, std::forward<Params>(parameters)...);
+                shared_from_this(), std::forward<Params>(parameters)...);
             if (window == nullptr) {
                 return nullptr;
             }

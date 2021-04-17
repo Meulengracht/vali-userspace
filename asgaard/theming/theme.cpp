@@ -26,7 +26,6 @@
 #include <libzip/streams/memstream.h>
 #include <libzip/methods/Bzip2Method.h>
 
-
 namespace Asgaard {
 namespace Theming {
     // declare the loader class which we want to keep private
@@ -88,18 +87,18 @@ void Theme::InitializeTheme()
     m_loader = std::make_unique<ThemeLoader>("$themes/default.pak");
     
     // push paths
-    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CURSOR), "cursor16.png")); // NOT THERE
+    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CURSOR), "cursor16.png")); // 20, 24, 32
 
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CLOSE), "close16.png")); // 20, 24, 32
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_MAXIMIZE), "max16.png")); // 20, 24, 32
-    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_MINIMIZE), "min16.png")); // NOT THERE
+    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_MINIMIZE), "min16.png")); // 20, 24, 32
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_APP_DEFAULT), "app16.png")); // 20, 24, 32
 
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_SEARCH), "search-grey24.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_BACKGROUND), "bg.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_TERMINAL), "terminal64.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_EDITOR), "notepad64.png"));
-    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_GAME), "game64.png")); // NOT THERE
+    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_GAME), "game64.png"));
 
     // load colors
     m_colors.insert(std::make_pair(static_cast<int>(Colors::DECORATION_FILL), Drawing::Color(0x0, 0x0C, 0x35, 0x33)));
@@ -122,7 +121,7 @@ Drawing::Image Theme::GetImage(enum Elements element)
         return Drawing::Image();   
     }
 
-    return Drawing::Image(*dataStream);
+    return Drawing::Image(*dataStream, entry->GetSize());
 }
 
 Drawing::Color Theme::GetColor(enum Colors color)

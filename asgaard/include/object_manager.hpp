@@ -47,10 +47,10 @@ namespace Asgaard {
             if (object == nullptr) {
                 return nullptr;
             }
+            m_objects[object->Id()] = object;
 
             // subscribe to events so we can react on destroy invokes
             object->Subscribe(this);
-            m_objects.emplace(object->Id(), object);
             return object;
         }
         
@@ -66,10 +66,10 @@ namespace Asgaard {
             if (object == nullptr) {
                 return nullptr;
             }
+            m_objects[object->Id()] = object;
 
             // subscribe to events so we can react on destroy invokes
             object->Subscribe(this);
-            m_objects.emplace(object->Id(), object);
             return object;
         }
         
@@ -81,7 +81,7 @@ namespace Asgaard {
             }
             
             std::shared_ptr<T> object = std::make_shared<T>(id);
-            m_objects.emplace(id, object);
+            m_objects[id] = object;
             return object;
         }
         
@@ -93,7 +93,7 @@ namespace Asgaard {
             }
             
             std::shared_ptr<T> object = std::make_shared<T>(id, std::forward<Params>(parameters)...);
-            m_objects.emplace(id, object);
+            m_objects[id] = object;
             return object;
         }
 

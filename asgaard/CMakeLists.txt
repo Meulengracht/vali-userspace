@@ -68,9 +68,8 @@ add_library(asgaard SHARED
     window_edge.cpp
 )
 add_dependencies(asgaard protocols)
-set_target_properties(asgaard
-    PROPERTIES
-        COMPILE_FLAGS "-DASGAARD_BUILD"
+target_compile_definitions(asgaard PRIVATE
+    -DASGAARD_BUILD -DASGAARD_THEME_PASSWORD=\"$ENV{VALI_CODE}\"
 )
 
 if (MOLLENOS)

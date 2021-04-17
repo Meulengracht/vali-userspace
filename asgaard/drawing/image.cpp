@@ -81,13 +81,30 @@ namespace Asgaard {
             m_ownsBuffer = true;
         }
 
-        Image::Image(std::istream& stream)
+        Image::Image(std::istream& stream, std::size_t count)
         {
-            std::vector<char> v((std::istream_iterator<char>(stream)), std::istream_iterator<char>());
+            std::vector<char> v;
             int               width;
             int               height;
             int               numComponents;
+            
+            v.reserve(count);
+            auto readIntoVector = [&]
+            {
+                const std::size_t buffer_size = 4096;
+                char buffer[buffer_size];
+                while (count > buffer_size)
+                {
+                    stream.read(buffer, buffer_size);
+                    std::copy(buffer, buffer + buffer_size, std::back_inserter(v));
+                    count -= buffer_size;
+                }
 
+                stream.read(buffer, count);
+                std::copy(buffer, buffer + count, std::back_inserter(v));
+            };
+
+            readIntoVector();
             auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(v.data()), v.size(), 
                 &width, &height, &numComponents, STBI_rgb_alpha);
             if (buffer == nullptr) {
@@ -120,11 +137,41 @@ namespace Asgaard {
             ZeroImage();
         }
 
+        Image::Image(const Image& image)
+        {
+            // make a deep copy, and start with the allocation as that
+            // can fail, so if we fail here we leave everything in ok order.
+            m_data = new char[image.Stride() * image.m_rows];
+            memcpy(m_data, image.m_data, image.Stride() * image.m_rows);
+            m_ownsBuffer = true;
+
+            // copy the rest of the data
+            m_format = image.m_format;
+            m_rows = image.m_rows;
+            m_columns = image.m_columns;
+        }
+
         Image::~Image()
         {
             if (m_data && m_ownsBuffer) {
                 free(m_data);
             }
+        }
+
+        Image& Image::operator=(const Image& image)
+        {
+            // make a deep copy, and start with the allocation as that
+            // can fail, so if we fail here we leave everything in ok order.
+            m_data = new char[image.Stride() * image.m_rows];
+            memcpy(m_data, image.m_data, image.Stride() * image.m_rows);
+            m_ownsBuffer = true;
+            
+            // copy the rest of the data
+            m_format = image.m_format;
+            m_rows = image.m_rows;
+            m_columns = image.m_columns;
+
+            return *this;
         }
 
         Color Image::GetPixel(int index) const

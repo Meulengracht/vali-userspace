@@ -33,8 +33,9 @@ namespace Asgaard {
         class ASGAARD_API Image {
         public:
             Image();
+            Image(const Image&);
             Image(const std::string& path);
-            Image(std::istream& stream);
+            Image(std::istream&, std::size_t);
             Image(const void* imageData, PixelFormat format, int rows, int columns);
             Image(const void* imageData, PixelFormat format, int rows, int columns, bool takeOwnership);
             ~Image();
@@ -47,6 +48,9 @@ namespace Asgaard {
             int Stride() const { return m_columns * GetBytesPerPixel(m_format); }
             PixelFormat Format() const { return m_format; }
             void* Data() const { return m_data; }
+
+
+            Image& operator=(const Image&);
 
         private:
             void ZeroImage();

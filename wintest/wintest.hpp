@@ -45,7 +45,7 @@ protected:
 
         // Create initial buffer the size of this surface
         m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-            Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8);
+            Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8, Asgaard::MemoryBuffer::Flags::NONE);
         
         // Create the window decoration
         EnableDecoration(true);
