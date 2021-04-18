@@ -58,8 +58,8 @@ namespace Asgaard {
             Theme(const std::string& themePack);
             ~Theme();
 
-            Drawing::Image GetImage(enum Elements element);
-            Drawing::Color GetColor(enum Colors color);
+            ASGAARD_API Drawing::Image GetImage(enum Elements element);
+            ASGAARD_API Drawing::Color GetColor(enum Colors color);
 
         private:
             void InitializeTheme();

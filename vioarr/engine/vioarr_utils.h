@@ -27,7 +27,7 @@
 
 //#define __TRACE
 //#define VIOARR_TRACEMODE
-#define VIOARR_LAUNCHER "alumni.app"
+#define VIOARR_LAUNCHER "heimdall.app"
 //#define VIOARR_REVERSE_FB_BLIT // must be given to asm aswell
 
 #include <stdint.h>

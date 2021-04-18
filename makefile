@@ -101,6 +101,18 @@ build_macia:
 	@printf "%b" "\033[1;35mChecking if macia needs to be built\033[m\n"
 	@$(MAKE) -s -C macia -f makefile
 
+heimdall-build:
+	mkdir -p heimdall-build
+	cd heimdall-build && cmake -G "Unix Makefiles" \
+		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
+		../heimdall
+
+.PHONY: build_heimdall
+build_heimdall: heimdall-build
+	cd heimdall-build && make -j$(CPU_COUNT) && make install
+
 asgaard-build:
 	mkdir -p asgaard-build
 	cd asgaard-build && cmake -G "Unix Makefiles" \
@@ -282,6 +294,10 @@ clean_mesa:
 clean_asgaard:
 	@rm -rf asgaard-build
 
+.PHONY: clean_heimdall
+clean_heimdall:
+	@rm -rf heimdall-build
+
 .PHONY: clean_doom
 clean_doom:
 	@rm -rf doom-build
@@ -347,6 +363,7 @@ clean_apps:
 	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf asgaard-build
+	@rm -rf heimdall-build
 
 .PHONY: clean
 clean:
@@ -359,6 +376,7 @@ clean:
 	@$(MAKE) -s -C vioarr -f makefile clean
 	@$(MAKE) -s -C wintest -f makefile clean
 	@rm -rf asgaard-build
+	@rm -rf heimdall-build
 	@rm -rf llvm-build
 	@rm -rf doom-build
 	@rm -rf lua-build

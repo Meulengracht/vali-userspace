@@ -42,6 +42,6 @@ namespace Asgaard {
         Pointer(uint32_t id);
         ~Pointer();
         
-        void SetSurface(const std::shared_ptr<Surface>&);
+        ASGAARD_API void SetSurface(const std::shared_ptr<Surface>&, int xOffset = 0, int yOffset = 0);
     };
 }

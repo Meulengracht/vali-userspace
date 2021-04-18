@@ -111,7 +111,11 @@ void vioarr_input_set_surface(vioarr_input_source_t* input, vioarr_surface_t* su
     }
 
     if (input->state.pointer.surface) {
+        // when clearing a surface for a pointer we will automatically hide it so
+        // it doesn't float around.
         vioarr_manager_demote_cursor(input->state.pointer.surface);
+        vioarr_surface_set_buffer(input->state.pointer.surface, NULL);
+        vioarr_surface_commit(input->state.pointer.surface);
     }
 
     if (surface) {

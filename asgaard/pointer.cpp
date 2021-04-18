@@ -38,7 +38,7 @@ namespace Asgaard {
 
     }
 
-    void Pointer::SetSurface(const std::shared_ptr<Surface>& surface)
+    void Pointer::SetSurface(const std::shared_ptr<Surface>& surface, int xOffset, int yOffset)
     {
         uint32_t id = 0;
         if (surface) {
@@ -46,6 +46,6 @@ namespace Asgaard {
         }
 
         // calling with an id of 0 will result in clearing the pointer surface
-        wm_pointer_set_surface(APP.GrachtClient(), nullptr, Id(), id, 0, 0);
+        wm_pointer_set_surface(APP.GrachtClient(), nullptr, Id(), id, xOffset, yOffset);
     }
 }

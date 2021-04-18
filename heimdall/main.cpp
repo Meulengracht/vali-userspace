@@ -1,4 +1,4 @@
-/* ValiOS
+/* MollenOS
  *
  * Copyright 2018, Philip Meulengracht
  *
@@ -16,34 +16,26 @@
  * along with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * ValiOS - Application Framework (Asgaard)
- *  - Contains the implementation of the application framework used for building
- *    graphical applications.
+ * Terminal Implementation (Alumnious)
+ * - The terminal emulator implementation for Vali. Built on manual rendering and
+ *   using freetype as the font renderer.
  */
-#pragma once
 
-#include "../config.hpp"
-#include "../utils/publisher.hpp"
-#include <cstdint>
-#include <map>
-#include <memory>
+#include <io.h>
+#include <ioctl.h>
+#include <ioset.h>
+#include "heimdall.hpp"
 
-namespace Asgaard {
-    namespace Theming {
-        class Theme;
+int main(int argc, char **argv)
+{
+    // initialize application
+    Asgaard::APP.Initialize();
 
-        class ThemeManager final : public Utils::Publisher {
-        public:
-            ThemeManager();
-            ~ThemeManager();
+    auto screen = Asgaard::APP.GetScreen();
+    auto window = screen->CreateWindow<Heimdall>(
+        Asgaard::Rectangle(0, 0, screen->GetCurrentWidth(), screen->GetCurrentHeight()));
 
-        public:
-            ASGAARD_API const std::shared_ptr<Theme>& GetTheme() const;
-
-        private:
-            std::shared_ptr<Theme> m_theme;
-        };
-        
-        extern ASGAARD_API ThemeManager TM;
-    }
+    // We only call exit() to get out, so release ownership of window
+    window.reset();
+    return Asgaard::APP.Execute();
 }
