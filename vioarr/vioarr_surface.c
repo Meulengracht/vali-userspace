@@ -288,8 +288,6 @@ void wm_surface_destroy_callback(struct gracht_recv_message* message, struct wm_
         wm_core_event_error_single(message->client, input->surface_id, ENOENT, "wm_surface: object does not exist");
         return;
     }
-
-    vioarr_input_on_surface_destroy(surface);
-    vioarr_manager_unregister_surface(surface);
+    
     vioarr_surface_destroy(surface);
 }

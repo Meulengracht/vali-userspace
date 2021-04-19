@@ -32,8 +32,54 @@
 
 #include <stdint.h>
 #include <ddk/utils.h>
+#include <threads.h>
 
 #define vioarr_utils_trace TRACE
 #define vioarr_utils_error ERROR
+
+typedef struct vioarr_rwlock {
+    mtx_t sync_object;
+    int   readers;
+    cnd_t signal;
+} vioarr_rwlock_t;
+#define RWLOCK_INIT { MUTEX_INIT(mtx_plain), 0, COND_INIT }
+
+static void vioarr_rwlock_init(vioarr_rwlock_t* lock)
+{
+    mtx_init(&lock->sync_object, mtx_plain);
+    cnd_init(&lock->signal);
+    lock->readers = 0;
+}
+
+static void vioarr_rwlock_r_lock(vioarr_rwlock_t* lock)
+{
+    mtx_lock(&lock->sync_object);
+    lock->readers++;
+    mtx_unlock(&lock->sync_object);
+}
+
+static void vioarr_rwlock_r_unlock(vioarr_rwlock_t* lock)
+{
+    mtx_lock(&lock->sync_object);
+    lock->readers--;
+    if (!lock->readers) {
+        cnd_signal(&lock->signal);
+    }
+    mtx_unlock(&lock->sync_object);
+}
+
+static void vioarr_rwlock_w_lock(vioarr_rwlock_t* lock)
+{
+    mtx_lock(&lock->sync_object);
+    if (lock->readers) {
+        cnd_wait(&lock->signal, &lock->sync_object);
+    }
+}
+
+static void vioarr_rwlock_w_unlock(vioarr_rwlock_t* lock)
+{
+    mtx_unlock(&lock->sync_object);
+    cnd_signal(&lock->signal);
+}
 
 #endif //!__VIOARR_UTILS_H__

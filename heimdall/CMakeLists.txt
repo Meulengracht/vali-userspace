@@ -33,6 +33,7 @@ add_custom_target(
 add_executable(heimdall
     ${GENERATED_SOURCES}
     
+    effects/guassian_blur.cpp
     main.cpp
 )
 add_dependencies(heimdall protocols)

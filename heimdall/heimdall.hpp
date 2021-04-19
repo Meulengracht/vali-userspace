@@ -31,8 +31,12 @@
 #include <asgaard/theming/theme_manager.hpp>
 #include <asgaard/theming/theme.hpp>
 #include <os/keycodes.h>
+#include <os/process.h>
 
+#include "effects/guassian_blur.hpp"
 #include "widgets/cursor.hpp"
+
+#include <ddk/utils.h>
 
 #define CURSOR_SIZE 16
 
@@ -51,13 +55,11 @@ public:
 private:
     void OnCreated() override
     {
-        // Don't hardcode 4 bytes per pixel, this is only because we assume a format of ARGB32
         auto screenSize = m_screen->GetCurrentWidth() * m_screen->GetCurrentHeight() * 4;
         m_memory = MemoryPool::Create(this, screenSize);
 
-        // Create initial buffer the size of this surface
         m_buffer = MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-            Dimensions().Height(), PixelFormat::A8B8G8R8, MemoryBuffer::Flags::NONE);
+            Dimensions().Height(), PixelFormat::X8B8G8R8, MemoryBuffer::Flags::NONE);
         
         m_cursor = OM.CreateClientObject<HeimdallCursor>(m_screen, Rectangle(0, 0, CURSOR_SIZE, CURSOR_SIZE));
 
@@ -69,17 +71,28 @@ private:
     void LoadResources()
     {
         const auto theme = Theming::TM.GetTheme();
-        auto background = theme->GetImage(Theming::Theme::Elements::IMAGE_BACKGROUND);
 
-        auto renderImage = [&](const auto& buffer, const auto& image) {
+        auto renderImage = [](const auto& buffer, const auto& image) {
             Drawing::Painter painter(buffer);
             painter.RenderImage(image);
         };
+
+        auto blurImage = [&](const auto& buffer, const auto& image) {
+            GuassianBlurEffect blurEffect;
+            auto blurredBackground = blurEffect.Apply(image, 3.0);
+            renderImage(buffer, blurredBackground);
+        };
+
+        // Render the normal state
+        auto background = theme->GetImage(Theming::Theme::Elements::IMAGE_BACKGROUND);
         renderImage(m_buffer, background);
+        //blurImage(m_bufferBlurred, background);
     }
     
     void FinishSetup()
     {
+        RequestPriorityLevel(PriorityLevel::BOTTOM);
+        RequestFullscreenMode(FullscreenMode::NORMAL);
         MarkInputRegion(Dimensions());
         SetBuffer(m_buffer);
         MarkDamaged(Dimensions());
@@ -89,16 +102,6 @@ private:
     void OnRefreshed(MemoryBuffer* buffer) override
     {
         // nothing to do
-    }
-
-    void OnFrame() override
-    {
-        // nothing to do
-    }
-    
-    void OnResized(enum Surface::SurfaceEdges edges, int width, int height) override
-    {
-        
     }
 
     void OnMouseEnter(const std::shared_ptr<Pointer>& pointer, int localX, int localY) override
@@ -113,7 +116,7 @@ private:
 
     }
 
-    void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override
+    void OnMouseMove(const std::shared_ptr<Pointer>& pointer, int localX, int localY) override
     {
 
     }
@@ -125,8 +128,10 @@ private:
     
     void OnKeyEvent(const KeyEvent& keyEvent) override
     {
+        ERROR("Heimdall::OnKeyEvent(keycode=%u", keyEvent.KeyCode());
         if (keyEvent.KeyCode() == VK_F1 && !keyEvent.Pressed()) {
-            // Spawn terminal
+            UUId_t pid;
+            ProcessSpawn("$bin/alumni.app", NULL, &pid);
         }
         else if (keyEvent.KeyCode() == VK_LWIN && !keyEvent.Pressed()) {
             // Show 

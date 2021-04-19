@@ -97,9 +97,9 @@ int vioarr_buffer_destroy(vioarr_buffer_t* buffer)
     }
     
     references = atomic_fetch_sub(&buffer->references, 1);
-    if (references == 0) {
+    if (references == 1) {
         // destroy logic
-        vioarr_memory_destroy_pool(buffer->pool);
+        free(buffer);
     }
     return 0;
 }

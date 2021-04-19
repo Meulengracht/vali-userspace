@@ -25,17 +25,59 @@
 #include <libzip/ZipFile.h>
 #include <libzip/streams/memstream.h>
 #include <libzip/methods/Bzip2Method.h>
+#include <fstream>
+
+struct membuf : std::streambuf
+{
+    membuf(char *begin, char *end) : begin(begin), end(end)
+    {
+        this->setg(begin, begin, end);
+    }
+
+    virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which = std::ios_base::in) override
+    {
+        if(dir == std::ios_base::cur)
+        gbump(off);
+        else if(dir == std::ios_base::end)
+        setg(begin, end+off, end);
+        else if(dir == std::ios_base::beg)
+        setg(begin, begin+off, end);
+
+        return gptr() - eback();
+    }
+
+    virtual pos_type seekpos(std::streampos pos, std::ios_base::openmode mode) override
+    {
+        return seekoff(pos - pos_type(off_type(0)), std::ios_base::beg, mode);
+    }
+
+    char *begin, *end;
+};
 
 namespace Asgaard {
 namespace Theming {
     // declare the loader class which we want to keep private
     class ThemeLoader {
     public:
-        ThemeLoader(const std::string& path) {
-            m_zipHandle = ZipFile::Open(path);
-        }
-        ~ThemeLoader() {
+        ThemeLoader(const std::string& path)
+        {
+            std::ifstream file(path, std::ios::binary | std::ios::ate);
+            std::streamsize size = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            m_buffer.reserve(size);
+            if (!file.read(m_buffer.data(), size)) {
+                // throw
+            }
             
+            m_wrapper = new membuf(m_buffer.data(), m_buffer.data() + size);
+            m_stream = new std::istream(m_wrapper);
+            m_zipHandle = ZipArchive::Create(m_stream, false);
+        }
+        ~ThemeLoader()
+        {
+            delete m_stream;
+            delete m_wrapper;
         }
 
         ZipArchiveEntry::Ptr GetEntry(std::string& path) {
@@ -62,7 +104,10 @@ namespace Theming {
         }
 
     private:
-        ZipArchive::Ptr m_zipHandle;
+        ZipArchive::Ptr   m_zipHandle;
+        std::vector<char> m_buffer;
+        membuf*           m_wrapper;
+        std::istream*     m_stream;
     };
 }
 }
@@ -118,7 +163,7 @@ Drawing::Image Theme::GetImage(enum Elements element)
 
     auto dataStream = entry->GetDecompressionStream();
     if (!dataStream) {
-        return Drawing::Image();   
+        return Drawing::Image();
     }
 
     return Drawing::Image(*dataStream, entry->GetSize());

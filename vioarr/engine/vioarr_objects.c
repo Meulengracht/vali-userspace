@@ -131,26 +131,33 @@ int vioarr_objects_remove_object(int client, uint32_t id)
 
 void vioarr_objects_remove_by_client(int client)
 {
-    foreach_nolink(i, &objects) {
-        vioarr_object_t* object = i->value;
-        if (object->client == client) {
-            element_t* next = i->next;
-            if (object->type == object_type_surface) {
-                vioarr_surface_destroy(object->object);
-            }
-            else if (object->type == object_type_memory_pool) {
-                vioarr_memory_destroy_pool(object->object);
-            }
-            else if (object->type == object_type_buffer) {
-                vioarr_buffer_destroy(object->object);
-            }
-            list_remove(&objects, i);
-            i = next;
+    #define CLEANUP_TYPE(object_type, dctor) \
+        _foreach_nolink(i, &objects) { \
+            vioarr_object_t* object = i->value; \
+            if (object->client == client) { \
+                element_t* next = i->next; \
+                if (object->type == object_type) { \
+                    dctor(object->object); \
+                } \
+                list_remove(&objects, i); \
+                free(i->value); \
+                i = next; \
+            } \
+            else { \
+                i = i->next; \
+            } \
         }
-        else {
-            i = i->next;
-        }
-    }
+
+
+    // When we clean objects up due to disconnect, we want to go through
+    // and make sure we up in this order:
+    // surfaces
+    // buffers
+    // pools
+    element_t* i;
+    CLEANUP_TYPE(object_type_surface, vioarr_surface_destroy)
+    CLEANUP_TYPE(object_type_buffer, vioarr_buffer_destroy)
+    CLEANUP_TYPE(object_type_memory_pool, vioarr_memory_destroy_pool)
 }
 
 // publishes all server objects

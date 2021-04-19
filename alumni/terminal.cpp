@@ -282,7 +282,7 @@ void Terminal::OnCreated()
     
     // Create initial buffer the size of this surface
     m_buffer = Asgaard::MemoryBuffer::Create(this, m_memory, 0, Dimensions().Width(),
-        Dimensions().Height(), Asgaard::PixelFormat::A8B8G8R8, Asgaard::MemoryBuffer::Flags::NONE);
+        Dimensions().Height(), Asgaard::PixelFormat::X8B8G8R8, Asgaard::MemoryBuffer::Flags::NONE);
     
     // we couldn't do this in constructor as the OM had not registered us
     auto terminal = std::dynamic_pointer_cast<Terminal>(Asgaard::OM[Id()]);
@@ -295,7 +295,6 @@ void Terminal::OnCreated()
     PrepareBuffer();
     SetBuffer(m_buffer);
     SetDropShadow(Asgaard::Rectangle(-10, -10, 20, 30));
-    SetTransparency(true);
     m_resolver->PrintCommandHeader();
 }
 

@@ -26,6 +26,9 @@
 #include <vector>
 #include <iterator>
 
+#define __TRACE
+#include <ddk/utils.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -88,26 +91,21 @@ namespace Asgaard {
             int               height;
             int               numComponents;
             
-            v.reserve(count);
             auto readIntoVector = [&]
             {
-                const std::size_t buffer_size = 4096;
-                char buffer[buffer_size];
-                while (count > buffer_size)
-                {
-                    stream.read(buffer, buffer_size);
-                    std::copy(buffer, buffer + buffer_size, std::back_inserter(v));
-                    count -= buffer_size;
-                }
-
+                char* buffer = new char[count];
                 stream.read(buffer, count);
+                if (!stream)
+                    ERROR("Image::Image error: only %llu could be read", stream.gcount());
                 std::copy(buffer, buffer + count, std::back_inserter(v));
+                delete[] buffer;
             };
 
             readIntoVector();
             auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(v.data()), v.size(), 
                 &width, &height, &numComponents, STBI_rgb_alpha);
             if (buffer == nullptr) {
+                ERROR("Image::Image failed to load image from istream: %s", stbi_failure_reason());
                 ZeroImage();
                 return;
             }
@@ -135,6 +133,26 @@ namespace Asgaard {
         Image::Image()
         {
             ZeroImage();
+        }
+
+        Image::Image(int width, int height, PixelFormat format)
+        {
+            if (width > 0 && height > 0) {
+                m_format = format;
+                m_rows = height;
+                m_columns = width;
+
+                m_data = new char[Stride() * height];
+                if (!m_data) {
+                    // throw
+                }
+                m_ownsBuffer = true;
+
+                memset(m_data, 0, Stride() * height);
+            }
+            else {
+                ZeroImage();
+            }
         }
 
         Image::Image(const Image& image)

@@ -33,6 +33,7 @@ namespace Asgaard {
         class ASGAARD_API Image {
         public:
             Image();
+            Image(int width, int height, PixelFormat format);
             Image(const Image&);
             Image(const std::string& path);
             Image(std::istream&, std::size_t);

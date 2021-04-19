@@ -52,6 +52,7 @@ typedef struct vioarr_renderer {
     int              height;
     int              scale;
     int              rotation;
+    atomic_uint      frame_count;
     float            pixel_ratio;
 } vioarr_renderer_t;
 
@@ -98,6 +99,7 @@ vioarr_renderer_t* vioarr_renderer_create(vioarr_screen_t* screen)
     renderer->pixel_ratio = (float)width / (float)height;
     renderer->scale       = 1;
     renderer->rotation    = 0;
+    renderer->frame_count = ATOMIC_VAR_INIT(0);
     
     return renderer;
 }
@@ -203,6 +205,23 @@ void vioarr_renderer_destroy_image(vioarr_renderer_t* renderer, int resourceId)
 #endif
 }
 
+void vioarr_renderer_wait_frame(vioarr_renderer_t* renderer)
+{
+    uint32_t startFrame;
+    uint32_t nextFrame;
+
+    if (!renderer) {
+        return;
+    }
+
+    startFrame = atomic_load(&renderer->frame_count);
+    nextFrame  = startFrame + 1;
+    while (startFrame < nextFrame && nextFrame - startFrame == 1) {
+        thrd_yield();
+        startFrame = atomic_load(&renderer->frame_count);
+    }
+}
+
 void vioarr_renderer_render(vioarr_renderer_t* renderer)
 {
     element_t*       i;
@@ -239,4 +258,5 @@ void vioarr_renderer_render(vioarr_renderer_t* renderer)
 
     glFinish();
 #endif
+    atomic_fetch_add(&renderer->frame_count, 1);
 }

@@ -29,50 +29,19 @@
 #include <stdlib.h>
 #include <threads.h>
 
-typedef struct vioarr_rwlock {
-    mtx_t sync_object;
-    int   readers;
-    cnd_t signal;
-} vioarr_rwlock_t;
-#define RWLOCK_INIT { MUTEX_INIT(mtx_plain), 0, COND_INIT }
-
-void vioarr_rwlock_r_lock(vioarr_rwlock_t* lock)
-{
-    mtx_lock(&lock->sync_object);
-    lock->readers++;
-    mtx_unlock(&lock->sync_object);
-}
-
-void vioarr_rwlock_r_unlock(vioarr_rwlock_t* lock)
-{
-    mtx_lock(&lock->sync_object);
-    lock->readers--;
-    if (!lock->readers) {
-        cnd_signal(&lock->signal);
-    }
-    mtx_unlock(&lock->sync_object);
-}
-
-void vioarr_rwlock_w_lock(vioarr_rwlock_t* lock)
-{
-    mtx_lock(&lock->sync_object);
-    if (lock->readers) {
-        cnd_wait(&lock->signal, &lock->sync_object);
-    }
-}
-
-void vioarr_rwlock_w_unlock(vioarr_rwlock_t* lock)
-{
-    mtx_unlock(&lock->sync_object);
-    cnd_signal(&lock->signal);
-}
-
 typedef struct vioarr_manager {
     list_t          surfaces[SURFACE_LEVELS];
     vioarr_rwlock_t lock;
 } vioarr_manager_t;
 
 static vioarr_manager_t g_manager = { { LIST_INIT, LIST_INIT, LIST_INIT, LIST_INIT }, RWLOCK_INIT };
+
+static void* __surface_key(vioarr_surface_t* surface)
+{
+    uint32_t surfaceId = vioarr_surface_id(surface);
+    surfaceId |= ((uint32_t)vioarr_surface_client(surface) << 16);
+    return (void*)(uintptr_t)surfaceId;
+}
 
 void vioarr_manager_register_surface(vioarr_surface_t* surface)
 {
@@ -87,7 +56,7 @@ void vioarr_manager_register_surface(vioarr_surface_t* surface)
         return;
     }
 
-    ELEMENT_INIT(element, (uintptr_t)vioarr_surface_id(surface), surface);
+    ELEMENT_INIT(element, __surface_key(surface), surface);
     
     vioarr_rwlock_w_lock(&g_manager.lock);
     list_append(&g_manager.surfaces[vioarr_surface_level(surface)], element);
@@ -96,31 +65,39 @@ void vioarr_manager_register_surface(vioarr_surface_t* surface)
 
 void vioarr_manager_unregister_surface(vioarr_surface_t* surface)
 {
-    int level;
+    element_t* element;
+    int        level;
 
     if (!surface) {
-        ERROR("[vioarr_renderer_register_surface] null parameters");
+        vioarr_utils_error("[vioarr_renderer_register_surface] null parameters");
         return;
     }
 
     level = vioarr_surface_level(surface);
 
+    vioarr_utils_error("vioarr_manager_unregister_surface 0x%llx:%i", surface, level);
     vioarr_rwlock_w_lock(&g_manager.lock);
-    element_t* element = list_find(&g_manager.surfaces[level], (void*)(uintptr_t)vioarr_surface_id(surface));
+    element = list_find(&g_manager.surfaces[level], __surface_key(surface));
     if (element) {
         list_remove(&g_manager.surfaces[level], element);
+        vioarr_utils_error("vioarr_manager_unregister_surface removed 0x%llx, next 0x%llx", 
+            element->value, list_back(&g_manager.surfaces[level]));
+    }
+    else {
+        vioarr_utils_error("[vioarr_renderer_register_surface] surface missing in its level list");
     }
     vioarr_rwlock_w_unlock(&g_manager.lock);
 }
 
 static void __change_surface_level(vioarr_surface_t* surface, int level, int newLevel)
 {
-    element_t* element = list_find(&g_manager.surfaces[level], (void*)(uintptr_t)vioarr_surface_id(surface));
+    element_t* element = list_find(&g_manager.surfaces[level], __surface_key(surface));
     if (element) {
         list_remove(&g_manager.surfaces[level], element);
         list_append(&g_manager.surfaces[newLevel], element);
         vioarr_surface_set_level(surface, newLevel);
     }
+    vioarr_utils_error("__change_surface_level 0x%llx=%i", surface, newLevel);
 }
 
 void vioarr_manager_promote_cursor(vioarr_surface_t* surface)
@@ -177,6 +154,7 @@ vioarr_surface_t* vioarr_manager_front_surface(void)
         // back element is front
         element_t* element = list_back(&g_manager.surfaces[level]);
         if (element) {
+            vioarr_utils_error("vioarr_manager_front_surface 0x%llx:%i", element->value, level);
             front = element->value;
             break;
         }
@@ -194,6 +172,7 @@ vioarr_surface_t* vioarr_manager_surface_at(int x, int y)
         foreach_reverse(i, &g_manager.surfaces[level]) {
             vioarr_surface_t* surface = i->value;
             if (vioarr_surface_contains(surface, x, y)) {
+                vioarr_rwlock_r_unlock(&g_manager.lock);
                 return surface;
             }
         }
@@ -210,7 +189,7 @@ void vioarr_manager_push_to_front(vioarr_surface_t* surface)
     }
 
     vioarr_rwlock_w_lock(&g_manager.lock);
-    element_t* element = list_find(&g_manager.surfaces[level], (void*)(uintptr_t)vioarr_surface_id(surface));
+    element_t* element = list_find(&g_manager.surfaces[level], __surface_key(surface));
     if (element) {
         list_remove(&g_manager.surfaces[level], element);
         list_append(&g_manager.surfaces[level], element);
