@@ -41,6 +41,7 @@ public:
             PixelFormat::A8B8G8R8, MemoryBuffer::Flags::NONE);
 
         SetTransparency(true);
+        LoadCursor();
     }
 
     void LoadCursor()

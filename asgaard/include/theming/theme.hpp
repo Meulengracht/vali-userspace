@@ -44,7 +44,6 @@ namespace Asgaard {
 
                 // UI Elements
                 IMAGE_SEARCH,
-                IMAGE_BACKGROUND,
                 IMAGE_TERMINAL,
                 IMAGE_EDITOR,
                 IMAGE_GAME

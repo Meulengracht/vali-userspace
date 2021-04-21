@@ -44,7 +44,7 @@ void              vioarr_manager_change_level(vioarr_surface_t* surface, int lev
 void              vioarr_manager_render_start(list_t** surfaceLevels);
 void              vioarr_manager_render_end(void);
 vioarr_surface_t* vioarr_manager_front_surface(void);
-vioarr_surface_t* vioarr_manager_surface_at(int x, int y);
-void              vioarr_manager_push_to_front(vioarr_surface_t* surface);
+vioarr_surface_t* vioarr_manager_surface_at(int x, int y, int* localX, int* localY);
+void              vioarr_manager_focus_surface(vioarr_surface_t* surface);
 
 #endif //!__VIOARR_MANAGER_H__

@@ -22,6 +22,8 @@
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
 
+//#define __TRACE
+
 #include <ddk/video.h>
 #include <glad/glad.h>
 #include <GL/osmesa.h>
@@ -300,6 +302,7 @@ int vioarr_screen_publish_modes(vioarr_screen_t* screen, int client)
 
 void vioarr_screen_frame(vioarr_screen_t* screen)
 {
+    ENTRY("vioarr_screen_frame()");
     vioarr_renderer_render(screen->renderer);
 
 #ifndef VIOARR_TRACEMODE
@@ -311,4 +314,5 @@ void vioarr_screen_frame(vioarr_screen_t* screen)
         screen->row_loops, screen->bytes_remaining, screen->stride);
 #endif // VIOARR_REVERSE_FB_BLIT
 #endif //!VIOARR_TRACEMODE
+    EXIT("vioarr_screen_frame");
 }

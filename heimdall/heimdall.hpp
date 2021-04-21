@@ -70,8 +70,6 @@ private:
 
     void LoadResources()
     {
-        const auto theme = Theming::TM.GetTheme();
-
         auto renderImage = [](const auto& buffer, const auto& image) {
             Drawing::Painter painter(buffer);
             painter.RenderImage(image);
@@ -84,7 +82,7 @@ private:
         };
 
         // Render the normal state
-        auto background = theme->GetImage(Theming::Theme::Elements::IMAGE_BACKGROUND);
+        Drawing::Image background("$themes/backgrounds/bg.png");
         renderImage(m_buffer, background);
         //blurImage(m_bufferBlurred, background);
     }

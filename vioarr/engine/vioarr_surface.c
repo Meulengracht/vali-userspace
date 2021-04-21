@@ -168,25 +168,23 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         return;
     }
 
-    // cleanup any external systems
-    vioarr_input_on_surface_destroy(surface);
+    // cleanup any external systems. In this case it's
+    // important that any cleanup calls must happen after we unregister
+    // the surface so noone gets a pointer to this.
     vioarr_manager_unregister_surface(surface);
+    vioarr_input_on_surface_destroy(surface);
 
     // restore any changes to dimension
     __restore_region(surface);
 
     // if this surface is a child, remove it from the parent
     if (surface->parent) {
-        vioarr_utils_error("vioarr_surface_destroy removing from parent");
         __remove_child(surface->parent, surface);
         __make_orphan(surface);
-        
-        vioarr_utils_error("vioarr_surface_destroy waiting a frame");
         vioarr_renderer_wait_frame(vioarr_screen_renderer(surface->screen));
     }
 
     // if we have children, go through them and promote them to regular surfaces
-    vioarr_utils_error("vioarr_surface_destroy promoting children");
     itr = ACTIVE_PROPERTIES(surface).children;
     while (itr) {
         vioarr_surface_t* next = itr->link;
@@ -194,7 +192,6 @@ void vioarr_surface_destroy(vioarr_surface_t* surface)
         itr = next;
     }
 
-    vioarr_utils_error("vioarr_surface_destroy cleaning up resources");
     __cleanup_surface_properties(&surface->properties[0]);
     __cleanup_surface_properties(&surface->properties[1]);
     __cleanup_surface_backbuffer(surface->screen, &surface->backbuffers[0]);
@@ -420,7 +417,6 @@ void vioarr_surface_restore_size(vioarr_surface_t* surface)
 int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
 {
     vioarr_surface_t* itr;
-    vioarr_region_t*  region;
     int               inputSupported = 0;
     if (!surface || !surface->visible) {
         return 0;
@@ -428,23 +424,6 @@ int vioarr_surface_supports_input(vioarr_surface_t* surface, int x, int y)
 
     vioarr_rwlock_r_lock(&surface->lock);
     inputSupported = vioarr_region_contains(ACTIVE_PROPERTIES(surface).input_region, x, y);
-    if (inputSupported) {
-        goto exit;
-    }
-    
-    // check children if they support input
-    itr    = ACTIVE_PROPERTIES(surface).children;
-    region = __get_active_region(surface);
-    while (itr) {
-        if (vioarr_surface_supports_input(itr, 
-                x - vioarr_region_x(region), 
-                y - vioarr_region_y(region))) {
-            return 1;
-        }
-        itr = itr->link;
-    }
-
-exit:
     vioarr_rwlock_r_unlock(&surface->lock);
     return inputSupported;
 }
@@ -467,6 +446,63 @@ int vioarr_surface_contains(vioarr_surface_t* surface, int x, int y)
 exit:
     vioarr_rwlock_r_unlock(&surface->lock);
     return contained;
+}
+
+vioarr_surface_t* vioarr_surface_at(vioarr_surface_t* surface, int x, int y, int* localX, int* localY)
+{
+    vioarr_surface_t* surfaceAt = NULL;
+    vioarr_region_t*  region;
+    vioarr_utils_trace("vioarr_surface_at(surface=%u, x=%i, y=%i)", vioarr_surface_id(surface), x, y);
+    if (!surface) {
+        return NULL;
+    }
+
+    vioarr_rwlock_r_lock(&surface->lock);
+    region = __get_active_region(surface);
+    if (vioarr_region_contains(region, x, y)) {
+        vioarr_surface_t* itr = ACTIVE_PROPERTIES(surface).children;
+        int               xInSurface = x - vioarr_region_x(region);
+        int               yInSurface = y - vioarr_region_y(region);
+
+        while (itr) {
+            vioarr_surface_t* subAt = vioarr_surface_at(itr, 
+                xInSurface, yInSurface,
+                localX, localY);
+            if (subAt) {
+                surfaceAt = subAt;
+                break;
+            }
+            itr = itr->link;
+        }
+
+        // if we did not find a subsurface, then set this one as the innermost at
+        if (!surfaceAt) {
+            *localX = xInSurface;
+            *localY = yInSurface;
+            surfaceAt = surface;
+        }
+    }
+    vioarr_rwlock_r_unlock(&surface->lock);
+
+    vioarr_utils_trace("vioarr_surface_at returns=%u", vioarr_surface_id(surfaceAt));
+    return surfaceAt;
+}
+
+vioarr_surface_t* vioarr_surface_parent(vioarr_surface_t* surface, int upperMost)
+{
+    vioarr_surface_t* parent = NULL;
+
+    if (!surface) {
+        return NULL;
+    }
+
+    parent = surface->parent;
+    if (parent && upperMost) {
+        while (parent->parent) {
+            parent = parent->parent;
+        }
+    }
+    return parent;
 }
 
 void vioarr_surface_invalidate(vioarr_surface_t* surface, int x, int y, int width, int height)

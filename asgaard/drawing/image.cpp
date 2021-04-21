@@ -23,11 +23,9 @@
 #include "../include/drawing/color.hpp"
 #include "../include/drawing/image.hpp"
 #include "../include/exceptions/out_of_range_exception.h"
+#include "../include/exceptions/application_exception.h"
 #include <vector>
 #include <iterator>
-
-#define __TRACE
-#include <ddk/utils.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -96,7 +94,7 @@ namespace Asgaard {
                 char* buffer = new char[count];
                 stream.read(buffer, count);
                 if (!stream)
-                    ERROR("Image::Image error: only %llu could be read", stream.gcount());
+                    throw ApplicationException("failed to read image stream", -1);
                 std::copy(buffer, buffer + count, std::back_inserter(v));
                 delete[] buffer;
             };
@@ -105,7 +103,6 @@ namespace Asgaard {
             auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(v.data()), v.size(), 
                 &width, &height, &numComponents, STBI_rgb_alpha);
             if (buffer == nullptr) {
-                ERROR("Image::Image failed to load image from istream: %s", stbi_failure_reason());
                 ZeroImage();
                 return;
             }

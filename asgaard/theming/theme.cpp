@@ -132,7 +132,7 @@ void Theme::InitializeTheme()
     m_loader = std::make_unique<ThemeLoader>("$themes/default.pak");
     
     // push paths
-    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CURSOR), "cursor16.png")); // 20, 24, 32
+    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CURSOR), "cursor16.png")); // 32, 40, 48
 
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_CLOSE), "close16.png")); // 20, 24, 32
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_MAXIMIZE), "max16.png")); // 20, 24, 32
@@ -140,7 +140,6 @@ void Theme::InitializeTheme()
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_APP_DEFAULT), "app16.png")); // 20, 24, 32
 
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_SEARCH), "search-grey24.png"));
-    m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_BACKGROUND), "bg.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_TERMINAL), "terminal64.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_EDITOR), "notepad64.png"));
     m_paths.insert(std::make_pair(static_cast<int>(Elements::IMAGE_GAME), "game64.png"));
