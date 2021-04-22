@@ -165,7 +165,9 @@ Drawing::Image Theme::GetImage(enum Elements element)
         return Drawing::Image();
     }
 
-    return Drawing::Image(*dataStream, entry->GetSize());
+    Drawing::Image image(*dataStream, entry->GetSize());
+    entry->CloseDecompressionStream();
+    return image;
 }
 
 Drawing::Color Theme::GetColor(enum Colors color)

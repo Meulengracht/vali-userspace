@@ -61,12 +61,6 @@ void wm_surface_set_buffer_callback(struct gracht_recv_message* message, struct 
         goto exit;
     }
     
-    if (!buffer) {
-        vioarr_utils_error("wm_surface_set_buffer_callback: failed to find buffer");
-        wm_core_event_error_single(message->client, input->buffer_id, ENOENT, "wm_buffer: object does not exist");
-        goto exit;
-    }
-    
     vioarr_surface_set_buffer(surface, buffer);
 
 exit:
