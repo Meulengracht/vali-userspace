@@ -65,6 +65,8 @@ namespace Asgaard {
 
         ASGAARD_API void RequestPriorityLevel(enum PriorityLevel);
         ASGAARD_API void RequestFullscreenMode(enum FullscreenMode);
+
+        ASGAARD_API void Destroy() override;
         
     // Window events that can/should be reacted on.
     protected:

@@ -27,6 +27,7 @@
 #include "include/rectangle.hpp"
 #include "include/pointer.hpp"
 #include "include/window_decoration.hpp"
+#include "include/window_title.hpp"
 #include "include/theming/theme_manager.hpp"
 #include "include/theming/theme.hpp"
 #include "include/drawing/painter.hpp"
@@ -50,8 +51,6 @@ namespace Asgaard {
         const std::shared_ptr<Drawing::Font>& font) 
         : SubSurface(id, screen, parent, dimensions)
         , m_appFont(font)
-        , m_lmbHold(false)
-        , m_dragInOperation(false)
         , m_redraw(false)
         , m_redrawReady(false)
     {
@@ -63,8 +62,8 @@ namespace Asgaard {
             Dimensions().Width(), Dimensions().Height(),
             PixelFormat::A8B8G8R8, MemoryBuffer::Flags::NONE);
         
-        SetBuffer(m_buffer);
         SetTransparency(true);
+        SetBuffer(m_buffer);
         RedrawReady();
 
         Initialize();
@@ -108,7 +107,7 @@ namespace Asgaard {
         m_appIcon->SetImage(appImage);
 
         // middle
-        m_appTitle = OM.CreateClientObject<Asgaard::Widgets::Label>(m_screen, this,
+        m_appTitle = OM.CreateClientObject<Asgaard::WindowTitle>(m_screen, this,
             Rectangle(
                 8 + 8 + ICON_SIZE, // start text next to app icon
                 0, 
@@ -195,25 +194,6 @@ namespace Asgaard {
             m_redrawReady.store(true);
         }
     }
-
-    void WindowDecoration::OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed)
-    {
-        if (button == Pointer::Buttons::LEFT) {
-            m_lmbHold = pressed;
-            if (!m_lmbHold) {
-                m_dragInOperation = false;
-            }
-        }
-    }
-
-    void WindowDecoration::OnMouseMove(const std::shared_ptr<Pointer>& pointer, int localX, int localY)
-    {
-        if (m_lmbHold && !m_dragInOperation) {
-            m_dragInOperation = true;
-            Notify(static_cast<int>(Notification::INITIATE_DRAG), 
-                reinterpret_cast<void*>(static_cast<intptr_t>(pointer->Id())));
-        }
-    }
     
     void WindowDecoration::Notification(Publisher* source, int event, void* data)
     {
@@ -224,6 +204,11 @@ namespace Asgaard {
 
         if (event == static_cast<int>(Object::Notification::ERROR)) {
             Notify(static_cast<int>(Object::Notification::ERROR), data);
+        }
+        else if (object->Id() == m_appTitle->Id()) {
+            if (event == static_cast<int>(WindowTitle::Notification::INITIATE_DRAG)) {
+                Notify(static_cast<int>(Notification::INITIATE_DRAG), data);
+            }
         }
         else if (event == static_cast<int>(Widgets::Icon::Notification::CLICKED)) {
             if (object->Id() == m_minIcon->Id()) {

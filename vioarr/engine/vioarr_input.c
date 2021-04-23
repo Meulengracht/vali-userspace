@@ -21,7 +21,8 @@
  *   for communication between compositor clients and the server. The server renders
  *   using Mesa3D with either the soft-renderer or llvmpipe render for improved performance.
  */
-#define __TRACE
+
+//#define __TRACE
 
 #include <ds/list.h>
 #include <os/keycodes.h>
@@ -269,6 +270,8 @@ static void __normal_mode_motion(vioarr_input_source_t* source, int clampedX, in
                 source->id,
                 vioarr_surface_id(currentSurface));
         }
+        vioarr_utils_trace("__normal_mode_motion next active surface %i:%u",
+            vioarr_surface_client(surfaceAfterMove), vioarr_surface_id(surfaceAfterMove));
 
         // If the new surface does not support input, then we clear operating surface
         // and move on
@@ -320,6 +323,9 @@ static void __resize_mode_motion(vioarr_input_source_t* source, int clampedX, in
 
     source->state.pointer.x += clampedX;
     source->state.pointer.y += clampedY;
+    if (source->state.pointer.surface) {
+        vioarr_surface_move(source->state.pointer.surface, clampedX, clampedY);
+    }
 }
 
 static void __move_mode_motion(vioarr_input_source_t* source, int clampedX, int clampedY)
@@ -334,6 +340,9 @@ static void __move_mode_motion(vioarr_input_source_t* source, int clampedX, int 
     vioarr_surface_move(currentSurface, clampedX, clampedY);
     source->state.pointer.x += clampedX;
     source->state.pointer.y += clampedY;
+    if (source->state.pointer.surface) {
+        vioarr_surface_move(source->state.pointer.surface, clampedX, clampedY);
+    }
 }
 
 static void __grabbed_mode_motion(vioarr_input_source_t* source, int clampedX, int clampedY, int z)
@@ -427,6 +436,9 @@ static void __resize_mode_click(vioarr_input_source_t* source, uint32_t button, 
 
     // send click to notify surface of the end
     wm_pointer_event_click_single(
+    if (source->state.pointer.surface) {
+        vioarr_surface_move(source->state.pointer.surface, clampedX, clampedY);
+    }
         vioarr_surface_client(currentSurface),
         source->id,
         vioarr_surface_id(currentSurface), 

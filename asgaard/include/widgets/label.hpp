@@ -60,7 +60,7 @@ namespace Asgaard {
             void SetAnchors(Anchors anchors);
             void RequestRedraw();
             
-        private:
+        protected:
             void Notification(Publisher*, int = 0, void* = 0) override;
             
         private:

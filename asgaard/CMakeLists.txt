@@ -66,6 +66,7 @@ add_library(asgaard SHARED
     window_base.cpp
     window_decoration.cpp
     window_edge.cpp
+    window_title.cpp
 )
 add_dependencies(asgaard protocols)
 target_compile_definitions(asgaard PRIVATE

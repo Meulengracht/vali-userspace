@@ -120,6 +120,7 @@
         "sdl_internal.h": "c",
         "vioarr_buffer.h": "c",
         "fcntl.h": "c",
-        "__functional_base_03": "c"
+        "__functional_base_03": "c",
+        "wm_core_protocol_server.h": "c"
     }
 }

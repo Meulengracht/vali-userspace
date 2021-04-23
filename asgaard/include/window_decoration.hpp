@@ -35,6 +35,7 @@
 namespace Asgaard {
     class MemoryPool;
     class MemoryBuffer;
+    class WindowTitle;
     
     namespace Drawing {
         class Font;
@@ -78,8 +79,6 @@ namespace Asgaard {
         void Redraw();
         void RedrawReady();
         void Notification(Publisher*, int = 0, void* = 0) override;
-        void OnMouseClick(const std::shared_ptr<Pointer>&, enum Pointer::Buttons button, bool pressed) override;
-        void OnMouseMove(const std::shared_ptr<Pointer>&, int localX, int localY) override;
 
     private:
         // consists of multiple resources;
@@ -90,14 +89,12 @@ namespace Asgaard {
         std::shared_ptr<MemoryPool>     m_memory;
         std::shared_ptr<MemoryBuffer>   m_buffer;
         std::shared_ptr<Drawing::Font>  m_appFont;
-        std::shared_ptr<Widgets::Label> m_appTitle;
+        std::shared_ptr<WindowTitle>    m_appTitle;
         std::shared_ptr<Widgets::Icon>  m_appIcon;
         std::shared_ptr<Widgets::Icon>  m_minIcon;
         std::shared_ptr<Widgets::Icon>  m_maxIcon;
         std::shared_ptr<Widgets::Icon>  m_closeIcon;
 
-        bool              m_lmbHold;
-        bool              m_dragInOperation;
         bool              m_redraw;
         std::atomic<bool> m_redrawReady;
     };

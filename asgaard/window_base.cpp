@@ -51,10 +51,12 @@ namespace Asgaard {
     {
         Rectangle decorationDimensions(0, 0, dimensions.Width(), 35);
         m_decoration = OM.CreateClientObject<Asgaard::WindowDecoration>(screen, this, decorationDimensions);
+        m_decoration->Subscribe(this);
 
         // install in right lower corner
         Rectangle edgeDimensions(dimensions.Width() - 16, dimensions.Height() - 16, 16, 16);
         m_edge = OM.CreateClientObject<Asgaard::WindowEdge>(screen, this, edgeDimensions);
+        m_edge->Subscribe(this);
 
         // retrieve a list of supported window content formats
         wm_surface_get_formats(APP.GrachtClient(), nullptr, Id());
@@ -63,7 +65,16 @@ namespace Asgaard {
 
     WindowBase::~WindowBase()
     {
-        
+        Destroy();   
+    }
+
+    void WindowBase::Destroy()
+    {
+        if (m_decoration) { m_decoration->Unsubscribe(this); }
+        if (m_edge)       { m_edge->Unsubscribe(this); }
+
+        // invoke base destroy
+        Surface::Destroy();
     }
 
     void WindowBase::SetTitle(const std::string& title)
