@@ -436,9 +436,6 @@ static void __resize_mode_click(vioarr_input_source_t* source, uint32_t button, 
 
     // send click to notify surface of the end
     wm_pointer_event_click_single(
-    if (source->state.pointer.surface) {
-        vioarr_surface_move(source->state.pointer.surface, clampedX, clampedY);
-    }
         vioarr_surface_client(currentSurface),
         source->id,
         vioarr_surface_id(currentSurface), 

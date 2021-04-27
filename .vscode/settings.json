@@ -121,6 +121,7 @@
         "vioarr_buffer.h": "c",
         "fcntl.h": "c",
         "__functional_base_03": "c",
-        "wm_core_protocol_server.h": "c"
+        "wm_core_protocol_server.h": "c",
+        "utils.h": "c"
     }
 }

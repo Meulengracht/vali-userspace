@@ -217,7 +217,6 @@ namespace Asgaard {
         return m_screenFound && m_syncRecieved;
     }
     
-
     void Application::PumpMessages()
     {
         int status = 0;
