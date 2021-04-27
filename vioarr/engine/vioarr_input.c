@@ -429,22 +429,6 @@ static void __normal_mode_click(vioarr_input_source_t* source, uint32_t button, 
     }
 }
 
-static void __resize_mode_click(vioarr_input_source_t* source, uint32_t button, int pressed)
-{
-    vioarr_surface_t* currentSurface = source->state.pointer.op_surface;
-    vioarr_utils_trace("__resize_mode_click()");
-
-    // send click to notify surface of the end
-    wm_pointer_event_click_single(
-        vioarr_surface_client(currentSurface),
-        source->id,
-        vioarr_surface_id(currentSurface), 
-        button, pressed);
-
-    // reset mode
-    __clear_state(source);
-}
-
 static void vioarr_input_pointer_click(vioarr_input_source_t* source, uint32_t button, int pressed)
 {
     vioarr_utils_trace("vioarr_input_pointer_click()");
@@ -452,12 +436,10 @@ static void vioarr_input_pointer_click(vioarr_input_source_t* source, uint32_t b
         source->state.pointer.mode == POINTER_MODE_GRABBED) {
         __normal_mode_click(source, button, pressed);
     }
-    else if (source->state.pointer.mode == POINTER_MODE_RESIZING) {
-        __resize_mode_click(source, button, pressed);
-    }
     else {
-        __normal_mode_click(source, button, pressed);
-        __clear_state(source); // todo only clear on release of lmb?!
+        if (button == 0 /* LMB */ && !pressed) {
+            __clear_state(source);
+        }
     }
 }
 

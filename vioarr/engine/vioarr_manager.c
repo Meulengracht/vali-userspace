@@ -194,6 +194,7 @@ void vioarr_manager_focus_surface(vioarr_surface_t* surface)
     if (entering != g_manager.focused) {
         leaving = g_manager.focused;
         g_manager.focused = entering;
+
         if (g_manager.focused) {
             element_t* element = list_find(&g_manager.surfaces[level], __surface_key(entering));
             if (element) {

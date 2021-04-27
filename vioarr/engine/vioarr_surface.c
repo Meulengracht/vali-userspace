@@ -490,14 +490,13 @@ vioarr_surface_t* vioarr_surface_at(vioarr_surface_t* surface, int x, int y, int
 
 vioarr_surface_t* vioarr_surface_parent(vioarr_surface_t* surface, int upperMost)
 {
-    vioarr_surface_t* parent = NULL;
+    vioarr_surface_t* parent = surface;
 
     if (!surface) {
         return NULL;
     }
 
-    parent = surface->parent;
-    if (parent && upperMost) {
+    if (upperMost) {
         while (parent->parent) {
             parent = parent->parent;
         }
