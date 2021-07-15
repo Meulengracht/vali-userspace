@@ -44,6 +44,13 @@ export VALI_CXXFLAGS = $(shared_flags) -static $(arch_flags)
 ###################################
 ##### BUILD TARGETS           #####
 ###################################
+.PHONY: init
+init:
+	git submodule update --init
+	cd llvm/projects && git clone https://github.com/Meulengracht/libcxx.git
+	cd llvm/projects && git clone https://github.com/Meulengracht/libcxxabi.git
+	cd llvm/projects && git clone https://github.com/Meulengracht/libunwind.git
+
 .PHONY: build
 build: $(VALI_APPLICATION_PATH) build_zlib build_libpng build_lua build_libfreetype build_llvm build_apps build_wm
 	
@@ -71,60 +78,6 @@ build_wm: build_mesa build_glm build_vioarr
 .PHONY: build_sdl_apps
 build_sdl_apps: build_sdl build_sdlttf build_sdlimage build_sdlmixer build_sdlshooter build_lite
 
-.PHONY: build_zlib
-build_zlib:
-	@printf "%b" "\033[1;35mChecking if zlib needs to be built\033[m\n"
-	@$(MAKE) -s -C zlib -f makefile
-
-.PHONY: build_libpng
-build_libpng:
-	@printf "%b" "\033[1;35mChecking if libpng needs to be built\033[m\n"
-	@$(MAKE) -s -C libpng -f makefile
-
-.PHONY: build_libfreetype
-build_libfreetype:
-	@printf "%b" "\033[1;35mChecking if freetype needs to be built\033[m\n"
-	@$(MAKE) -s -C freetype -f makefile
-
-.PHONY: build_wintest
-build_wintest:
-	@printf "%b" "\033[1;35mChecking if wintest needs to be built\033[m\n"
-	@$(MAKE) -s -C wintest -f makefile
-
-.PHONY: build_alumni
-build_alumni:
-	@printf "%b" "\033[1;35mChecking if alumni needs to be built\033[m\n"
-	@$(MAKE) -s -C alumni -f makefile
-
-.PHONY: build_macia
-build_macia:
-	@printf "%b" "\033[1;35mChecking if macia needs to be built\033[m\n"
-	@$(MAKE) -s -C macia -f makefile
-
-heimdall-build:
-	mkdir -p heimdall-build
-	cd heimdall-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../heimdall
-
-.PHONY: build_heimdall
-build_heimdall: heimdall-build
-	cd heimdall-build && make -j$(CPU_COUNT) && make install
-
-asgaard-build:
-	mkdir -p asgaard-build
-	cd asgaard-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../asgaard
-
-.PHONY: build_asgaard
-build_asgaard: asgaard-build
-	cd asgaard-build && make -j$(CPU_COUNT) && make install
-
 # Repositories
 llvm/projects/libcxx:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libcxx.git
@@ -132,7 +85,7 @@ llvm/projects/libcxx:
 llvm/projects/libcxxabi:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libcxxabi.git
 
-llvm/projects/libun-DASGAARD_DLLwind:
+llvm/projects/libunwind:
 	cd llvm/projects && git clone https://github.com/Meulengracht/libunwind.git
 
 llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
@@ -169,117 +122,6 @@ build_llvm: llvm-build
 	cd llvm-build && make -j$(CPU_COUNT) && make install
 	@-mv llvm-build/bin/*.lib $(VALI_APPLICATION_PATH)/lib/
 	@-mv $(VALI_APPLICATION_PATH)/lib/*.dll $(VALI_APPLICATION_PATH)/bin/
-
-doom-build:
-	mkdir -p doom-build
-	cd doom-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../doom
-
-.PHONY: build_doom
-build_doom: doom-build
-	cd doom-build && make -j$(CPU_COUNT) && make install
-
-lua-build:
-	mkdir -p lua-build
-	cd lua-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../lua
-
-.PHONY: build_lua
-build_lua: lua-build
-	cd lua-build && make -j$(CPU_COUNT) && make install
-
-sdl-build:
-	mkdir -p sdl-build
-	cd sdl-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		-DSDL_SHARED_ENABLED_BY_DEFAULT=ON \
-		-DSDL_AUDIO=ON \
-		../SDL
-
-.PHONY: build_sdl
-build_sdl: sdl-build
-	cd sdl-build && make -j$(CPU_COUNT) && make install
-
-sdlimage-build:
-	mkdir -p sdlimage-build
-	cd sdlimage-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		-DPNG_BUILD_ZLIB=ON \
-		../SDL_image
-
-.PHONY: build_sdlimage
-build_sdlimage: sdlimage-build
-	cd sdlimage-build && make -j$(CPU_COUNT) && make install
-
-sdlttf-build:
-	mkdir -p sdlttf-build
-	cd sdlttf-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../SDL_ttf
-
-.PHONY: build_sdlttf
-build_sdlttf: sdlttf-build
-	cd sdlttf-build && make -j$(CPU_COUNT) && make install
-
-sdlmixer-build:
-	mkdir -p sdlmixer-build
-	cd sdlmixer-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../SDL_mixer
-
-.PHONY: build_sdlmixer
-build_sdlmixer: sdlmixer-build
-	cd sdlmixer-build && make -j$(CPU_COUNT) && make install
-
-sdlshooter-build:
-	mkdir -p sdlshooter-build
-	cd sdlshooter-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../sdlshooter
-
-.PHONY: build_sdlshooter
-build_sdlshooter: sdlshooter-build
-	cd sdlshooter-build && make -j$(CPU_COUNT) && make install
-
-lite-build:
-	mkdir -p lite-build
-	cd lite-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../lite
-
-.PHONY: build_lite
-build_lite: lite-build
-	cd lite-build && make -j$(CPU_COUNT) && make install
-
-libzip-build:
-	mkdir -p libzip-build
-	cd libzip-build && cmake -G "Unix Makefiles" \
-		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake \
-		../libzip
-
-.PHONY: build_libzip
-build_libzip: libzip-build
-	cd libzip-build && make -j$(CPU_COUNT) && make install
 
 .PHONY: build_mesa
 build_mesa:

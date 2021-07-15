@@ -34,3 +34,6 @@
 [submodule "libzip"]
 	path = libzip
 	url = https://github.com/umbrella-c/libzip
+[submodule "vioarr"]
+	path = vioarr
+	url = https://github.com/Meulengracht/vioarr
