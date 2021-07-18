@@ -123,5 +123,8 @@
         "__functional_base_03": "c",
         "wm_core_protocol_server.h": "c",
         "utils.h": "c"
-    }
+    },
+    "cmake.configureArgs": [
+        "-DCMAKE_TOOLCHAIN_FILE=config/Vali.cmake"
+    ]
 }

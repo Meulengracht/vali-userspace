@@ -13,6 +13,19 @@
 #    The architecture to build for.
 #
 
+# Sanitize expected environmental variables
+if(NOT DEFINED ENV{CROSS})
+message(FATAL_ERROR "Please set the CROSS environmental variable to the path of the Vali Crosscompiler.")
+endif()
+
+if(NOT DEFINED ENV{VALI_ARCH})
+message(FATAL_ERROR "Please set the VALI_ARCH environmental variable to the expected platform architecture.")
+endif()
+
+if(NOT DEFINED ENV{VALI_SDK_PATH})
+    message(FATAL_ERROR "Please set the VALI_SDK_PATH environmental variable to the path of the Vali SDK.")
+endif()
+
 # Setup environment stuff for cmake configuration
 set(CMAKE_SYSTEM_NAME vali-cross)
 set(CMAKE_CROSSCOMPILING OFF CACHE BOOL "")
@@ -22,6 +35,9 @@ set(CMAKE_LINKER "$ENV{CROSS}/bin/lld-link" CACHE FILEPATH "")
 set(CMAKE_AR "$ENV{CROSS}/bin/llvm-ar" CACHE FILEPATH "")
 set(CMAKE_RANLIB "$ENV{CROSS}/bin/llvm-ranlib" CACHE FILEPATH "")
 set(VERBOSE 1)
+
+# Setup expected environment variables
+set(ENV{VALI_LIBRARIES} "-LIBPATH:$ENV{VALI_SDK_PATH}/lib")
 
 # Setup shared compile flags to make compilation succeed
 set(VALI_COMPILE_FLAGS -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL)

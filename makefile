@@ -109,8 +109,6 @@ llvm-build: llvm/projects/libcxx llvm/projects/libcxxabi llvm/projects/libunwind
 		-DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
 		-DLIBCXX_INCLUDE_BENCHMARKS=OFF \
 		-DLIBCXX_INCLUDE_TESTS=OFF \
-		-DLIBCXX_INCLUDE_BENCHMARKS=OFF \
-		-DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
 		-DCMAKE_INSTALL_PREFIX=$(VALI_APPLICATION_PATH) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=../llvm/cmake/platforms/Vali.cmake \
@@ -209,16 +207,8 @@ clean_apps:
 
 .PHONY: clean
 clean:
-	@$(MAKE) -s -C zlib -f makefile clean
-	@$(MAKE) -s -C libpng -f makefile clean
-	@$(MAKE) -s -C freetype -f makefile clean
 	@$(MAKE) -s -C macia -f makefile clean
-	@$(MAKE) -s -C alumni -f makefile clean
 	@$(MAKE) -s -C mesa -f makefile clean
-	@$(MAKE) -s -C vioarr -f makefile clean
-	@$(MAKE) -s -C wintest -f makefile clean
-	@rm -rf asgaard-build
-	@rm -rf heimdall-build
 	@rm -rf llvm-build
 	@rm -rf doom-build
 	@rm -rf lua-build
@@ -228,5 +218,4 @@ clean:
 	@rm -rf sdlmixer-build
 	@rm -rf sdlshooter-build
 	@rm -rf lite-build
-	@rm -rf libzip-build
 	@rm -rf $(VALI_APPLICATION_PATH)
