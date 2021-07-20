@@ -32,7 +32,5 @@
 *.app
 
 # build dirs
-llvm-build/
-vioarr/protocols/
-vioarr/loader/
-asgaard/protocols/
+build/
+*-build/
