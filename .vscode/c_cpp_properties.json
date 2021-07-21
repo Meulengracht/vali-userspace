@@ -3,14 +3,9 @@
         {
             "name": "MollenOS-i386",
             "includePath": [
-                "${workspaceFolder}/alumni/**",
-                "${workspaceFolder}/asgaard/include/",
-                "${workspaceFolder}/freetype/include/**",
                 "${workspaceFolder}/glm/**",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",
-                "${workspaceFolder}/vioarr/**",
-                "${workspaceFolder}/wintest/**",
                 "${env:VALI_SDK_PATH}/include/",
                 "${env:VALI_DDK_PATH}/include/"
             ],
@@ -57,14 +52,9 @@
         {
             "name": "MollenOS-amd64",
             "includePath": [
-                "${workspaceFolder}/alumni/**",
-                "${workspaceFolder}/asgaard/include/",
-                "${workspaceFolder}/freetype/include/**",
                 "${workspaceFolder}/glm/**",
-                "${workspaceFolder}/blend2d/src/",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",
-                "${workspaceFolder}/wintest/**",
                 "${env:VALI_SDK_PATH}/include/",
                 "${env:VALI_DDK_PATH}/include/"
             ],
