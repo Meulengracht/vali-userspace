@@ -122,9 +122,11 @@
         "fcntl.h": "c",
         "__functional_base_03": "c",
         "wm_core_protocol_server.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "7ztypes.h": "c"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=config/Vali.cmake"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "Enabled"
 }

@@ -9,6 +9,19 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# initialize the default install path to be the build directory unless
+# VALI_APPLICATION_PATH is set.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    if (NOT DEFINED ENV{VALI_APPLICATION_PATH})
+        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/install)
+        set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Update the default install path" FORCE)
+    else()
+        set(CMAKE_INSTALL_PREFIX "$ENV{VALI_APPLICATION_PATH}" CACHE PATH "Update the default install path" FORCE)
+    endif()
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+message (STATUS "Install directory: ${CMAKE_INSTALL_PREFIX}")
+
+# retrieve the processor count to allow for quicker sub builds
 ProcessorCount(NUM_CORES)
 
 if (WIN32)
@@ -60,10 +73,15 @@ elseif (MOLLENOS)
     ExternalProject_Add(Mesa3D
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/mesa
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND ${MAKE_EXECUTABLE}
-        INSTALL_COMMAND ${MAKE_EXECUTABLE} install
-        BUILD_BYPRODUCTS ${CMAKE_INSTALL_PREFIX}/gallium-osmesa.dll
+        BUILD_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} ${MAKE_EXECUTABLE}
+        BUILD_IN_SOURCE ON
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} ${MAKE_EXECUTABLE} install
+        BUILD_BYPRODUCTS ${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll
     )
+
+########################################
+# Include link directories for the above libraries
+    link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 endif ()
 
 ########################################
@@ -74,15 +92,25 @@ add_subdirectory (lua)
 ########################################
 # Build the vioarr project and it's dependencies last
 add_subdirectory (vioarr)
+
+# add include paths from vioarr
+include_directories(vioarr/libs/common/include)
+include_directories(vioarr/libs/asgaard/include)
+
+# build apps that use asgaard
 add_subdirectory (doom)
 
 set(SDL_SHARED_ENABLED_BY_DEFAULT ON CACHE BOOL "Enable SDL shared library build")
 set(SDL_AUDIO ON CACHE BOOL "Enable SDL audio subsystem")
+set(SDL_ENABLE_VIORR ON CACHE BOOL "Enable Vioarr video subsystem")
 add_subdirectory (SDL)
 
 set(PNG_BUILD_ZLIB ON CACHE BOOL "Enable zlib build for SDL_image")
 add_subdirectory (SDL_image)
 add_subdirectory (SDL_mixer)
 add_subdirectory (SDL_ttf)
+
+# todo probably add sdl paths
+
 add_subdirectory (sdlshooter)
 add_subdirectory (lite)

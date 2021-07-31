@@ -53,7 +53,7 @@ set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
 # Setup shared compile flags to make compilation succeed
-set(VALI_COMPILE_FLAGS -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS -DZLIB_DLL)
+set(VALI_COMPILE_FLAGS -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS)
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
     set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -Di386 -D__i386__ -m32 --target=i386-pc-win32-itanium-coff)
 else()
