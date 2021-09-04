@@ -126,7 +126,9 @@
         "7ztypes.h": "c",
         "vali.h": "c",
         "sys_device_service_client.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "sdl_mixer.h": "c",
+        "ctype.h": "c"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=config/Vali.cmake"

@@ -1,16 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(SdlShooter C)
 
-# setup include directories
-if (MOLLENOS)
-  include_directories($ENV{VALI_APPLICATION_PATH}/include)
-  include_directories($ENV{VALI_DDK_PATH}/include)
-
-  link_directories($ENV{VALI_APPLICATION_PATH}/lib)
-  link_directories($ENV{VALI_DDK_PATH}/lib)
-endif()
-
-
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
