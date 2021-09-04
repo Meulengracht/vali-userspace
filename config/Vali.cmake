@@ -30,8 +30,8 @@ endif()
 # Setup expected environment variables
 set(ENV{VALI_INCLUDES}  "-I$ENV{VALI_SDK_PATH}/include/clang-9.0.0 -I$ENV{VALI_SDK_PATH}/include")
 set(ENV{VALI_LIBRARIES} "-LIBPATH:$ENV{VALI_SDK_PATH}/lib")
-set(ENV{VALI_SDK_CLIBS}   "static_libcrt.lib static_librt.lib c.lib m.lib")
-set(ENV{VALI_SDK_CXXLIBS} "$ENV{VALI_SDK_CLIBS} static_c++.lib static_c++abi.lib unwind.lib")
+set(ENV{VALI_SDK_CLIBS}   "c.dll.lib m.dll.lib libcrt.lib librt.lib")
+set(ENV{VALI_SDK_CXXLIBS} "$ENV{VALI_SDK_CLIBS} c++.lib c++abi.lib unwind.dll.lib")
 
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
     set(ENV{VALI_LFLAGS} "/machine:X86 /nodefaultlib /subsystem:native /lldmap $ENV{VALI_LIBRARIES}")

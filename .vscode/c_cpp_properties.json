@@ -52,6 +52,7 @@
         {
             "name": "MollenOS-amd64",
             "includePath": [
+                "${env:CROSS}/lib/clang/9.0.0/include/",
                 "${workspaceFolder}/glm/**",
                 "${workspaceFolder}/mesa/include/**",
                 "${workspaceFolder}/macia/**",

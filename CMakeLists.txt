@@ -40,7 +40,7 @@ elseif (MOLLENOS)
 # Build platform runtime for MollenOS
 # Must be invoked with -DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/llvm-build)
-    if (EXISTS ${CMAKE_BINARY_DIR}/llvm-build/bin/lli.app)
+    if (EXISTS ${CMAKE_BINARY_DIR}/llvm-build/bin/lli.run)
         message(STATUS "LLVM seems to be built already, assuming all is fine and skipping")
     else()
         set(ENV{LIBCXX_BOOTSTRAP} "true")
@@ -79,6 +79,13 @@ elseif (MOLLENOS)
         BUILD_BYPRODUCTS ${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll
     )
 
+    # add virtual target(s) to allow proper linking against the built library
+    add_library(opengl-osmesa SHARED IMPORTED)
+    set_property(TARGET opengl-osmesa PROPERTY
+                IMPORTED_LOCATION "${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll")
+    set_property(TARGET opengl-osmesa PROPERTY
+                IMPORTED_IMPLIB "${CMAKE_INSTALL_PREFIX}/lib/gallium-osmesa.lib")
+
 ########################################
 # Include link directories for the above libraries
     link_directories(${CMAKE_INSTALL_PREFIX}/lib)
@@ -104,6 +111,9 @@ set(SDL_SHARED_ENABLED_BY_DEFAULT ON CACHE BOOL "Enable SDL shared library build
 set(SDL_AUDIO ON CACHE BOOL "Enable SDL audio subsystem")
 set(SDL_ENABLE_VIORR ON CACHE BOOL "Enable Vioarr video subsystem")
 add_subdirectory (SDL)
+
+# add SDL include path
+include_directories(SDL/include)
 
 set(PNG_BUILD_ZLIB ON CACHE BOOL "Enable zlib build for SDL_image")
 add_subdirectory (SDL_image)

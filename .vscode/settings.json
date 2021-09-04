@@ -123,7 +123,10 @@
         "__functional_base_03": "c",
         "wm_core_protocol_server.h": "c",
         "utils.h": "c",
-        "7ztypes.h": "c"
+        "7ztypes.h": "c",
+        "vali.h": "c",
+        "sys_device_service_client.h": "c",
+        "socket.h": "c"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=config/Vali.cmake"
