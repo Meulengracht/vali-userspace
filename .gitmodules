@@ -1,36 +1,39 @@
 [submodule "mesa"]
 	path = mesa
-	url = https://github.com/Meulengracht/mesa.git
+	url = ../mesa.git
 [submodule "glm"]
 	path = glm
-	url = https://github.com/Meulengracht/glm.git
+	url = ../glm.git
 [submodule "doom"]
 	path = doom
-	url = https://github.com/umbrella-c/vali-doom.git
+	url = ../../umbrella-c/vali-doom.git
 [submodule "SDL"]
 	path = SDL
-	url = https://github.com/umbrella-c/SDL
+	url = ../../umbrella-c/SDL
 [submodule "lua"]
 	path = lua
-	url = https://github.com/umbrella-c/lua
+	url = ../../umbrella-c/lua
 [submodule "lite"]
 	path = lite
-	url = https://github.com/umbrella-c/lite
+	url = ../../umbrella-c/lite
 [submodule "libsodium"]
 	path = libsodium
-	url = https://github.com/umbrella-c/libsodium
+	url = ../../umbrella-c/libsodium
 [submodule "SDL_mixer"]
 	path = SDL_mixer
-	url = https://github.com/umbrella-c/SDL_mixer
+	url = ../../umbrella-c/SDL_mixer
 [submodule "SDL_ttf"]
 	path = SDL_ttf
-	url = https://github.com/umbrella-c/SDL_ttf
+	url = ../../umbrella-c/SDL_ttf
 [submodule "SDL_image"]
 	path = SDL_image
-	url = https://github.com/umbrella-c/SDL_image
+	url = ../../umbrella-c/SDL_image
 [submodule "libzip"]
 	path = libzip
-	url = https://github.com/umbrella-c/libzip
+	url = ../../umbrella-c/libzip
 [submodule "vioarr"]
 	path = vioarr
-	url = https://github.com/Meulengracht/vioarr
+	url = ../vioarr
+[submodule "llvm-project"]
+	path = llvm-project
+	url = ../../umbrella-c/llvm-project
