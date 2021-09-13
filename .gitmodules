@@ -1,6 +1,3 @@
-[submodule "llvm"]
-	path = llvm
-	url = https://github.com/Meulengracht/llvm
 [submodule "mesa"]
 	path = mesa
 	url = https://github.com/Meulengracht/mesa.git
