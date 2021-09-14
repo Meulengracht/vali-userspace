@@ -28,15 +28,15 @@ if(NOT DEFINED ENV{VALI_SDK_PATH})
 endif()
 
 # Setup expected environment variables
-set(ENV{VALI_INCLUDES}  "-I$ENV{VALI_SDK_PATH}/include/clang-9.0.0 -I$ENV{VALI_SDK_PATH}/include")
+set(ENV{VALI_INCLUDES}  "-I$ENV{VALI_SDK_PATH}/include/clang-14.0.0 -I$ENV{VALI_SDK_PATH}/include")
 set(ENV{VALI_LIBRARIES} "-LIBPATH:$ENV{VALI_SDK_PATH}/lib")
 set(ENV{VALI_SDK_CLIBS}   "c.dll.lib m.dll.lib libcrt.lib librt.lib")
 set(ENV{VALI_SDK_CXXLIBS} "$ENV{VALI_SDK_CLIBS} c++.lib c++abi.lib unwind.dll.lib")
 
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
-    set(ENV{VALI_LFLAGS} "/machine:X86 /nodefaultlib /subsystem:native /lldmap $ENV{VALI_LIBRARIES}")
+    set(ENV{VALI_LFLAGS} "/lldmap /lldvpe $ENV{VALI_LIBRARIES}")
 else()
-    set(ENV{VALI_LFLAGS} "/machine:X64 /nodefaultlib /subsystem:native /lldmap $ENV{VALI_LIBRARIES}")
+    set(ENV{VALI_LFLAGS} "/lldmap /lldvpe $ENV{VALI_LIBRARIES}")
 endif()
 
 # Setup environment stuff for cmake configuration
@@ -53,19 +53,23 @@ set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
 # Setup shared compile flags to make compilation succeed
-set(VALI_COMPILE_FLAGS -U_WIN32 -fms-extensions -nostdlib -nostdinc -static -DMOLLENOS)
+set(VALI_COMPILE_FLAGS -fms-extensions -nostdlib -nostdinc -static)
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
-    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -Di386 -D__i386__ -m32 --target=i386-pc-win32-itanium-coff)
+    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m32 --target=i386-uml-vali)
 else()
-    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -Damd64 -D__amd64__ -D__x86_64__ -m64 -fdwarf-exceptions --target=amd64-pc-win32-itanium-coff)
+    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m64 --target=amd64-uml-vali)
 endif()
 string(REPLACE ";" " " VALI_COMPILE_FLAGS "${VALI_COMPILE_FLAGS}")
 
 # We need to preserve any flags that were passed in by the user. However, we
 # can't append to CMAKE_C_FLAGS and friends directly, because toolchain files
 # will be re-invoked on each reconfigure and therefore need to be idempotent.
-# The assignments to the _INITIAL cache variables don't use FORCE, so they'll
+# The assignments to the _INIT cache variables don't use FORCE, so they'll
 # only be populated on the initial configure, and their values won't change
 # afterward.
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${VALI_COMPILE_FLAGS}" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${VALI_COMPILE_FLAGS}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_INIT "${VALI_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS_INIT "${VALI_COMPILE_FLAGS}")
+
+# make sure they are set as the default flags in cache if not already there
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING "Default platform flags for the C language")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT}" CACHE STRING "Default platform flags for the C++ language")
