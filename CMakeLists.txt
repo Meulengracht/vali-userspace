@@ -39,20 +39,20 @@ elseif (MOLLENOS)
 ########################################
 # Build platform runtime for MollenOS
 # Must be invoked with -DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/llvm-build)
-    if (EXISTS ${CMAKE_BINARY_DIR}/llvm-build/bin/lli.run)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/runtime)
+    if (EXISTS ${CMAKE_BINARY_DIR}/runtime/bin/lli.run)
         message(STATUS "LLVM seems to be built already, assuming all is fine and skipping")
     else()
         set(ENV{LIBCXX_BOOTSTRAP} "true")
         execute_process(
-            COMMAND "${CMAKE_COMMAND} -B ${CMAKE_BINARY_DIR}/llvm-build -DLLVM_ENABLE_PROJECTS=\"libcxx;libcxxabi;libunwind\" -DLLVM_INCLUDE_TESTS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_BOOTSTRAP_RUNTIME=ON -DLLVM_ENABLE_DUMP=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/ -DLIBCXXABI_VALI_BOOTSTRAP=ON -DLIBCXXABI_HERMETIC_STATIC_LIBRARY=ON -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DLIBCXXABI_HAS_EXTERNAL_THREAD_API=ON -DLIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS=OFF -DLIBCXX_VALI_BOOTSTRAP=ON -DLIBCXX_HERMETIC_STATIC_LIBRARY=ON -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON -DLIBCXX_HAS_EXTERNAL_THREAD_API=ON -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/platforms/Vali.cmake ${CMAKE_SOURCE_DIR}/llvm-project/llvm"
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/llvm-project/llvm
+            COMMAND ${CMAKE_COMMAND} -DRUNTIME_SOURCE_DIR=${CMAKE_SOURCE_DIR} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/config/Vali.cmake ${CMAKE_SOURCE_DIR}/runtime
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/runtime
         )
         execute_process(
-            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/llvm-build -j${NUM_CORES}
+            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/runtime -j${NUM_CORES}
         )
         execute_process(
-            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/llvm-build --target install --config Release
+            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/runtime --target install --config Release
         )
         set(ENV{LIBCXX_BOOTSTRAP})
     endif()
