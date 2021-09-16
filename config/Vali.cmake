@@ -53,13 +53,17 @@ set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
 # Setup shared compile flags to make compilation succeed
-set(VALI_COMPILE_FLAGS -fms-extensions -nostdlib -nostdinc -static)
+set(VALI_COMPILE_FLAGS -fms-extensions -nostdlib -nostdinc)
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
     set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m32 --target=i386-uml-vali)
 else()
     set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m64 --target=amd64-uml-vali)
 endif()
 string(REPLACE ";" " " VALI_COMPILE_FLAGS "${VALI_COMPILE_FLAGS}")
+
+# Setup any include directories neccessary for C and C++
+#set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES $ENV{VALI_SDK_PATH}/include/clang-14.0.0 $ENV{VALI_SDK_PATH}/include)
+#set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES $ENV{CROSS}/include/c++/v1 $ENV{VALI_SDK_PATH}/include/clang-14.0.0 $ENV{VALI_SDK_PATH}/include)
 
 # We need to preserve any flags that were passed in by the user. However, we
 # can't append to CMAKE_C_FLAGS and friends directly, because toolchain files
@@ -68,7 +72,7 @@ string(REPLACE ";" " " VALI_COMPILE_FLAGS "${VALI_COMPILE_FLAGS}")
 # only be populated on the initial configure, and their values won't change
 # afterward.
 set(CMAKE_C_FLAGS_INIT "${VALI_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS_INIT "${VALI_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS_INIT "${VALI_COMPILE_FLAGS} -static")
 
 # make sure they are set as the default flags in cache if not already there
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING "Default platform flags for the C language")
