@@ -28,7 +28,6 @@ if(NOT DEFINED ENV{VALI_SDK_PATH})
 endif()
 
 # Setup expected environment variables
-set(ENV{VALI_INCLUDES}  "-I$ENV{VALI_SDK_PATH}/include/clang-14.0.0 -I$ENV{VALI_SDK_PATH}/include")
 set(ENV{VALI_LIBRARIES} "-libpath:$ENV{VALI_SDK_PATH}/lib")
 set(ENV{VALI_SDK_CLIBS}   "c.dll.lib m.dll.lib libcrt.lib librt.lib")
 set(ENV{VALI_SDK_CXXLIBS} "$ENV{VALI_SDK_CLIBS} c++.lib c++abi.lib unwind.dll.lib")
@@ -53,17 +52,12 @@ set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
 # Setup shared compile flags to make compilation succeed
-set(VALI_COMPILE_FLAGS -fms-extensions -nostdlib -nostdinc)
+set(VALI_COMPILE_FLAGS "-fms-extensions")
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
-    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m32 --target=i386-uml-vali)
+    set(VALI_LLVM_COMPILE_FLAGS "${VALI_LLVM_COMPILE_FLAGS} --target=i386-uml-vali")
 else()
-    set(VALI_COMPILE_FLAGS ${VALI_COMPILE_FLAGS} -m64 --target=amd64-uml-vali)
+    set(VALI_LLVM_COMPILE_FLAGS "${VALI_LLVM_COMPILE_FLAGS} --target=amd64-uml-vali")
 endif()
-string(REPLACE ";" " " VALI_COMPILE_FLAGS "${VALI_COMPILE_FLAGS}")
-
-# Setup any include directories neccessary for C and C++
-#set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES $ENV{VALI_SDK_PATH}/include/clang-14.0.0 $ENV{VALI_SDK_PATH}/include)
-#set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES $ENV{CROSS}/include/c++/v1 $ENV{VALI_SDK_PATH}/include/clang-14.0.0 $ENV{VALI_SDK_PATH}/include)
 
 # We need to preserve any flags that were passed in by the user. However, we
 # can't append to CMAKE_C_FLAGS and friends directly, because toolchain files
