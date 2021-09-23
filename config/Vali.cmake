@@ -29,8 +29,6 @@ endif()
 
 # Setup expected environment variables
 set(ENV{VALI_LIBRARIES} "-libpath:$ENV{VALI_SDK_PATH}/lib")
-set(ENV{VALI_SDK_CLIBS}   "c.dll.lib m.dll.lib libcrt.lib librt.lib")
-set(ENV{VALI_SDK_CXXLIBS} "$ENV{VALI_SDK_CLIBS} c++.lib c++abi.lib unwind.dll.lib")
 
 if("$ENV{VALI_ARCH}" STREQUAL "i386")
     set(ENV{VALI_LFLAGS} "-lldmap -lldvpe $ENV{VALI_LIBRARIES}")

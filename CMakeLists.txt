@@ -40,7 +40,7 @@ elseif (MOLLENOS)
 # Build platform runtime for MollenOS
 # Must be invoked with -DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/runtime)
-    if (EXISTS ${CMAKE_BINARY_DIR}/runtime/bin/lli.run)
+    if (EXISTS ${CMAKE_BINARY_DIR}/runtime/LLVMRuntime-prefix/src/LLVMRuntime-build/bin/lli.run)
         message(STATUS "LLVM seems to be built already, assuming all is fine and skipping")
     else()
         set(ENV{LIBCXX_BOOTSTRAP} "true")
@@ -50,9 +50,6 @@ elseif (MOLLENOS)
         )
         execute_process(
             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/runtime -j${NUM_CORES}
-        )
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/runtime --target install --config Release
         )
         set(ENV{LIBCXX_BOOTSTRAP})
     endif()
@@ -73,9 +70,9 @@ elseif (MOLLENOS)
     ExternalProject_Add(Mesa3D
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/mesa
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} ${MAKE_EXECUTABLE}
+        BUILD_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} VALI_APPLICATION_PATH=${CMAKE_INSTALL_PREFIX} ${MAKE_EXECUTABLE}
         BUILD_IN_SOURCE ON
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} ${MAKE_EXECUTABLE} install
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} VALI_APPLICATION_PATH=${CMAKE_INSTALL_PREFIX} ${MAKE_EXECUTABLE} install
         BUILD_BYPRODUCTS ${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll ${CMAKE_INSTALL_PREFIX}/lib/gallium-osmesa.lib
     )
 
