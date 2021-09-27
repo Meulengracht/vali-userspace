@@ -19,7 +19,7 @@ if(NOT DEFINED ENV{CROSS})
 endif()
 
 if(NOT DEFINED ENV{VALI_ARCH})
-    message(WARNING "VALI_ARCH environmental variable was not set, defauling to amd64.")
+    message(STATUS "VALI_ARCH environmental variable was not set, defauling to amd64.")
     set(ENV{VALI_ARCH} amd64)
 endif()
 
@@ -29,19 +29,14 @@ endif()
 
 # Setup expected environment variables
 set(ENV{VALI_LIBRARIES} "-libpath:$ENV{VALI_SDK_PATH}/lib")
-
-if("$ENV{VALI_ARCH}" STREQUAL "i386")
-    set(ENV{VALI_LFLAGS} "-lldmap -lldvpe $ENV{VALI_LIBRARIES}")
-else()
-    set(ENV{VALI_LFLAGS} "-lldmap -lldvpe $ENV{VALI_LIBRARIES}")
-endif()
+set(ENV{VALI_LFLAGS} "-lldmap -lldvpe $ENV{VALI_LIBRARIES}")
 
 # Setup environment stuff for cmake configuration
-set(CMAKE_SYSTEM_NAME vali-cross)
+set(CMAKE_SYSTEM_NAME valicc)
+set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_CROSSCOMPILING OFF CACHE BOOL "")
 set(CMAKE_C_COMPILER "$ENV{CROSS}/bin/clang" CACHE FILEPATH "")
 set(CMAKE_CXX_COMPILER "$ENV{CROSS}/bin/clang++" CACHE FILEPATH "")
-set(CMAKE_LINKER "$ENV{CROSS}/bin/lld-link" CACHE FILEPATH "")
 set(CMAKE_AR "$ENV{CROSS}/bin/llvm-ar" CACHE FILEPATH "")
 set(CMAKE_RANLIB "$ENV{CROSS}/bin/llvm-ranlib" CACHE FILEPATH "")
 set(VERBOSE 1)
@@ -49,23 +44,10 @@ set(VERBOSE 1)
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
-# Setup shared compile flags to make compilation succeed
-set(VALI_COMPILE_FLAGS "-fms-extensions")
-if("$ENV{VALI_ARCH}" STREQUAL "i386")
-    set(VALI_LLVM_COMPILE_FLAGS "${VALI_LLVM_COMPILE_FLAGS} --target=i386-uml-vali")
-else()
-    set(VALI_LLVM_COMPILE_FLAGS "${VALI_LLVM_COMPILE_FLAGS} --target=amd64-uml-vali")
-endif()
-
 # We need to preserve any flags that were passed in by the user. However, we
 # can't append to CMAKE_C_FLAGS and friends directly, because toolchain files
 # will be re-invoked on each reconfigure and therefore need to be idempotent.
 # The assignments to the _INIT cache variables don't use FORCE, so they'll
 # only be populated on the initial configure, and their values won't change
 # afterward.
-set(CMAKE_C_FLAGS_INIT "${VALI_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS_INIT "${VALI_COMPILE_FLAGS} -static")
-
-# make sure they are set as the default flags in cache if not already there
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING "Default platform flags for the C language")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT}" CACHE STRING "Default platform flags for the C++ language")
+#string(APPEND CMAKE_CXX_FLAGS_INIT " -fstatic-runtime-cxx -static-libstdc++")

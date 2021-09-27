@@ -86,6 +86,7 @@ elseif (MOLLENOS)
 ########################################
 # Include link directories for the above libraries
     link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+    return()
 endif ()
 
 ########################################
@@ -106,7 +107,6 @@ add_subdirectory (doom)
 
 set(SDL_SHARED_ENABLED_BY_DEFAULT ON CACHE BOOL "Enable SDL shared library build")
 set(SDL_AUDIO ON CACHE BOOL "Enable SDL audio subsystem")
-set(SDL_ENABLE_VIORR ON CACHE BOOL "Enable Vioarr video subsystem")
 add_subdirectory (SDL)
 
 # add SDL include path
