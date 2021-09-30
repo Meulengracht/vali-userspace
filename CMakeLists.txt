@@ -86,13 +86,12 @@ elseif (MOLLENOS)
 ########################################
 # Include link directories for the above libraries
     link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-    return()
 endif ()
 
 ########################################
 # Add shared projects for all platforms
 add_subdirectory (lua)
-#add_subdirectory (macia)
+add_subdirectory (macia)
 
 ########################################
 # Build the vioarr project and it's dependencies last
@@ -116,8 +115,6 @@ set(PNG_BUILD_ZLIB ON CACHE BOOL "Enable zlib build for SDL_image")
 add_subdirectory (SDL_image)
 add_subdirectory (SDL_mixer)
 add_subdirectory (SDL_ttf)
-
-# todo probably add sdl paths
 
 add_subdirectory (sdlshooter)
 add_subdirectory (lite)
