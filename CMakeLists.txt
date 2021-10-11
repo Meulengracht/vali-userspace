@@ -38,14 +38,14 @@ elseif (MOLLENOS)
     )
 ########################################
 # Build platform runtime for MollenOS
-# Must be invoked with -DCMAKE_TOOLCHAIN_FILE=../config/Vali.cmake
+# Must be invoked with -DCMAKE_TOOLCHAIN_FILE=../cmake/Vali.cmake
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/runtime)
     if (EXISTS ${CMAKE_BINARY_DIR}/runtime/LLVMRuntime-prefix/src/LLVMRuntime-build/bin/lli.run)
         message(STATUS "LLVM seems to be built already, assuming all is fine and skipping")
     else()
         set(ENV{LIBCXX_BOOTSTRAP} "true")
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -DRUNTIME_SOURCE_DIR=${CMAKE_SOURCE_DIR} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/config/Vali.cmake ${CMAKE_SOURCE_DIR}/runtime
+            COMMAND ${CMAKE_COMMAND} -DRUNTIME_SOURCE_DIR=${CMAKE_SOURCE_DIR} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/cmake/Vali.cmake ${CMAKE_SOURCE_DIR}/runtime
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/runtime
         )
         execute_process(

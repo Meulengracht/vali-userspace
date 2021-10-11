@@ -30,7 +30,6 @@ endif()
 # Setup environment stuff for cmake configuration
 set(CMAKE_SYSTEM_NAME valicc)
 set(CMAKE_SYSTEM_VERSION 1)
-set(CMAKE_CROSSCOMPILING OFF CACHE BOOL "")
 set(CMAKE_C_COMPILER "$ENV{CROSS}/bin/clang" CACHE FILEPATH "")
 set(CMAKE_CXX_COMPILER "$ENV{CROSS}/bin/clang++" CACHE FILEPATH "")
 set(CMAKE_AR "$ENV{CROSS}/bin/llvm-ar" CACHE FILEPATH "")

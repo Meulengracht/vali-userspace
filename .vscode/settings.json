@@ -131,7 +131,7 @@
         "ctype.h": "c"
     },
     "cmake.configureArgs": [
-        "-DCMAKE_TOOLCHAIN_FILE=config/Vali.cmake"
+        "-DCMAKE_TOOLCHAIN_FILE=cmake/Vali.cmake"
     ],
     "C_Cpp.errorSquiggles": "Enabled"
 }
