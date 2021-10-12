@@ -128,7 +128,11 @@
         "sys_device_service_client.h": "c",
         "socket.h": "c",
         "sdl_mixer.h": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "__undef_macros": "cpp",
+        "threads.h": "c",
+        "__bits": "cpp",
+        "concepts": "cpp"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=cmake/Vali.cmake"

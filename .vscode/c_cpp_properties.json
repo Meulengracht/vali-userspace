@@ -10,7 +10,7 @@
       "name": "CMake",
       "intelliSenseMode": "clang-x64",
       "includePath": ["${myDefaultIncludePath}"],
-      "defines": ["__MOLLENOS__"],
+      "defines": ["MOLLENOS", "__MOLLENOS__", "__MOLLENOS64__", "__VALI__", "__VALI64__"],
       "cStandard": "c11",
       "cppStandard": "c++17",
       "compileCommands": "${workspaceFolder}/build/compile_commands.json",

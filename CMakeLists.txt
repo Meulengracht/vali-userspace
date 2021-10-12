@@ -55,7 +55,6 @@ elseif (MOLLENOS)
     endif()
 
     # include c++ and glm headers for rest of the projects
-    include_directories(${CMAKE_INSTALL_PREFIX}/include/c++/v1)
     include_directories(${CMAKE_SOURCE_DIR}/mesa/include)
     include_directories(${CMAKE_SOURCE_DIR}/glm/glm)
 
@@ -79,9 +78,9 @@ elseif (MOLLENOS)
     # add virtual target(s) to allow proper linking against the built library
     add_library(opengl-osmesa SHARED IMPORTED)
     set_property(TARGET opengl-osmesa PROPERTY
-                IMPORTED_LOCATION "${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll")
+                IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/mesa/build/vali-$ENV{VALI_ARCH}/gallium-osmesa.dll")
     set_property(TARGET opengl-osmesa PROPERTY
-                IMPORTED_IMPLIB "${CMAKE_INSTALL_PREFIX}/lib/gallium-osmesa.lib")
+                IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/mesa/build/vali-$ENV{VALI_ARCH}/gallium-osmesa.lib")
 
 ########################################
 # Include link directories for the above libraries
