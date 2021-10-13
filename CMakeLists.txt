@@ -60,7 +60,7 @@ elseif (MOLLENOS)
 
     # mark GLM for install
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/glm/glm 
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/glm
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
         PATTERN "*.txt" EXCLUDE
     )
 
