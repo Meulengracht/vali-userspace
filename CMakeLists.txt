@@ -66,21 +66,22 @@ elseif (MOLLENOS)
 
 ########################################
 # Build OSMesa for OpenGL support to Vioarr
+    set (OSMESA_BUILD_DIR ${CMAKE_SOURCE_DIR}/mesa/build/vali-$ENV{VALI_ARCH})
     ExternalProject_Add(Mesa3D
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/mesa
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} VALI_APPLICATION_PATH=${CMAKE_INSTALL_PREFIX} ${MAKE_EXECUTABLE}
         BUILD_IN_SOURCE ON
         INSTALL_COMMAND ${CMAKE_COMMAND} -E env VALI_ARCH=$ENV{VALI_ARCH} VALI_APPLICATION_PATH=${CMAKE_INSTALL_PREFIX} ${MAKE_EXECUTABLE} install
-        BUILD_BYPRODUCTS ${CMAKE_INSTALL_PREFIX}/bin/gallium-osmesa.dll ${CMAKE_INSTALL_PREFIX}/lib/gallium-osmesa.lib
+        BUILD_BYPRODUCTS ${OSMESA_BUILD_DIR}/gallium-osmesa.dll ${OSMESA_BUILD_DIR}/gallium-osmesa.lib
     )
 
     # add virtual target(s) to allow proper linking against the built library
     add_library(opengl-osmesa SHARED IMPORTED)
     set_property(TARGET opengl-osmesa PROPERTY
-                IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/mesa/build/vali-$ENV{VALI_ARCH}/gallium-osmesa.dll")
+                IMPORTED_LOCATION "${OSMESA_BUILD_DIR}/gallium-osmesa.dll")
     set_property(TARGET opengl-osmesa PROPERTY
-                IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/mesa/build/vali-$ENV{VALI_ARCH}/gallium-osmesa.lib")
+                IMPORTED_IMPLIB "${OSMESA_BUILD_DIR}/gallium-osmesa.lib")
 
 ########################################
 # Include link directories for the above libraries
