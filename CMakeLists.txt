@@ -86,6 +86,13 @@ elseif (MOLLENOS)
 ########################################
 # Include link directories for the above libraries
     link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+
+########################################
+# Add utility targets for mollenos
+    add_custom_target (refresh_maps
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/install_utils.py --cp --source ${CMAKE_BINARY_DIR} --dest ${CMAKE_INSTALL_PREFIX}/maps --pattern *.map
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
 endif ()
 
 ########################################
