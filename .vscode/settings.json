@@ -133,7 +133,8 @@
         "threads.h": "c",
         "__bits": "cpp",
         "concepts": "cpp",
-        "ctt_input_service_client.h": "c"
+        "ctt_input_service_client.h": "c",
+        "vioarr_utils.h": "c"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=cmake/Vali.cmake"
