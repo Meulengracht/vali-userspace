@@ -4,6 +4,7 @@ on:
   schedule:
     # Nightly builds
     - cron: '0 12 * * *'
+  workflow_dispatch:
 
 jobs:
   check_date:
