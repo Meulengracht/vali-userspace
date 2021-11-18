@@ -2,8 +2,8 @@
 
 | Build Configuration   | Status   |
 | --------------------- |:-------- |
-| I386                  | [![Build Status](http://www.mollenos.com/teamcity/app/rest/builds/buildType:(id:ValiOS_I386_Applications)/statusIcon)](http://www.mollenos.com/teamcity/project.html?projectId=ValiOS&branch_ValiOS=__all_branches__) |
-| AMD64                 | [![Build Status](http://www.mollenos.com/teamcity/app/rest/builds/buildType:(id:ValiOS_Amd64_Applications)/statusIcon)](http://www.mollenos.com/teamcity/project.html?projectId=ValiOS&branch_ValiOS=__all_branches__) |
+| I386                  | [![Build i386 Nightly](https://github.com/Meulengracht/vali-userspace/actions/workflows/nightly-i386.yml/badge.svg)](https://github.com/Meulengracht/vali-userspace/actions/workflows/nightly-i386.yml) |
+| AMD64                 | [![Build amd64 Nightly](https://github.com/Meulengracht/vali-userspace/actions/workflows/nightly-amd64.yml/badge.svg)](https://github.com/Meulengracht/vali-userspace/actions/workflows/nightly-amd64.yml) |
 
 This repository can be downloaded as a basis for application development in Vali. To start using this repository, a few things are mandatory.
 
@@ -34,13 +34,13 @@ the project.
 
 | Library       | Version   | Description             |
 | ------------- | ---------:|:-----------------------:|
-| openlibm      | <unk>     | open mathematical c-library   |
-| compiler-rt   | <unk>     | llvm/clang compiler runtime support  |
-| libunwind     | <unk>     | unwind support for the c++ itanium abi  |
-| libcxxabi     | <unk>     | c++ itanium abi compiler support implementation  |
-| libcxx        | <unk>     | c++ standard library support   |
-| llvm          | 9.0.0-dev | The LLVM compiler back-end   |
-| mesa3d        | 18.3-dev  | Open source 3d opengl framework   |
-| zlib          | 1.2.11    | Compression library   |
-| libpng        | <unk>     | PNG image library   |
-| freetype2     | <unk>     | Library to handle and render fonts   |
+| openlibm      | <unk>      | open mathematical c-library   |
+| compiler-rt   | <unk>      | llvm/clang compiler runtime support  |
+| libunwind     | <unk>      | unwind support for the c++ itanium abi  |
+| libcxxabi     | <unk>      | c++ itanium abi compiler support implementation  |
+| libcxx        | <unk>      | c++ standard library support   |
+| llvm          | 14.0.0-dev | The LLVM compiler back-end   |
+| mesa3d        | 18.3-dev   | Open source 3d opengl framework   |
+| zlib          | 1.2.11     | Compression library   |
+| libpng        | <unk>      | PNG image library   |
+| freetype2     | <unk>      | Library to handle and render fonts   |
