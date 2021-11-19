@@ -30,4 +30,4 @@ RUN sed -i 's/\r$//' ./depends.sh && chmod +x ./depends.sh && ./depends.sh && \
     mkdir -p build && cd build && \
     cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../cmake/Vali.cmake .. && \
     make && make install && cd $VALI_APPLICATION_PATH && tar -czvf vali-apps.tar.gz * && \
-    mkdir -p /github/workspace/out && cp ./vali-apps.tar.gz /github/workspace/out/vali-apps.tar.gz
+    cp ./vali-apps.tar.gz /github/workspace/vali-apps.tar.gz

@@ -38,4 +38,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: vali-apps-nightly-amd64
-        path: /home/runner/work/vali-userspace/vali-userspace/out/vali-apps.tar.gz
+        path: ./vali-apps.tar.gz
