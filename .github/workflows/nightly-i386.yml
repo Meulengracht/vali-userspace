@@ -32,9 +32,11 @@ jobs:
       with:
         submodules: recursive
     - name: Build and push
-      uses: docker/build-push-action@v1.1.0
+      uses: docker/build-push-action@v2
       with:
-        build_args: ARCH=i386,THEME_SECRET=${{ secrets.VALI_THEME_CODE }}
+        build_args: ARCH=amd64,THEME_SECRET=${{ secrets.VALI_THEME_CODE }}
+        target: artifact
+        output: type=local,dest=.
     - uses: actions/upload-artifact@v2
       with:
         name: vali-apps-nightly-i386
