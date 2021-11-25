@@ -40,7 +40,7 @@ jobs:
           ARCH=amd64
           THEME_SECRET=${{ secrets.VALI_THEME_CODE }}
         target: artifact
-        output: type=local,dest=.
+        outputs: type=local,dest=.
     - uses: actions/upload-artifact@v2
       with:
         name: vali-apps-nightly-amd64
